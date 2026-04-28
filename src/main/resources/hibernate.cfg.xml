@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <!-- Dialect and Basic Settings -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Use Thread Context for Session -->
+        <property name="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</property>
+
+        <!-- Mapping classes -->
+        <mapping class="com.agriconnect.model.User"/>
+        <mapping class="com.agriconnect.model.Farmer"/>
+        <mapping class="com.agriconnect.model.Buyer"/>
+        <mapping class="com.agriconnect.model.AgriExpert"/>
+        <mapping class="com.agriconnect.model.Crop"/>
+        <mapping class="com.agriconnect.model.Listing"/>
+        <mapping class="com.agriconnect.model.Bid"/>
+        <mapping class="com.agriconnect.model.Order"/>
+        <mapping class="com.agriconnect.model.Advisory"/>
+        <mapping class="com.agriconnect.model.MarketPrice"/>
+        <mapping class="com.agriconnect.model.FarmerScorecard"/>
+    </session-factory>
+</hibernate-configuration>

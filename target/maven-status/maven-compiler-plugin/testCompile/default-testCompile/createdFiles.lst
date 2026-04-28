@@ -1,0 +1,8 @@
+com\agriconnect\service\ListingServiceTest.class
+com\agriconnect\integration\BidFlowIT.class
+com\agriconnect\service\MatchmakingServiceTest.class
+com\agriconnect\service\FarmerScoreServiceTest.class
+com\agriconnect\service\AdvisoryAlertServiceTest.class
+com\agriconnect\integration\AuthControllerIT.class
+com\agriconnect\integration\ListingControllerIT.class
+com\agriconnect\service\BidServiceTest.class

@@ -1,0 +1,24 @@
+# ============================================================
+#  railway.toml — AgriConnect Railway Deployment Config
+#  Railway reads this file automatically when you run: railway up
+# ============================================================
+
+[build]
+# Tell Railway to build using the Dockerfile already in your project root.
+# Railway will run: docker build -t agriconnect .
+builder = "dockerfile"
+
+[deploy]
+# Tomcat's startup script — same command your Dockerfile already uses.
+startCommand = "catalina.sh run"
+
+# Railway pings this URL every 30 s to know the app is alive.
+# Your Spring app exposes /actuator/health via spring-boot-actuator.
+# NOTE: If you don't have actuator, change this to "/" or "/login"
+healthcheckPath = "/actuator/health"
+
+# Give Tomcat + Spring up to 5 minutes to fully boot (WAR deploy is slow).
+healthcheckTimeout = 300
+
+# Restart the container automatically if it crashes.
+restartPolicyType = "on_failure"

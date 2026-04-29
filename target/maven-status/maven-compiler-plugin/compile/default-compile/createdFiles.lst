@@ -7,6 +7,7 @@ com\agriconnect\model\ProduceListing$QualityGrade.class
 com\agriconnect\controller\AuthController.class
 com\agriconnect\dao\MatchmakingDao.class
 com\agriconnect\service\MatchmakingService.class
+com\agriconnect\dao\MspRateDao.class
 com\agriconnect\model\User.class
 com\agriconnect\model\Advisory.class
 com\agriconnect\dto\BidRankDto.class
@@ -28,16 +29,21 @@ com\agriconnect\model\MarketPrice.class
 com\agriconnect\exception\BusinessValidationException.class
 com\agriconnect\dao\AdvisoryDao.class
 com\agriconnect\model\ProduceListing$Status.class
+com\agriconnect\dao\NotificationDao.class
 com\agriconnect\controller\BidController.class
+com\agriconnect\dao\AuditLogDao.class
 com\agriconnect\dao\OrderDao.class
 com\agriconnect\model\Advisory$AdvisoryType.class
 com\agriconnect\service\AuditService.class
+com\agriconnect\dao\CropDao.class
 com\agriconnect\model\CriticalAlert.class
 com\agriconnect\security\CustomUserDetails.class
 com\agriconnect\model\User$Role.class
 com\agriconnect\model\FarmerProfile.class
 com\agriconnect\model\MatchmakingScore.class
 com\agriconnect\model\AuditLog.class
+com\agriconnect\dao\CriticalAlertDao.class
+com\agriconnect\dao\FarmerProfileDao.class
 com\agriconnect\model\User$VerificationStatus.class
 com\agriconnect\dao\BidDao.class
 com\agriconnect\dto\UserRegistrationDto.class
@@ -47,6 +53,7 @@ com\agriconnect\dto\AdvisoryRequestDto.class
 com\agriconnect\controller\AdvisoryController.class
 com\agriconnect\controller\MarketplaceWebController.class
 com\agriconnect\validation\ValidDateRangeValidator.class
+com\agriconnect\dao\BuyerProfileDao.class
 com\agriconnect\exception\GlobalExceptionHandler.class
 com\agriconnect\dao\BaseDaoImpl.class
 com\agriconnect\dto\ListingResponseDto.class

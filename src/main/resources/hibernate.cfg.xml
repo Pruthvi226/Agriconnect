@@ -16,15 +16,18 @@
 
         <!-- Mapping classes -->
         <mapping class="com.agriconnect.model.User"/>
-        <mapping class="com.agriconnect.model.Farmer"/>
-        <mapping class="com.agriconnect.model.Buyer"/>
-        <mapping class="com.agriconnect.model.AgriExpert"/>
+        <mapping class="com.agriconnect.model.FarmerProfile"/>
+        <mapping class="com.agriconnect.model.BuyerProfile"/>
         <mapping class="com.agriconnect.model.Crop"/>
-        <mapping class="com.agriconnect.model.Listing"/>
+        <mapping class="com.agriconnect.model.ProduceListing"/>
         <mapping class="com.agriconnect.model.Bid"/>
         <mapping class="com.agriconnect.model.Order"/>
         <mapping class="com.agriconnect.model.Advisory"/>
         <mapping class="com.agriconnect.model.MarketPrice"/>
-        <mapping class="com.agriconnect.model.FarmerScorecard"/>
+        <mapping class="com.agriconnect.model.MatchmakingScore"/>
+        <mapping class="com.agriconnect.model.MspRate"/>
+        <mapping class="com.agriconnect.model.Notification"/>
+        <mapping class="com.agriconnect.model.AuditLog"/>
+        <mapping class="com.agriconnect.model.CriticalAlert"/>
     </session-factory>
 </hibernate-configuration>

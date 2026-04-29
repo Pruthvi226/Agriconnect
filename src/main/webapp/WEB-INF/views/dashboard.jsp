@@ -41,7 +41,7 @@
                                         <div class="card-body">
                                             <h6>Match Score: <span class="text-success">${match.score}%</span></h6>
                                             <div class="progress mb-2" style="height: 10px;">
-                                              <div class="progress-bar bg-success" role="progressbar" style="width: ${match.score}%;" aria-valuenow="${match.score}" aria-valuemin="0" aria-valuemax="100"></div>
+                                              <div class="progress-bar bg-success" role="progressbar" data-width="${match.score}" aria-valuenow="${match.score}" aria-valuemin="0" aria-valuemax="100"></div>
                                             </div>
                                             <small class="text-muted">Proximity | Crop Fit | History</small>
                                             <hr>
@@ -67,5 +67,11 @@
     </c:if>
 
 </div>
+<script>
+    document.querySelectorAll('.progress-bar').forEach(function(el) {
+        var w = el.getAttribute('data-width');
+        if (w) el.style.width = w + '%';
+    });
+</script>
 </body>
 </html>

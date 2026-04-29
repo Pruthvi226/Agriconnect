@@ -35,12 +35,18 @@
                         </svg>
                     </div>
 
-                    <h4 class="mt-3" style="color: ${scoreColor};">${scoreBadge}</h4>
+                    <h4 class="mt-3" id="score-badge" data-color="${scoreColor}">${scoreBadge}</h4>
                     <p class="text-muted small">Based on delivery history, quality, and volume.</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+    var badge = document.getElementById('score-badge');
+    if (badge) {
+        badge.style.color = badge.getAttribute('data-color');
+    }
+</script>
 </body>
 </html>

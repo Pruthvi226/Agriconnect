@@ -2,7 +2,8 @@
 -- AgriConnect Database Schema (MySQL 8.x)
 -- Engine: InnoDB, Charset: UTF8MB4
 -- ---------------------------------------------------------
-
+CREATE DATABASE agriconnect;
+USE agriconnect;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS msp_rates;

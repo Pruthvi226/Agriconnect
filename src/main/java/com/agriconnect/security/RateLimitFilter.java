@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.springframework.lang.NonNull;
+
 import java.io.IOException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +21,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final ConcurrentHashMap<String, Deque<Long>> requestCounts = new ConcurrentHashMap<>();
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         if (request.getRequestURI().startsWith("/api/v1/")) {

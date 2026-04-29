@@ -1,6 +1,6 @@
-# Must match maven.compiler.release=21 in pom.xml.
-# Using jdk17 here would cause UnsupportedClassVersionError at startup.
-FROM tomcat:10.1-jdk21-temurin
+# Must match maven.compiler.release=17 in pom.xml.
+# Using jdk17 here to match the project environment.
+FROM tomcat:10.1-jdk17-temurin
 
 # Remove default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*

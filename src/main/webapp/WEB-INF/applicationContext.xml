@@ -18,12 +18,15 @@
     <task:executor id="myExecutor" pool-size="5" />
     <task:scheduler id="myScheduler" pool-size="5" />
 
+    <!-- Load properties from application.properties -->
+    <context:property-placeholder location="classpath:application.properties" />
+
     <!-- DataSource setup using Spring's DriverManagerDataSource -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://localhost:3306/agriconnect_db?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC" />
-        <property name="username" value="root" />
-        <property name="password" value="root" />
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
     </bean>
 
     <!-- Hibernate SessionFactory -->

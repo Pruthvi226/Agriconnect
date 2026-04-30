@@ -18,15 +18,19 @@
     <task:executor id="myExecutor" pool-size="5" />
     <task:scheduler id="myScheduler" pool-size="5" />
 
-    <!-- Load properties from application.properties -->
-    <context:property-placeholder location="classpath:application.properties" />
+    <!-- Load properties and allow environment variables to override local defaults. -->
+    <context:property-placeholder location="classpath:application.properties" ignore-unresolvable="false" />
 
-    <!-- DataSource setup using Spring's DriverManagerDataSource -->
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <!-- Production-grade pooled DataSource. -->
+    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
         <property name="driverClassName" value="${jdbc.driverClassName}" />
-        <property name="url" value="${jdbc.url}" />
+        <property name="jdbcUrl" value="${jdbc.url}" />
         <property name="username" value="${jdbc.username}" />
         <property name="password" value="${jdbc.password}" />
+        <property name="maximumPoolSize" value="${jdbc.pool.maximumPoolSize}" />
+        <property name="minimumIdle" value="${jdbc.pool.minimumIdle}" />
+        <property name="connectionTimeout" value="${jdbc.pool.connectionTimeoutMs}" />
+        <property name="poolName" value="AgriConnectPool" />
     </bean>
 
     <!-- Hibernate SessionFactory -->
@@ -34,6 +38,14 @@
         <property name="dataSource" ref="dataSource" />
         <!-- Map config file instead of packages to explicitly use hibernate.cfg.xml as requested -->
         <property name="configLocation" value="classpath:hibernate.cfg.xml" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+                <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+                <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+            </props>
+        </property>
     </bean>
 
     <!-- Transaction Manager -->
@@ -41,7 +53,7 @@
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 
-    <!-- Enable annotation-based transaction management -->
-    <tx:annotation-driven transaction-manager="transactionManager" />
+    <!-- Enable annotation-based transaction management with CGLIB proxying -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
 
 </beans>

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.3
@@ -8,7 +6,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASS}
       MYSQL_DATABASE: agriconnect
-      MYSQL_USER: ${DB_USER}
+      MYSQL_USER: ${DB_USER:-agriconnect}
       MYSQL_PASSWORD: ${DB_PASS}
     ports:
       - "3306:3306"
@@ -23,12 +21,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: production
       DB_URL: jdbc:mysql://db:3306/agriconnect?useSSL=false&serverTimezone=UTC
-      DB_USER: ${DB_USER}
+      DB_USER: ${DB_USER:-agriconnect}
       DB_PASS: ${DB_PASS}
       JWT_SECRET: ${JWT_SECRET}
-      AES_SECRET_KEY: ${AES_KEY}
+      AES_SECRET_KEY: ${AES_SECRET_KEY}
+      HIBERNATE_DDL_AUTO: update
     depends_on:
       - db
 

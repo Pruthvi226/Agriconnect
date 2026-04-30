@@ -1,16 +1,21 @@
-# Must match maven.compiler.release=17 in pom.xml.
-# Using jdk17 here to match the project environment.
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /workspace
+
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
+
 FROM tomcat:10.1-jdk17-temurin
 
-# Remove default webapps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy the generated WAR file into the ROOT context
-COPY target/agriconnect.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=build /workspace/target/agriconnect.war /usr/local/tomcat/webapps/ROOT.war
+COPY docker-entrypoint.sh /usr/local/bin/agriconnect-entrypoint.sh
+RUN chmod +x /usr/local/bin/agriconnect-entrypoint.sh
 
-# Set default active profile to production
-ENV SPRING_PROFILES_ACTIVE=production
+ENV PORT=8080
 
 EXPOSE 8080
 
+ENTRYPOINT ["agriconnect-entrypoint.sh"]
 CMD ["catalina.sh", "run"]

@@ -58,7 +58,7 @@ public class ProduceListing {
     private BigDecimal lng;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private Status status = Status.ACTIVE;
 
     @Column(name = "view_count")
     private Integer viewCount = 0;

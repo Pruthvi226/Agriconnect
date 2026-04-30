@@ -1,5 +1,6 @@
 package com.agriconnect.controller;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,8 @@ public class ActuatorController {
         boolean isUp = true;
 
         // 1. DB Connection Check
-        try {
-            sessionFactory.getCurrentSession().createQuery("SELECT 1L", Long.class).uniqueResult();
+        try (Session session = sessionFactory.openSession()) {
+            session.createNativeQuery("SELECT 1", Integer.class).uniqueResult();
             details.put("database", "UP");
         } catch (Exception e) {
             details.put("database", "DOWN (" + e.getMessage() + ")");
@@ -33,9 +34,9 @@ public class ActuatorController {
         }
 
         // 2. Pending Notifications Queue Depth < 1000
-        try {
+        try (Session session = sessionFactory.openSession()) {
             String hql = "SELECT COUNT(n) FROM Notification n WHERE n.isRead = false";
-            Long queueDepth = sessionFactory.getCurrentSession().createQuery(hql, Long.class).uniqueResult();
+            Long queueDepth = session.createQuery(hql, Long.class).uniqueResult();
             if (queueDepth != null && queueDepth >= 1000) {
                 details.put("notificationsQueue", "DOWN (Depth: " + queueDepth + ")");
                 isUp = false;

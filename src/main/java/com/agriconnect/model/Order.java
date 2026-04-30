@@ -36,7 +36,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
-    private OrderStatus orderStatus;
+    private OrderStatus orderStatus = OrderStatus.CONFIRMED;
 
     @Column(name = "expected_delivery")
     private LocalDate expectedDelivery;
@@ -46,7 +46,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

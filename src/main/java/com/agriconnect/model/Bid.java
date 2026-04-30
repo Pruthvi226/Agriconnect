@@ -28,7 +28,7 @@ public class Bid {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bid_status")
-    private BidStatus bidStatus;
+    private BidStatus bidStatus = BidStatus.PENDING;
 
     @Column(columnDefinition = "TEXT")
     private String message;

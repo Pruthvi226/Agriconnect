@@ -13,8 +13,6 @@ builder = "dockerfile"
 startCommand = "catalina.sh run"
 
 # Railway pings this URL every 30 s to know the app is alive.
-# Your Spring app exposes /actuator/health via spring-boot-actuator.
-# NOTE: If you don't have actuator, change this to "/" or "/login"
 healthcheckPath = "/actuator/health"
 
 # Give Tomcat + Spring up to 5 minutes to fully boot (WAR deploy is slow).

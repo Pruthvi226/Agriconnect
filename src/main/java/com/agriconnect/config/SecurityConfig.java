@@ -1,6 +1,5 @@
 package com.agriconnect.config;
 
-import com.agriconnect.security.CustomUserDetailsService;
 import com.agriconnect.security.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +13,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +31,7 @@ public class SecurityConfig {
     private com.agriconnect.security.RateLimitFilter rateLimitFilter;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,20 +39,56 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disabled for simplicity/demo, should enable in true prod
             .authorizeHttpRequests(auth -> auth
                 // PUBLIC
-                .requestMatchers("/api/v1/auth/**", "/web/login", "/web/register", "/web/marketplace").permitAll()
+                .requestMatchers(
+                    antMatcher("/api/v1/auth/**"),
+                    antMatcher("/"),
+                    antMatcher("/web"),
+                    antMatcher("/web/login"),
+                    antMatcher("/web/register"),
+                    antMatcher("/web/marketplace"),
+                    antMatcher("/resources/**"),
+                    antMatcher("/actuator/health")
+                ).permitAll()
                 // FARMER
-                .requestMatchers("/api/v1/listings/**", "/api/v1/bids/received", "/web/dashboard/farmer").hasRole("FARMER")
+                .requestMatchers(
+                    antMatcher("/api/v1/listings/**"),
+                    antMatcher("/api/v1/bids/received"),
+                    antMatcher("/web/dashboard/farmer")
+                ).hasRole("FARMER")
                 // BUYER
-                .requestMatchers("/api/v1/bids/**", "/api/v1/orders/my", "/web/dashboard/buyer").hasRole("BUYER")
+                .requestMatchers(
+                    antMatcher("/api/v1/bids/**"),
+                    antMatcher("/api/v1/orders/my"),
+                    antMatcher("/web/dashboard/buyer")
+                ).hasRole("BUYER")
                 // EXPERT
-                .requestMatchers("/api/v1/advisories/**", "/web/dashboard/expert").hasRole("AGRI_EXPERT")
-                // ADMIN AND ACTUATOR
-                .requestMatchers("/web/admin/**", "/api/v1/admin/**", "/actuator/**").hasRole("ADMIN")
+                .requestMatchers(
+                    antMatcher("/api/v1/advisories/**"),
+                    antMatcher("/web/dashboard/expert")
+                ).hasRole("AGRI_EXPERT")
+                // ADMIN AND METRICS
+                .requestMatchers(
+                    antMatcher("/web/admin/**"),
+                    antMatcher("/api/v1/admin/**"),
+                    antMatcher("/actuator/metrics")
+                ).hasRole("ADMIN")
                 // ANY OTHER
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
+            .formLogin(form -> form
+                .loginPage("/web/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/web/marketplace", true)
+                .failureUrl("/web/login?error=true")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/web/login?logout=true")
+                .permitAll()
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)

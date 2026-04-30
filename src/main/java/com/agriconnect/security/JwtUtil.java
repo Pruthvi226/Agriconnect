@@ -4,10 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +18,15 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // In production, load this from environment variables.
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long jwtExpirationMs = 86400000; // 24 hours
+    private final SecretKey secretKey;
+    private final long jwtExpirationMs;
+
+    public JwtUtil(
+            @Value("${jwt.secret}") String jwtSecret,
+            @Value("${jwt.expiration.ms}") long jwtExpirationMs) {
+        this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        this.jwtExpirationMs = jwtExpirationMs;
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

@@ -16,10 +16,12 @@ com\agriconnect\model\BuyerProfile$BusinessType.class
 com\agriconnect\dao\BaseDao.class
 com\agriconnect\dao\MarketPriceDao.class
 com\agriconnect\controller\DashboardController.class
+com\agriconnect\controller\WebAuthController.class
 com\agriconnect\model\MspRate$Season.class
 com\agriconnect\service\MspRateService.class
 com\agriconnect\util\EncryptionUtil.class
 com\agriconnect\dao\UserDao.class
+com\agriconnect\service\UserService.class
 com\agriconnect\validation\ValidDateRange.class
 com\agriconnect\controller\ListingController.class
 com\agriconnect\service\AdvisoryAlertService.class
@@ -31,6 +33,7 @@ com\agriconnect\dao\AdvisoryDao.class
 com\agriconnect\model\ProduceListing$Status.class
 com\agriconnect\dao\NotificationDao.class
 com\agriconnect\controller\BidController.class
+com\agriconnect\controller\HomeController.class
 com\agriconnect\dao\AuditLogDao.class
 com\agriconnect\dao\OrderDao.class
 com\agriconnect\model\Advisory$AdvisoryType.class

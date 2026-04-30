@@ -47,7 +47,7 @@
                         <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill fw-bold mt-3 shadow-sm">Login to Platform</button>
                     </form>
                     <div class="text-center mt-4">
-                        <p class="text-muted">Don't have an account? <a href="${pageContext.request.contextPath}/register" class="text-success fw-bold text-decoration-none">Register here</a></p>
+                        <p class="text-muted">Don't have an account? <a href="${pageContext.request.contextPath}/web/register" class="text-success fw-bold text-decoration-none">Register here</a></p>
                     </div>
                 </div>
             </div>

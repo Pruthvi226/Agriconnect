@@ -6,7 +6,7 @@
 <hibernate-configuration>
     <session-factory>
         <!-- Use Thread Context for Session -->
-        <property name="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</property>
+        <property name="hibernate.current_session_context_class">org.springframework.orm.hibernate6.SpringSessionContext</property>
 
         <!-- Mapping classes -->
         <mapping class="com.agriconnect.model.User"/>

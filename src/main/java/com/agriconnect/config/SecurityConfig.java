@@ -1,6 +1,8 @@
 package com.agriconnect.config;
 
 import com.agriconnect.security.JwtAuthFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,11 +13,17 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
+import java.util.Collection;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
@@ -36,7 +44,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Disabled for simplicity/demo, should enable in true prod
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // PUBLIC
                 .requestMatchers(
@@ -46,6 +54,7 @@ public class SecurityConfig {
                     antMatcher("/web/login"),
                     antMatcher("/web/register"),
                     antMatcher("/web/marketplace"),
+                    antMatcher("/web/marketplace/listing/**"),
                     antMatcher("/resources/**"),
                     antMatcher("/actuator/health")
                 ).permitAll()
@@ -53,7 +62,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     antMatcher("/api/v1/listings/**"),
                     antMatcher("/api/v1/bids/received"),
-                    antMatcher("/web/dashboard/farmer")
+                    antMatcher("/web/dashboard/farmer"),
+                    antMatcher("/web/dashboard/farmer/**")
                 ).hasRole("FARMER")
                 // BUYER
                 .requestMatchers(
@@ -64,14 +74,18 @@ public class SecurityConfig {
                 // EXPERT
                 .requestMatchers(
                     antMatcher("/api/v1/advisories/**"),
-                    antMatcher("/web/dashboard/expert")
+                    antMatcher("/web/dashboard/expert"),
+                    antMatcher("/web/advisories")
                 ).hasRole("AGRI_EXPERT")
-                // ADMIN AND METRICS
+                // ADMIN
                 .requestMatchers(
                     antMatcher("/web/admin/**"),
+                    antMatcher("/web/dashboard/admin"),
                     antMatcher("/api/v1/admin/**"),
                     antMatcher("/actuator/metrics")
                 ).hasRole("ADMIN")
+                // Notifications for authenticated users
+                .requestMatchers(antMatcher("/web/notifications")).authenticated()
                 // ANY OTHER
                 .anyRequest().authenticated()
             )
@@ -81,13 +95,15 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/web/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/web/marketplace", true)
+                .successHandler(roleBasedSuccessHandler())
                 .failureUrl("/web/login?error=true")
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/web/login?logout=true")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
                 .permitAll()
             )
             .authenticationProvider(authenticationProvider())
@@ -95,6 +111,36 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler roleBasedSuccessHandler() {
+        return new AuthenticationSuccessHandler() {
+            @Override
+            public void onAuthenticationSuccess(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                Authentication authentication) throws IOException {
+                Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+                String redirectUrl = "/web/marketplace";
+                for (GrantedAuthority authority : authorities) {
+                    String role = authority.getAuthority();
+                    if (role.equals("ROLE_FARMER")) {
+                        redirectUrl = "/web/dashboard/farmer";
+                        break;
+                    } else if (role.equals("ROLE_BUYER")) {
+                        redirectUrl = "/web/dashboard/buyer";
+                        break;
+                    } else if (role.equals("ROLE_AGRI_EXPERT")) {
+                        redirectUrl = "/web/dashboard/expert";
+                        break;
+                    } else if (role.equals("ROLE_ADMIN")) {
+                        redirectUrl = "/web/dashboard/admin";
+                        break;
+                    }
+                }
+                response.sendRedirect(request.getContextPath() + redirectUrl);
+            }
+        };
     }
 
     @Bean

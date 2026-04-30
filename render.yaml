@@ -3,17 +3,37 @@ services:
     name: agriconnect
     env: docker
     plan: free
+    dockerfilePath: ./Dockerfile
+    # Render auto-detects the repo root, so rootDir is not needed
     healthCheckPath: /actuator/health
     envVars:
       - key: PORT
-        value: 8080
+        value: "10000"
+      # ---- Database (set these in the Render Dashboard) ----
       - key: DB_URL
-        sync: false
+        sync: false          # e.g. jdbc:mysql://host:3306/agriconnect?useSSL=true&serverTimezone=UTC
       - key: DB_USER
         sync: false
       - key: DB_PASS
         sync: false
+      # ---- Hibernate ----
+      - key: HIBERNATE_DIALECT
+        value: org.hibernate.dialect.MySQLDialect
+      - key: HIBERNATE_DDL_AUTO
+        value: validate
+      - key: HIBERNATE_SHOW_SQL
+        value: "false"
+      # ---- Security secrets (auto-generated) ----
       - key: JWT_SECRET
         generateValue: true
       - key: AES_SECRET_KEY
         generateValue: true
+      # ---- Optional tuning ----
+      - key: DB_POOL_MAX
+        value: "5"
+      - key: DB_POOL_MIN
+        value: "1"
+      - key: DB_CONNECTION_TIMEOUT_MS
+        value: "30000"
+      - key: SPRING_PROFILES_ACTIVE
+        value: production

@@ -23,6 +23,8 @@ com\agriconnect\util\EncryptionUtil.class
 com\agriconnect\dao\UserDao.class
 com\agriconnect\service\UserService.class
 com\agriconnect\validation\ValidDateRange.class
+com\agriconnect\controller\NotificationsWebController.class
+com\agriconnect\config\SecurityConfig$1.class
 com\agriconnect\controller\ListingController.class
 com\agriconnect\service\AdvisoryAlertService.class
 com\agriconnect\controller\ActuatorController.class
@@ -37,6 +39,7 @@ com\agriconnect\controller\HomeController.class
 com\agriconnect\dao\AuditLogDao.class
 com\agriconnect\dao\OrderDao.class
 com\agriconnect\model\Advisory$AdvisoryType.class
+com\agriconnect\controller\ListingDetailWebController.class
 com\agriconnect\service\AuditService.class
 com\agriconnect\dao\CropDao.class
 com\agriconnect\model\CriticalAlert.class

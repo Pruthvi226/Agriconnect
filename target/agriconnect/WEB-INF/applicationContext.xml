@@ -18,8 +18,14 @@
     <task:executor id="myExecutor" pool-size="5" />
     <task:scheduler id="myScheduler" pool-size="5" />
 
-    <!-- Load properties and allow environment variables to override local defaults. -->
-    <context:property-placeholder location="classpath:application.properties" ignore-unresolvable="false" />
+    <!-- Load base properties; production overrides are supplied via ENV vars which
+         map to the ${..} placeholders already defined in application.properties.
+         Also load the production properties file when it exists on the classpath. -->
+    <context:property-placeholder
+        location="classpath:application.properties,classpath*:application-production.properties"
+        ignore-unresolvable="true"
+        ignore-resource-not-found="true"
+        order="1" />
 
     <!-- Production-grade pooled DataSource. -->
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
@@ -34,7 +40,7 @@
     </bean>
 
     <!-- Hibernate SessionFactory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate6.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
         <!-- Map config file instead of packages to explicitly use hibernate.cfg.xml as requested -->
         <property name="configLocation" value="classpath:hibernate.cfg.xml" />
@@ -49,7 +55,7 @@
     </bean>
 
     <!-- Transaction Manager -->
-    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+    <bean id="transactionManager" class="org.springframework.orm.hibernate6.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
 

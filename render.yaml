@@ -4,14 +4,21 @@ services:
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    # Render auto-detects the repo root, so rootDir is not needed
-    healthCheckPath: /actuator/health
+
+    # ── Health check ─────────────────────────────────────────────────────────
+    # /health is a zero-dependency liveness probe (HealthController.java).
+    # It returns 200 immediately as long as Tomcat is up, with no DB calls.
+    # /actuator/health is the richer readiness probe (still publicly accessible).
+    healthCheckPath: /health
+
+    # ── Runtime env vars ─────────────────────────────────────────────────────
+    # NOTE: Do NOT set PORT here. Render injects $PORT automatically for free-tier
+    # Docker services (usually 10000). The docker-entrypoint.sh reads $PORT and
+    # patches Tomcat's server.xml to the correct value at startup.
     envVars:
-      - key: PORT
-        value: "10000"
-      # ---- Database (set these in the Render Dashboard) ----
+      # ---- Database (set these in the Render Dashboard → Environment) -------
       - key: DB_URL
-        sync: false          # e.g. jdbc:mysql://host:3306/agriconnect?useSSL=true&serverTimezone=UTC
+        sync: false   # e.g. jdbc:mysql://host:3306/agriconnect?useSSL=true&serverTimezone=UTC
       - key: DB_USER
         sync: false
       - key: DB_PASS
@@ -20,7 +27,9 @@ services:
       - key: HIBERNATE_DIALECT
         value: org.hibernate.dialect.MySQLDialect
       - key: HIBERNATE_DDL_AUTO
-        value: validate
+        # Use 'update' on first deploy so Hibernate creates missing tables.
+        # Switch to 'validate' once schema is stable.
+        value: update
       - key: HIBERNATE_SHOW_SQL
         value: "false"
       # ---- Security secrets (auto-generated) ----
@@ -28,9 +37,9 @@ services:
         generateValue: true
       - key: AES_SECRET_KEY
         generateValue: true
-      # ---- Optional tuning ----
+      # ---- Connection pool tuning (conservative for free tier) ----
       - key: DB_POOL_MAX
-        value: "5"
+        value: "3"
       - key: DB_POOL_MIN
         value: "1"
       - key: DB_CONNECTION_TIMEOUT_MS

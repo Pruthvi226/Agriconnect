@@ -46,8 +46,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // PUBLIC
+                // PUBLIC — liveness + readiness probes must be accessible without auth
                 .requestMatchers(
+                    antMatcher("/health"),          // Render liveness probe (no DB dependency)
+                    antMatcher("/actuator/health"), // detailed readiness probe
                     antMatcher("/api/v1/auth/**"),
                     antMatcher("/"),
                     antMatcher("/web"),
@@ -55,8 +57,7 @@ public class SecurityConfig {
                     antMatcher("/web/register"),
                     antMatcher("/web/marketplace"),
                     antMatcher("/web/marketplace/listing/**"),
-                    antMatcher("/resources/**"),
-                    antMatcher("/actuator/health")
+                    antMatcher("/resources/**")
                 ).permitAll()
                 // FARMER
                 .requestMatchers(

@@ -11,152 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
-
-        /* ---- NAVBAR ---- */
-        .navbar {
-            background: linear-gradient(135deg, #0a4f2c, #16783a) !important;
-            padding: 0.875rem 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .navbar-brand { font-weight: 800; font-size: 1.3rem; letter-spacing: -0.3px; }
-        .navbar-brand span { color: #86efac; }
-        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; font-size: 0.9rem; transition: color 0.2s; }
-        .nav-link:hover { color: white !important; }
-        .nav-link.active { color: white !important; }
-        .navbar .btn-logout {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            padding: 0.4rem 0.875rem;
-            transition: all 0.2s;
-        }
-        .navbar .btn-logout:hover { background: rgba(255,255,255,0.25); color: white; }
-
-        /* ---- HERO / ROLE BANNER ---- */
-        .role-banner {
-            background: linear-gradient(135deg, #0a4f2c, #1a9e4a);
-            color: white;
-            padding: 2.5rem 0 3.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .role-banner::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0; right: 0;
-            height: 40px;
-            background: #f0f4f8;
-            clip-path: ellipse(55% 100% at 50% 100%);
-        }
-        .role-banner h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem; }
-        .role-banner p { color: rgba(255,255,255,0.8); margin: 0; font-size: 0.95rem; }
-        .role-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            padding: 0.3rem 0.875rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            backdrop-filter: blur(5px);
-        }
-
-        /* ---- STATS CARDS ---- */
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.5rem;
-            border: none;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.06);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
-        .stat-icon {
-            width: 48px; height: 48px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; margin-bottom: 1rem;
-        }
-        .stat-icon.green { background: #dcfce7; }
-        .stat-icon.blue { background: #dbeafe; }
-        .stat-icon.orange { background: #ffedd5; }
-        .stat-icon.red { background: #fee2e2; }
-        .stat-value { font-size: 1.75rem; font-weight: 800; color: #1a202c; line-height: 1; margin-bottom: 0.25rem; }
-        .stat-label { font-size: 0.8rem; color: #718096; font-weight: 500; }
-
-        /* ---- SECTION TITLES ---- */
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* ---- MATCH CARDS ---- */
-        .match-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem;
-            border: 2px solid #e2e8f0;
-            transition: all 0.2s;
-            height: 100%;
-        }
-        .match-card:hover { border-color: #16783a; box-shadow: 0 4px 20px rgba(22,120,58,0.1); }
-        .match-score-badge {
-            background: #dcfce7;
-            color: #15803d;
-            font-weight: 700;
-            font-size: 0.8rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 20px;
-            display: inline-block;
-        }
         .progress { height: 8px; border-radius: 4px; background: #e2e8f0; }
         .progress-bar { border-radius: 4px; }
-
-        /* ---- QUICK ACTIONS ---- */
-        .action-btn {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 1.25rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: block;
-            color: #4a5568;
+        .navbar .btn-logout {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            color: white; border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+            padding: 0.4rem 0.875rem; transition: all 0.2s;
         }
-        .action-btn:hover {
-            border-color: #16783a;
-            background: #f0fff4;
-            color: #16783a;
-            transform: translateY(-2px);
-        }
-        .action-btn .action-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
-        .action-btn .action-label { font-size: 0.8rem; font-weight: 600; }
-
-        /* ---- ADMIN CARD ---- */
-        .admin-alert {
-            background: linear-gradient(135deg, #fff7ed, #fffbeb);
-            border: 2px solid #f59e0b;
-            border-radius: 20px;
-            padding: 1.75rem;
-        }
-        .msp-percent { font-size: 3.5rem; font-weight: 800; color: #d97706; line-height: 1; }
+        .navbar .btn-logout:hover { background: rgba(255,255,255,0.25); color: white; }
     </style>
 </head>
 <body>

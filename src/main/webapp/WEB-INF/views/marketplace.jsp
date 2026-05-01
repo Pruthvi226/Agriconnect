@@ -11,147 +11,65 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        body { background: #f0f4f8; min-height: 100vh; }
-
-        .navbar {
-            background: linear-gradient(135deg, #0a4f2c, #16783a) !important;
-            padding: 0.875rem 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .navbar-brand { font-weight: 800; font-size: 1.3rem; letter-spacing: -0.3px; }
-        .navbar-brand span { color: #86efac; }
-        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; font-size: 0.9rem; transition: color 0.2s; }
-        .nav-link:hover { color: white !important; }
-        .navbar .btn-logout {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white; border-radius: 8px; font-size: 0.875rem;
-            font-weight: 500; padding: 0.4rem 0.875rem; transition: all 0.2s;
-        }
-        .navbar .btn-logout:hover { background: rgba(255,255,255,0.25); color: white; }
-
         .page-header {
             background: linear-gradient(135deg, #0a4f2c, #1a9e4a);
-            color: white;
-            padding: 2rem 0 3rem;
-            position: relative;
-            overflow: hidden;
+            color: white; padding: 2rem 0 3rem; position: relative; overflow: hidden;
         }
         .page-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px; left: 0; right: 0;
-            height: 40px;
-            background: #f0f4f8;
-            clip-path: ellipse(55% 100% at 50% 100%);
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+            height: 40px; background: var(--bg-color); clip-path: ellipse(55% 100% at 50% 100%);
         }
         .page-header h1 { font-weight: 800; font-size: 1.75rem; margin-bottom: 0.25rem; }
         .page-header p { color: rgba(255,255,255,0.8); margin: 0; font-size: 0.9rem; }
 
         .search-bar {
-            background: white;
-            border-radius: 16px;
-            padding: 1.25rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 1.75rem;
-        }
-        .search-bar .form-control {
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 0.875rem;
-        }
-        .search-bar .form-control:focus {
-            border-color: #16783a;
-            box-shadow: 0 0 0 3px rgba(22,120,58,0.1);
+            background: var(--card-bg); border-radius: 16px; padding: 1.25rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 1.75rem; backdrop-filter: blur(10px);
         }
         .search-bar .btn-search {
-            background: linear-gradient(135deg, #16783a, #0a4f2c);
-            border: none; border-radius: 10px; color: white;
-            font-weight: 600; font-size: 0.875rem;
-            padding: 0.6rem 1.25rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; border-radius: 10px; color: white; font-weight: 600;
+            font-size: 0.875rem; padding: 0.6rem 1.25rem; transition: all 0.2s;
         }
+        .search-bar .btn-search:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(26,158,74,0.3); }
 
         .listing-card {
-            background: white;
-            border-radius: 20px;
-            border: 2px solid #e2e8f0;
-            overflow: hidden;
-            transition: all 0.25s;
-            height: 100%;
+            background: white; border-radius: 20px; border: 2px solid #e2e8f0;
+            overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100%;
         }
         .listing-card:hover {
-            border-color: #16783a;
-            transform: translateY(-4px);
-            box-shadow: 0 12px 35px rgba(22,120,58,0.12);
+            border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-hover);
         }
-
-        .card-top {
-            padding: 1.25rem 1.25rem 0.75rem;
-        }
-
+        .card-top { padding: 1.25rem 1.25rem 0.75rem; }
         .crop-icon {
-            width: 44px; height: 44px;
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem;
-            flex-shrink: 0;
+            width: 44px; height: 44px; background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0;
         }
-
         .crop-name { font-size: 1rem; font-weight: 700; color: #1a202c; margin-bottom: 0.1rem; }
         .crop-variety { font-size: 0.78rem; color: #718096; font-weight: 500; }
         .location-chip {
-            display: inline-flex; align-items: center; gap: 0.3rem;
-            background: #f0f4f8; color: #4a5568;
-            padding: 0.25rem 0.6rem; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 0.3rem; background: #f0f4f8; color: #4a5568;
+            padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500;
         }
-
         .price-row { padding: 0.75rem 1.25rem; border-top: 1px solid #f0f4f8; }
         .asking-price { font-size: 1.5rem; font-weight: 800; color: #15803d; }
         .price-unit { font-size: 0.75rem; color: #718096; font-weight: 500; }
-
         .msp-row { padding: 0 1.25rem 0.75rem; }
         .badge-msp-below { background: #fee2e2; color: #b91c1c; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600; }
         .badge-msp-above { background: #dcfce7; color: #15803d; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600; }
         .badge-msp-at { background: #e0e7ff; color: #3730a3; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600; }
-
-        .qty-row {
-            padding: 0.5rem 1.25rem;
-            background: #f8fafc;
-            font-size: 0.8rem;
-            color: #718096;
+        .qty-row { padding: 0.5rem 1.25rem; background: #f8fafc; font-size: 0.8rem; color: #718096; }
+        .card-footer-custom { padding: 0.875rem 1.25rem; background: white; border-top: 1px solid #f0f4f8; }
+        .results-count { font-size: 0.875rem; color: #718096; margin-bottom: 1rem; }
+        .navbar .btn-logout {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            color: white; border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+            padding: 0.4rem 0.875rem; transition: all 0.2s;
         }
-
-        .card-footer-custom {
-            padding: 0.875rem 1.25rem;
-            background: white;
-            border-top: 1px solid #f0f4f8;
-        }
-
-        .btn-bid {
-            background: linear-gradient(135deg, #16783a, #0a4f2c);
-            border: none; border-radius: 10px;
-            color: white; font-weight: 600; font-size: 0.875rem;
-            padding: 0.6rem; width: 100%; transition: all 0.2s;
-        }
-        .btn-bid:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(22,120,58,0.35);
-            color: white;
-        }
-
-        .results-count {
-            font-size: 0.875rem;
-            color: #718096;
-            margin-bottom: 1rem;
-        }
-        .results-count strong { color: #1a202c; }
-
-        .empty-state { text-align: center; padding: 4rem 2rem; background: white; border-radius: 20px; }
-        .empty-state .icon { font-size: 3.5rem; margin-bottom: 1rem; }
+        .navbar .btn-logout:hover { background: rgba(255,255,255,0.25); }
     </style>
 </head>
 <body>
@@ -284,7 +202,7 @@
 
                             <div class="card-footer-custom">
                                 <a href="${pageContext.request.contextPath}/web/marketplace/listing/${listing.id}"
-                                   class="btn btn-bid">
+                                   class="btn btn-primary-custom w-100 p-2">
                                     <i class="bi bi-hammer me-1"></i>View &amp; Bid
                                 </a>
                             </div>

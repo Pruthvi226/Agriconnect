@@ -1,1 +1,16 @@
+# Build output — never commit compiled artefacts
 .build/
+target/
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.launch
+
+# OS
+.DS_Store
+Thumbs.db
+

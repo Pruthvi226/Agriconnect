@@ -2,32 +2,47 @@
 set -eu
 
 # ── Resolve port ──────────────────────────────────────────────────────────────
-# Render injects $PORT (usually 10000 on free tier). We default to 8080 locally.
+# Render injects $PORT at runtime (typically 10000 on free tier).
+# We fall back to 8080 for local Docker runs.
 TOMCAT_PORT="${PORT:-8080}"
 
-echo "[AgriConnect] Configuring Tomcat to listen on port ${TOMCAT_PORT} ..."
+echo "[AgriConnect] Starting with PORT=${TOMCAT_PORT}"
 
-# Patch server.xml connector port
-sed -i "s/port=\"8080\"/port=\"${TOMCAT_PORT}\"/g" \
-    /usr/local/tomcat/conf/server.xml
+# ── Patch Tomcat server.xml connector port ────────────────────────────────────
+# Replace ALL numeric connector port values in server.xml with our target port.
+# This handles the default 8080 as well as any previously patched value.
+SERVER_XML="/usr/local/tomcat/conf/server.xml"
 
-# Verify the patch worked
-if grep -q "port=\"${TOMCAT_PORT}\"" /usr/local/tomcat/conf/server.xml; then
-    echo "[AgriConnect] Port patch verified: Tomcat will bind to ${TOMCAT_PORT}"
+# Only patch if the port isn't already correct (idempotent)
+if grep -q "port=\"${TOMCAT_PORT}\"" "${SERVER_XML}"; then
+    echo "[AgriConnect] server.xml already set to port ${TOMCAT_PORT}, no patch needed."
 else
-    echo "[AgriConnect] WARNING: Port patch may not have applied. Dumping connector config:"
-    grep -i "connector" /usr/local/tomcat/conf/server.xml || true
+    # Replace the HTTP Connector port (8080 or whatever it currently is)
+    sed -i "s/port=\"8080\"/port=\"${TOMCAT_PORT}\"/" "${SERVER_XML}"
+    echo "[AgriConnect] Patched server.xml: HTTP Connector → port ${TOMCAT_PORT}"
 fi
 
-# ── JVM tuning for Render free tier (512 MB RAM) ─────────────────────────────
-export JAVA_OPTS="${JAVA_OPTS:-} \
+# ── Verify patch ──────────────────────────────────────────────────────────────
+if grep -q "port=\"${TOMCAT_PORT}\"" "${SERVER_XML}"; then
+    echo "[AgriConnect] Verified: Tomcat will bind to port ${TOMCAT_PORT}"
+else
+    echo "[AgriConnect] ERROR: Port patch failed! Dumping connector lines:"
+    grep -i "Connector" "${SERVER_XML}" || true
+    # Don't exit — let Tomcat start and surface the error itself
+fi
+
+# ── JVM tuning ────────────────────────────────────────────────────────────────
+# Optimised for Render free tier (512 MB RAM).
+export CATALINA_OPTS="${CATALINA_OPTS:-} \
   -XX:+UseContainerSupport \
   -XX:MaxRAMPercentage=70.0 \
-  -XX:InitialRAMPercentage=40.0 \
+  -XX:InitialRAMPercentage=30.0 \
   -XX:+ExitOnOutOfMemoryError \
   -Djava.security.egd=file:/dev/./urandom \
-  -Dfile.encoding=UTF-8"
+  -Dfile.encoding=UTF-8 \
+  -Dserver.port=${TOMCAT_PORT}"
 
-echo "[AgriConnect] JVM options: ${JAVA_OPTS}"
+echo "[AgriConnect] CATALINA_OPTS set."
 echo "[AgriConnect] Starting Tomcat on port ${TOMCAT_PORT} ..."
+
 exec "$@"

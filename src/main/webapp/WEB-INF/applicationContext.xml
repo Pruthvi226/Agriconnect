@@ -36,6 +36,9 @@
         <property name="maximumPoolSize" value="${jdbc.pool.maximumPoolSize}" />
         <property name="minimumIdle" value="${jdbc.pool.minimumIdle}" />
         <property name="connectionTimeout" value="${jdbc.pool.connectionTimeoutMs}" />
+        <!-- -1 means: don't fail startup if DB is unreachable. App starts fast
+             and serves /health immediately; DB-dependent endpoints fail gracefully. -->
+        <property name="initializationFailTimeout" value="${jdbc.pool.initializationFailTimeout:-1}" />
         <property name="poolName" value="AgriConnectPool" />
     </bean>
 

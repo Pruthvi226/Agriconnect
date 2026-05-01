@@ -12,11 +12,11 @@ RUN mvn clean package -DskipTests -q
 # ─── Stage 2: Runtime ────────────────────────────────────────────────────────
 FROM tomcat:10.1-jdk17-temurin
 
-# Install curl for Docker HEALTHCHECK
+# Install curl for health probe (no xmlstarlet needed — sed is sufficient)
 RUN apt-get update -qq && apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Remove default webapps
+# Remove default webapps to keep image lean
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Deploy as ROOT so context path is /
@@ -28,21 +28,20 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # ── Environment defaults ───────────────────────────────────────────────────────
 # PORT is overridden at runtime by Render (or docker run -e PORT=...).
-# The entrypoint patches server.xml to use this value.
+# Do NOT hard-code this to 8080 — the entrypoint patches server.xml to $PORT.
 ENV PORT=8080
 ENV SPRING_PROFILES_ACTIVE=production
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dfile.encoding=UTF-8"
 
-# Expose the default port (Render overrides via $PORT env var at runtime)
+# Expose the default port (documentation only; Render overrides via $PORT)
 EXPOSE 8080
 
 # ── Docker-native liveness probe ──────────────────────────────────────────────
-# Checks the zero-dependency /health endpoint. If Tomcat is up, it returns 200.
-# --interval: check every 30s | --timeout: fail if no response in 10s
-# --start-period: give Tomcat 90s to start before first check
-# --retries: mark unhealthy after 3 consecutive failures
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-    CMD curl -fsS "http://localhost:${PORT:-8080}/health" || exit 1
+# IMPORTANT: Use shell form (not exec form) so that $PORT is evaluated at
+# container runtime, not at image build time. This means the HEALTHCHECK
+# always probes whichever port Tomcat is actually listening on.
+# --start-period: 120s gives Spring + Hibernate time to fully initialize.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD curl -fsS "http://localhost:${PORT}/health" || exit 1
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["catalina.sh", "run"]

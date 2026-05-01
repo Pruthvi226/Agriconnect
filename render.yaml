@@ -16,9 +16,8 @@ services:
     # Docker services (usually 10000). The docker-entrypoint.sh reads $PORT and
     # patches Tomcat's server.xml to the correct value at startup.
     envVars:
-      # ---- Port override ----
-      - key: PORT
-        value: "8080"
+      # NOTE: Do NOT set PORT here. Render injects $PORT automatically.
+      # The docker-entrypoint.sh reads $PORT and patches Tomcat's server.xml.
       # ---- Database (set these in the Render Dashboard → Environment) -------
       - key: DB_URL
         sync: false   # e.g. jdbc:mysql://host:3306/agriconnect?useSSL=true&serverTimezone=UTC

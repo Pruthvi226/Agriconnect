@@ -8,7 +8,7 @@ TOMCAT_PORT="${PORT:-8080}"
 echo "[AgriConnect] Configuring Tomcat to listen on port ${TOMCAT_PORT} ..."
 
 # Patch server.xml connector port
-sed -i "s/port=\"8080\" protocol=\"HTTP\/1.1\"/port=\"${TOMCAT_PORT}\" protocol=\"HTTP\/1.1\"/" \
+sed -i "s/port=\"8080\"/port=\"${TOMCAT_PORT}\"/g" \
     /usr/local/tomcat/conf/server.xml
 
 # Verify the patch worked

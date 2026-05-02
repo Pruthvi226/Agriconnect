@@ -83,9 +83,7 @@ public class DashboardController {
 
     @GetMapping("/expert")
     public ModelAndView expertDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
-        mav.addObject("role", "Agri-Expert");
-        return mav;
+        return new ModelAndView("redirect:/web/expert/dashboard");
     }
 
     @GetMapping("/admin")

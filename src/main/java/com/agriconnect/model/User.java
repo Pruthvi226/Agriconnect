@@ -2,6 +2,8 @@ package com.agriconnect.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,6 +35,24 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status")
     private VerificationStatus verificationStatus;
+
+    @Column(length = 200)
+    private String specialisation;
+
+    @Column(name = "consultation_fee_30min", precision = 8, scale = 2)
+    private BigDecimal consultationFee30min;
+
+    @Column(name = "consultation_fee_60min", precision = 8, scale = 2)
+    private BigDecimal consultationFee60min;
+
+    @Column(name = "languages_spoken", columnDefinition = "TEXT")
+    private String languagesSpoken;
+
+    @Column(name = "total_sessions")
+    private Integer totalSessions = 0;
+
+    @Column(name = "avg_rating", precision = 3, scale = 2)
+    private BigDecimal avgRating = BigDecimal.ZERO;
 
     @JsonIgnore
     @Column(name = "aadhaar_hash", length = 64)
@@ -70,6 +90,18 @@ public class User {
     public void setRole(Role role) { this.role = role; }
     public VerificationStatus getVerificationStatus() { return verificationStatus; }
     public void setVerificationStatus(VerificationStatus verificationStatus) { this.verificationStatus = verificationStatus; }
+    public String getSpecialisation() { return specialisation; }
+    public void setSpecialisation(String specialisation) { this.specialisation = specialisation; }
+    public BigDecimal getConsultationFee30min() { return consultationFee30min; }
+    public void setConsultationFee30min(BigDecimal consultationFee30min) { this.consultationFee30min = consultationFee30min; }
+    public BigDecimal getConsultationFee60min() { return consultationFee60min; }
+    public void setConsultationFee60min(BigDecimal consultationFee60min) { this.consultationFee60min = consultationFee60min; }
+    public String getLanguagesSpoken() { return languagesSpoken; }
+    public void setLanguagesSpoken(String languagesSpoken) { this.languagesSpoken = languagesSpoken; }
+    public Integer getTotalSessions() { return totalSessions; }
+    public void setTotalSessions(Integer totalSessions) { this.totalSessions = totalSessions; }
+    public BigDecimal getAvgRating() { return avgRating; }
+    public void setAvgRating(BigDecimal avgRating) { this.avgRating = avgRating; }
     public String getAadhaarHash() { return aadhaarHash; }
     public void setAadhaarHash(String aadhaarHash) { this.aadhaarHash = aadhaarHash; }
     public LocalDateTime getCreatedAt() { return createdAt; }

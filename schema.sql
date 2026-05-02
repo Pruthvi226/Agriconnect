@@ -5,6 +5,10 @@
 -- ---------------------------------------------------------
 
 DROP TABLE IF EXISTS critical_alerts;
+DROP TABLE IF EXISTS expert_wallet_transactions;
+DROP TABLE IF EXISTS consultation_reviews;
+DROP TABLE IF EXISTS expert_consultations;
+DROP TABLE IF EXISTS booking_slots;
 DROP TABLE IF EXISTS wallet_transactions;
 DROP TABLE IF EXISTS price_history;
 DROP TABLE IF EXISTS audit_logs;
@@ -30,6 +34,12 @@ CREATE TABLE users (
     phone VARCHAR(15),
     role VARCHAR(30) NOT NULL,
     verification_status VARCHAR(30) NOT NULL,
+    specialisation VARCHAR(200),
+    consultation_fee_30min DECIMAL(8, 2),
+    consultation_fee_60min DECIMAL(8, 2),
+    languages_spoken TEXT,
+    total_sessions INT DEFAULT 0,
+    avg_rating DECIMAL(3, 2) DEFAULT 0.00,
     aadhaar_hash VARCHAR(64),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
@@ -138,6 +148,68 @@ CREATE TABLE orders (
     CONSTRAINT fk_order_buyer FOREIGN KEY (buyer_id) REFERENCES buyer_profiles(id) ON DELETE CASCADE
 );
 
+CREATE TABLE booking_slots (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    provider_id BIGINT NOT NULL,
+    slot_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    district VARCHAR(100),
+    crop_focus VARCHAR(100),
+    notes VARCHAR(255),
+    slot_status VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_booking_slot_provider UNIQUE (provider_id, slot_date, start_time),
+    CONSTRAINT fk_booking_slot_provider FOREIGN KEY (provider_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE expert_consultations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    expert_id BIGINT NOT NULL,
+    farmer_id BIGINT NOT NULL,
+    slot_id BIGINT NOT NULL,
+    crop_focus VARCHAR(100),
+    farmer_district VARCHAR(100),
+    duration_minutes INT NOT NULL,
+    fee_amount DECIMAL(8, 2) NOT NULL,
+    consultation_status VARCHAR(30) NOT NULL,
+    payment_status VARCHAR(30) NOT NULL,
+    razorpay_order_id VARCHAR(100),
+    razorpay_payment_id VARCHAR(100),
+    session_link VARCHAR(500),
+    reminder_sent BOOLEAN DEFAULT FALSE,
+    review_requested BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL,
+    CONSTRAINT uk_expert_consultation_slot UNIQUE (slot_id),
+    CONSTRAINT fk_consultation_expert FOREIGN KEY (expert_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_consultation_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE,
+    CONSTRAINT fk_consultation_slot FOREIGN KEY (slot_id) REFERENCES booking_slots(id) ON DELETE CASCADE
+);
+
+CREATE TABLE consultation_reviews (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    consultation_id BIGINT NOT NULL,
+    rating INT NOT NULL,
+    review_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_consultation_review UNIQUE (consultation_id),
+    CONSTRAINT fk_consultation_review_booking FOREIGN KEY (consultation_id) REFERENCES expert_consultations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE expert_wallet_transactions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    expert_id BIGINT NOT NULL,
+    consultation_id BIGINT NOT NULL,
+    transaction_type VARCHAR(20) NOT NULL,
+    gross_amount DECIMAL(10, 2) NOT NULL,
+    platform_fee DECIMAL(10, 2) NOT NULL,
+    net_amount DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_expert_wallet_user FOREIGN KEY (expert_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_expert_wallet_consultation FOREIGN KEY (consultation_id) REFERENCES expert_consultations(id) ON DELETE CASCADE
+);
+
 CREATE TABLE advisories (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     expert_id BIGINT NOT NULL,
@@ -240,3 +312,5 @@ CREATE INDEX idx_listing_lat_lng ON produce_listings(lat, lng);
 CREATE INDEX idx_bid_listing_status ON bids(listing_id, bid_status);
 CREATE INDEX idx_match_farmer_score ON matchmaking_scores(farmer_id, score);
 CREATE INDEX idx_price_history_lookup ON price_history(crop_name, district, price_date);
+CREATE INDEX idx_booking_slot_lookup ON booking_slots(slot_date, district, crop_focus, slot_status);
+CREATE INDEX idx_expert_consultation_lookup ON expert_consultations(expert_id, consultation_status, payment_status);

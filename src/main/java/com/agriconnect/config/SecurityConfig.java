@@ -82,9 +82,16 @@ public class SecurityConfig {
                 // EXPERT
                 .requestMatchers(
                     antMatcher("/api/v1/advisories/**"),
+                    antMatcher("/api/v1/expert/**"),
                     antMatcher("/web/dashboard/expert"),
-                    antMatcher("/web/advisories")
+                    antMatcher("/web/advisories"),
+                    antMatcher("/web/expert/**")
                 ).hasRole("AGRI_EXPERT")
+                .requestMatchers(
+                    antMatcher("/api/v1/consultations/**"),
+                    antMatcher("/web/farmer/consultations"),
+                    antMatcher("/web/farmer/consultations/**")
+                ).authenticated()
                 // ADMIN
                 .requestMatchers(
                     antMatcher("/web/admin/**"),

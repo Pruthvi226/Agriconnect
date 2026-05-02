@@ -25,5 +25,8 @@
         <mapping class="com.agriconnect.model.CriticalAlert"/>
         <mapping class="com.agriconnect.model.WalletTransaction"/>
         <mapping class="com.agriconnect.model.PriceHistory"/>
+        <mapping class="com.agriconnect.model.FpoGroup"/>
+        <mapping class="com.agriconnect.model.FpoMembership"/>
+        <mapping class="com.agriconnect.model.FpoListing"/>
     </session-factory>
 </hibernate-configuration>

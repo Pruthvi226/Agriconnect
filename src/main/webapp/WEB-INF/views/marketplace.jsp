@@ -89,6 +89,53 @@
 
 <div class="container pb-5" style="margin-top: -1.5rem; position: relative; z-index: 1;">
 
+    <c:if test="${not empty fpoListings}">
+        <div class="workspace-panel mb-4">
+            <div class="panel-title">
+                <div>
+                    <h2>FPO collective deals</h2>
+                    <div class="text-muted small">Verified farmer collectives pooled for bulk-ready procurement.</div>
+                </div>
+                <span class="priority-pill">At the top</span>
+            </div>
+            <div class="row g-3">
+                <c:forEach var="fpo" items="${fpoListings}">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="listing-card border-success">
+                            <div class="card-top">
+                                <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                                    <div>
+                                        <div class="crop-name">${fpo.cropName}</div>
+                                        <div class="crop-variety">${fpo.groupName}</div>
+                                    </div>
+                                    <span class="badge-msp-above">${fpo.badgeLabel}</span>
+                                </div>
+                                <span class="location-chip">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                                    ${fpo.district}, ${fpo.state}
+                                </span>
+                            </div>
+                            <div class="price-row d-flex align-items-end gap-1">
+                                <span class="asking-price">Rs ${fpo.minPricePerKg}</span>
+                                <span class="price-unit mb-1">/ kg min</span>
+                            </div>
+                            <div class="qty-row">
+                                <i class="bi bi-people-fill me-1"></i>
+                                <strong>${fpo.totalQuantityKg} kg</strong> pooled from ${fpo.totalMembers} members
+                            </div>
+                            <div class="card-footer-custom">
+                                <div class="d-flex justify-content-between align-items-center small text-muted">
+                                    <span>Grade ${fpo.qualityGrade}</span>
+                                    <span>Deadline ${fpo.poolingDeadline}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+    </c:if>
+
     <!-- SEARCH BAR -->
     <div class="search-bar">
         <form method="get" action="${pageContext.request.contextPath}/web/marketplace" class="row g-2 align-items-end">

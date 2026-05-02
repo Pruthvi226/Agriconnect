@@ -7,6 +7,9 @@
 DROP TABLE IF EXISTS critical_alerts;
 DROP TABLE IF EXISTS wallet_transactions;
 DROP TABLE IF EXISTS price_history;
+DROP TABLE IF EXISTS fpo_listings;
+DROP TABLE IF EXISTS fpo_memberships;
+DROP TABLE IF EXISTS fpo_groups;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS market_prices;
 DROP TABLE IF EXISTS crop_master;
@@ -233,6 +236,44 @@ CREATE TABLE price_history (
     accepted_price DECIMAL(8, 2) NOT NULL,
     price_date DATE NOT NULL,
     source VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE fpo_groups (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    group_name VARCHAR(200) NOT NULL,
+    leader_farmer_id BIGINT NOT NULL,
+    district VARCHAR(100),
+    state VARCHAR(100),
+    registration_number VARCHAR(100) NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    total_members INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_fpo_registration UNIQUE (registration_number),
+    CONSTRAINT fk_fpo_leader FOREIGN KEY (leader_farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE fpo_memberships (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fpo_id BIGINT NOT NULL,
+    farmer_id BIGINT NOT NULL,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT FALSE,
+    CONSTRAINT uk_fpo_farmer UNIQUE (fpo_id, farmer_id),
+    CONSTRAINT fk_fpo_membership_group FOREIGN KEY (fpo_id) REFERENCES fpo_groups(id) ON DELETE CASCADE,
+    CONSTRAINT fk_fpo_membership_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE fpo_listings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fpo_id BIGINT NOT NULL,
+    crop_name VARCHAR(100) NOT NULL,
+    total_quantity_kg DECIMAL(12, 2) NOT NULL,
+    min_price_per_kg DECIMAL(8, 2) NOT NULL,
+    quality_grade VARCHAR(10),
+    pooling_deadline DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_fpo_listing_group FOREIGN KEY (fpo_id) REFERENCES fpo_groups(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_farmer_lat_lng ON farmer_profiles(lat, lng);

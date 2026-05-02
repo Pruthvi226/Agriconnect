@@ -32,6 +32,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link ${param.active == 'fpo' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/fpo/dashboard">
+                        <i class="bi bi-diagram-3 me-1"></i>FPO
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link ${param.active == 'profile' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/farmer/profile">
                         <i class="bi bi-person-badge me-1"></i>Profile
                     </a>

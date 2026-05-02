@@ -52,12 +52,15 @@ public class ListingController {
 class MarketplaceWebController {
     @Autowired
     private ListingService listingService;
+    @Autowired
+    private com.agriconnect.service.FpoService fpoService;
 
     @GetMapping
     public ModelAndView getMarketplace() {
         ModelAndView mav = new ModelAndView("marketplace");
         List<ProduceListing> listings = listingService.searchListings(new SearchFiltersDto());
         List<com.agriconnect.dto.ListingResponseDto> dtos = listings.stream().map(com.agriconnect.dto.ListingResponseDto::new).toList();
+        mav.addObject("fpoListings", fpoService.getFpoListingsForBuyer());
         mav.addObject("listings", dtos);
         return mav;
     }

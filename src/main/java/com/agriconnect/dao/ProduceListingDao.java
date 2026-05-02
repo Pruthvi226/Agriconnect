@@ -60,4 +60,13 @@ public class ProduceListingDao extends BaseDaoImpl<ProduceListing, Long> {
 
         return query.getResultList();
     }
+
+    public List<ProduceListing> findActiveListingsByFarmersAndCrop(List<Long> farmerIds, String cropName) {
+        String hql = "SELECT l FROM ProduceListing l WHERE l.farmerProfile.id IN (:farmerIds) " +
+                "AND l.cropName = :cropName AND l.status IN ('ACTIVE', 'BIDDING')";
+        return sessionFactory.getCurrentSession().createQuery(hql, ProduceListing.class)
+                .setParameter("farmerIds", farmerIds)
+                .setParameter("cropName", cropName)
+                .getResultList();
+    }
 }

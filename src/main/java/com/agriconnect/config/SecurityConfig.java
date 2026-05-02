@@ -66,12 +66,17 @@ public class SecurityConfig {
                 // FARMER
                 .requestMatchers(
                     antMatcher("/api/v1/listings/**"),
+                    antMatcher("/api/v1/fpo/groups"),
+                    antMatcher("/api/v1/fpo/*/join"),
+                    antMatcher("/api/v1/fpo/memberships/*/approve"),
+                    antMatcher("/api/v1/fpo/*/listings"),
                     antMatcher("/api/v1/bids/received"),
                     antMatcher("/api/v1/bids/*/accept"),
                     antMatcher("/api/v1/bids/*/reject"),
                     antMatcher("/api/v1/bids/orders/**"),
                     antMatcher("/web/dashboard/farmer"),
-                    antMatcher("/web/dashboard/farmer/**")
+                    antMatcher("/web/dashboard/farmer/**"),
+                    antMatcher("/web/farmer/fpo/**")
                 ).hasRole("FARMER")
                 // BUYER
                 .requestMatchers(

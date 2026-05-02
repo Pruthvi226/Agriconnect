@@ -6,7 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/web/dashboard")
@@ -20,6 +23,9 @@ public class DashboardController {
 
     @Autowired
     private com.agriconnect.service.BidService bidService;
+
+    @Autowired
+    private com.agriconnect.service.DemandForecastService demandForecastService;
 
     @GetMapping("/farmer")
     public ModelAndView farmerDashboard(Authentication authentication) {
@@ -43,6 +49,15 @@ public class DashboardController {
         mav.addObject("deliveredOrderCount", farmerOrders.stream()
                 .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.DELIVERED)
                 .count());
+
+        com.agriconnect.dto.DemandForecastReport forecast = demandForecastService.getLatestForecast();
+        mav.addObject("forecast", forecast);
+        mav.addObject("forecastTopCrops", forecast.getTopCrops().stream().limit(3).toList());
+        Map<String, com.agriconnect.dto.DemandForecastReport.PriceTrendSnapshot> forecastTrendMap = new LinkedHashMap<>();
+        for (com.agriconnect.dto.DemandForecastReport.PriceTrendSnapshot trend : forecast.getPriceTrends()) {
+            forecastTrendMap.put(trend.getCropName(), trend);
+        }
+        mav.addObject("forecastTrendMap", forecastTrendMap);
 
         mav.addObject("matches", matchmakingService.getRecommendedBuyersForFarmer(1L)); // profile-aware matching still uses the demo seed
         return mav;

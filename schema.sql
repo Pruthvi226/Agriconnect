@@ -7,6 +7,7 @@
 DROP TABLE IF EXISTS critical_alerts;
 DROP TABLE IF EXISTS wallet_transactions;
 DROP TABLE IF EXISTS price_history;
+DROP TABLE IF EXISTS demand_forecast_cache;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS market_prices;
 DROP TABLE IF EXISTS crop_master;
@@ -233,6 +234,12 @@ CREATE TABLE price_history (
     accepted_price DECIMAL(8, 2) NOT NULL,
     price_date DATE NOT NULL,
     source VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE demand_forecast_cache (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    report_json TEXT NOT NULL,
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_farmer_lat_lng ON farmer_profiles(lat, lng);

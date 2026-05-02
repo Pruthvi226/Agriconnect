@@ -26,6 +26,8 @@ services:
       DB_PASS: ${DB_PASS}
       JWT_SECRET: ${JWT_SECRET}
       AES_SECRET_KEY: ${AES_SECRET_KEY}
+      HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      HIBERNATE_DEFAULT_SCHEMA:
       HIBERNATE_DDL_AUTO: update
     depends_on:
       - db

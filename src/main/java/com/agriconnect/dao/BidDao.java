@@ -2,7 +2,9 @@ package com.agriconnect.dao;
 
 import com.agriconnect.model.Bid;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class BidDao extends BaseDaoImpl<Bid, Long> {
@@ -15,6 +17,18 @@ public class BidDao extends BaseDaoImpl<Bid, Long> {
         String hql = "SELECT b FROM Bid b JOIN FETCH b.buyer JOIN FETCH b.listing WHERE b.listing.id = :listingId ORDER BY b.bidPricePerKg DESC";
         return sessionFactory.getCurrentSession().createQuery(hql, Bid.class)
                 .setParameter("listingId", listingId)
+                .getResultList();
+    }
+
+    public List<Bid> findPendingByFarmer(Long farmerId) {
+        String hql = "SELECT b FROM Bid b " +
+                "JOIN FETCH b.buyer buyer " +
+                "JOIN FETCH b.listing listing " +
+                "WHERE listing.farmerProfile.id = :farmerId AND b.bidStatus = :status " +
+                "ORDER BY b.createdAt DESC";
+        return sessionFactory.getCurrentSession().createQuery(hql, Bid.class)
+                .setParameter("farmerId", farmerId)
+                .setParameter("status", Bid.BidStatus.PENDING)
                 .getResultList();
     }
 
@@ -34,5 +48,16 @@ public class BidDao extends BaseDaoImpl<Bid, Long> {
         
         int rank = rankedBids.indexOf(bidId);
         return rank != -1 ? rank + 1 : null;
+    }
+
+    public int rejectPendingBidsForListingExcept(Long listingId, Long acceptedBidId) {
+        String hql = "UPDATE Bid b SET b.bidStatus = :rejectedStatus " +
+                "WHERE b.listing.id = :listingId AND b.bidStatus = :pendingStatus AND b.id NOT IN (:acceptedIds)";
+        return sessionFactory.getCurrentSession().createMutationQuery(hql)
+                .setParameter("rejectedStatus", Bid.BidStatus.REJECTED)
+                .setParameter("pendingStatus", Bid.BidStatus.PENDING)
+                .setParameter("listingId", listingId)
+                .setParameter("acceptedIds", Set.of(acceptedBidId))
+                .executeUpdate();
     }
 }

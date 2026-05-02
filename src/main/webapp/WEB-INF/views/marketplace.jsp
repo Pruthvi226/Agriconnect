@@ -75,37 +75,9 @@
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/marketplace">
-            🌾 Agri<span>Connect</span>
-        </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-            <i class="bi bi-list text-white fs-4"></i>
-        </button>
-        <div class="collapse navbar-collapse" id="navMenu">
-            <ul class="navbar-nav ms-auto align-items-center gap-1">
-                <li class="nav-item">
-                    <a class="nav-link active" href="${pageContext.request.contextPath}/web/marketplace">
-                        <i class="bi bi-shop me-1"></i>Marketplace
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/web/notifications">
-                        <i class="bi bi-bell me-1"></i>Alerts
-                    </a>
-                </li>
-                <li class="nav-item ms-2">
-                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
-                        <button type="submit" class="btn-logout">
-                            <i class="bi bi-box-arrow-right me-1"></i>Sign Out
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<jsp:include page="fragments/farmer-nav.jsp">
+    <jsp:param name="active" value="marketplace" />
+</jsp:include>
 
 <!-- PAGE HEADER -->
 <div class="page-header">

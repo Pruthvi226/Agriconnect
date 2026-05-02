@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
         body { background: #f0f4f8; min-height: 100vh; }
@@ -120,18 +121,9 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/marketplace">
-            🌾 Agri<span>Connect</span>
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <a href="${pageContext.request.contextPath}/web/dashboard/farmer" class="btn-back">
-                <i class="bi bi-arrow-left me-1"></i>Dashboard
-            </a>
-        </div>
-    </div>
-</nav>
+<jsp:include page="fragments/farmer-nav.jsp">
+    <jsp:param name="active" value="profile" />
+</jsp:include>
 
 <div class="profile-hero">
     <div class="container text-center">
@@ -261,6 +253,91 @@
                 </a>
                 <a href="${pageContext.request.contextPath}/web/dashboard/farmer" class="btn btn-outline-secondary ms-2 px-4">
                     <i class="bi bi-grid me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-4">
+            <div class="workspace-panel h-100">
+                <div class="panel-title">
+                    <h3>Profile Readiness</h3>
+                    <span class="sell-signal good">86%</span>
+                </div>
+                <div class="criteria-item">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold" style="font-size: 0.875rem;">Farm location</span>
+                        <span class="text-success fw-bold" style="font-size: 0.875rem;">Done</span>
+                    </div>
+                    <div class="criteria-bar"><div class="criteria-bar-fill bg-success" data-width="100"></div></div>
+                </div>
+                <div class="criteria-item">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold" style="font-size: 0.875rem;">Crop history</span>
+                        <span class="text-success fw-bold" style="font-size: 0.875rem;">Good</span>
+                    </div>
+                    <div class="criteria-bar"><div class="criteria-bar-fill bg-success" data-width="82"></div></div>
+                </div>
+                <div class="criteria-item">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold" style="font-size: 0.875rem;">Bank verification</span>
+                        <span class="text-warning fw-bold" style="font-size: 0.875rem;">Pending</span>
+                    </div>
+                    <div class="criteria-bar"><div class="criteria-bar-fill bg-warning" data-width="45"></div></div>
+                </div>
+                <a href="${pageContext.request.contextPath}/web/notifications" class="btn btn-outline-success w-100 mt-3">
+                    <i class="bi bi-patch-check me-1"></i>Complete Verification
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="workspace-panel h-100">
+                <div class="panel-title">
+                    <h3>Buyer Trust Signals</h3>
+                </div>
+                <div class="timeline-list">
+                    <div class="timeline-item">
+                        <i class="bi bi-camera"></i>
+                        <div>
+                            <strong>Add produce photos</strong>
+                            <span>Photos improve bid confidence.</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <i class="bi bi-droplet"></i>
+                        <div>
+                            <strong>Add quality notes</strong>
+                            <span>Moisture, grade, and packaging.</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <i class="bi bi-truck"></i>
+                        <div>
+                            <strong>Confirm pickup slots</strong>
+                            <span>Buyers prefer clear loading windows.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="workspace-panel h-100">
+                <div class="panel-title">
+                    <h3>Smart Suggestions</h3>
+                </div>
+                <div class="signal-card mb-2">
+                    <div class="signal-label">Next best action</div>
+                    <div class="fw-bold mt-1">List wheat before Friday mandi close</div>
+                    <div class="text-muted small mt-1">Nearby bids are trending above MSP.</div>
+                </div>
+                <div class="signal-card">
+                    <div class="signal-label">Score booster</div>
+                    <div class="fw-bold mt-1">Respond to buyer messages within 6 hours</div>
+                    <div class="text-muted small mt-1">Improves response-rate component.</div>
+                </div>
+                <a href="${pageContext.request.contextPath}/web/dashboard/farmer" class="btn btn-success w-100 mt-3">
+                    <i class="bi bi-grid-1x2 me-1"></i>Open Dashboard
                 </a>
             </div>
         </div>

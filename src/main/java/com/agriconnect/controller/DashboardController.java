@@ -1,6 +1,7 @@
 package com.agriconnect.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +18,57 @@ public class DashboardController {
     @Autowired
     private com.agriconnect.service.MatchmakingService matchmakingService;
 
+    @Autowired
+    private com.agriconnect.service.BidService bidService;
+
     @GetMapping("/farmer")
-    public ModelAndView farmerDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
+    public ModelAndView farmerDashboard(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("farmer-dashboard");
         mav.addObject("role", "Farmer");
-        // Feature 2: Smart Matchmaking
-        mav.addObject("matches", matchmakingService.getRecommendedBuyersForFarmer(1L)); // stub farmer 1L
+        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
+
+        List<com.agriconnect.model.Bid> pendingBookings = bidService.getPendingBookingsForFarmerUser(userId);
+        List<com.agriconnect.model.Order> farmerOrders = bidService.getOrdersForFarmerUser(userId);
+        List<com.agriconnect.model.ProduceListing> farmerListings = listingService.getListingsForFarmerUser(userId);
+
+        mav.addObject("pendingBookings", pendingBookings);
+        mav.addObject("farmerOrders", farmerOrders);
+        mav.addObject("farmerListings", farmerListings);
+        mav.addObject("pendingBookingCount", pendingBookings.size());
+        mav.addObject("listingCount", farmerListings.size());
+        mav.addObject("activeOrderCount", farmerOrders.stream()
+                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.CONFIRMED
+                        || order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.IN_TRANSIT)
+                .count());
+        mav.addObject("deliveredOrderCount", farmerOrders.stream()
+                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.DELIVERED)
+                .count());
+
+        mav.addObject("matches", matchmakingService.getRecommendedBuyersForFarmer(1L)); // profile-aware matching still uses the demo seed
+        return mav;
+    }
+
+    @GetMapping("/farmer/listings")
+    public ModelAndView farmerListings(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("farmer-listings");
+        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
+        mav.addObject("farmerListings", listingService.getListingsForFarmerUser(userId));
+        return mav;
+    }
+
+    @GetMapping("/farmer/bookings")
+    public ModelAndView farmerBookings(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("farmer-bookings");
+        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
+        List<com.agriconnect.model.Bid> pendingBookings = bidService.getPendingBookingsForFarmerUser(userId);
+        List<com.agriconnect.model.Order> farmerOrders = bidService.getOrdersForFarmerUser(userId);
+        mav.addObject("pendingBookings", pendingBookings);
+        mav.addObject("farmerOrders", farmerOrders);
+        mav.addObject("pendingBookingCount", pendingBookings.size());
+        mav.addObject("activeOrderCount", farmerOrders.stream()
+                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.CONFIRMED
+                        || order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.IN_TRANSIT)
+                .count());
         return mav;
     }
 

@@ -17,7 +17,7 @@ public class OrderDao extends BaseDaoImpl<Order, Long> {
     }
 
     public List<Order> findByFarmer(Long farmerId, Order.OrderStatus status) {
-        String hql = "SELECT o FROM Order o JOIN FETCH o.bid JOIN FETCH o.buyer WHERE o.farmer.id = :farmerId ";
+        String hql = "SELECT o FROM Order o JOIN FETCH o.bid bid JOIN FETCH bid.listing JOIN FETCH o.buyer WHERE o.farmer.id = :farmerId ";
         if (status != null) hql += "AND o.orderStatus = :status ";
         hql += "ORDER BY o.createdAt DESC";
         

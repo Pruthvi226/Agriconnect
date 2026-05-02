@@ -12,6 +12,34 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
+    <style>
+        .login-role-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        .login-role-options input {
+            position: absolute;
+            opacity: 0;
+        }
+        .login-role-options label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            border: 1px solid #dbe3ef;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .login-role-options input:checked + label {
+            border-color: var(--primary);
+            background: #f0fff4;
+            color: var(--primary-dark);
+        }
+    </style>
 </head>
 <body class="auth-page">
 
@@ -29,7 +57,7 @@
         <c:if test="${not empty param.error}">
             <div class="alert alert-danger d-flex align-items-center gap-2 mb-3 border-0" style="background:#fff5f5; color:#c53030; border-radius:12px;">
                 <i class="bi bi-exclamation-circle-fill"></i>
-                Invalid email or password. Please try again.
+                Invalid email, role, or password. Please try again.
             </div>
         </c:if>
         <c:if test="${not empty param.logout}">
@@ -46,12 +74,30 @@
         </c:if>
 
         <form action="${pageContext.request.contextPath}/login" method="post" id="loginForm">
+            <input type="hidden" id="username" name="username">
             <div class="mb-3">
-                <label for="username" class="form-label text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">Email Address</label>
+                <label for="loginEmail" class="form-label text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">Email Address</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" id="username" name="username"
+                    <input type="email" class="form-control" id="loginEmail" name="loginEmail"
                            placeholder="you@example.com" required autocomplete="email">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">Sign in as</label>
+                <div class="login-role-options">
+                    <div>
+                        <input type="radio" name="loginRole" id="login-role-farmer" value="FARMER" checked>
+                        <label for="login-role-farmer"><i class="bi bi-flower1 me-2"></i>Farmer</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="loginRole" id="login-role-buyer" value="BUYER">
+                        <label for="login-role-buyer"><i class="bi bi-shop me-2"></i>Buyer</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="loginRole" id="login-role-expert" value="AGRI_EXPERT">
+                        <label for="login-role-expert"><i class="bi bi-mortarboard me-2"></i>Expert</label>
+                    </div>
                 </div>
             </div>
             <div class="mb-4">
@@ -85,6 +131,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.getElementById('loginForm').addEventListener('submit', function() {
+        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        const role = document.querySelector('input[name="loginRole"]:checked').value;
+        document.getElementById('username').value = email + '|' + role;
         const btn = document.getElementById('loginBtn');
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
         btn.disabled = true;

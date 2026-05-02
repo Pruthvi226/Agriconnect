@@ -4,8 +4,9 @@ import com.agriconnect.dao.UserDao;
 import com.agriconnect.dto.UserRegistrationDto;
 import com.agriconnect.exception.BusinessValidationException;
 import com.agriconnect.model.User;
+import com.agriconnect.security.LoginIdentity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +18,13 @@ public class UserService {
     private UserDao userDao;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
 
     public User register(UserRegistrationDto dto) {
-        String email = dto.getEmail().trim().toLowerCase();
-        if (userDao.findByEmail(email).isPresent()) {
-            throw new BusinessValidationException("An account already exists for this email");
+        String email = LoginIdentity.normalizeEmail(dto.getEmail());
+        User.Role role = User.Role.valueOf(dto.getRole());
+        if (userDao.existsByEmailAndRole(email, role)) {
+            throw new BusinessValidationException("An account already exists for this email and role");
         }
 
         User user = new User();
@@ -30,7 +32,7 @@ public class UserService {
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setPhone(dto.getPhone().trim());
-        user.setRole(User.Role.valueOf(dto.getRole()));
+        user.setRole(role);
         user.setVerificationStatus(User.VerificationStatus.PENDING);
         userDao.save(user);
         return user;

@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { font-family: 'Inter', sans-serif; }
@@ -147,16 +148,9 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/marketplace">
-            🌾 Agri<span>Connect</span>
-        </a>
-        <a href="${pageContext.request.contextPath}/web/marketplace" class="btn-back">
-            <i class="bi bi-arrow-left me-1"></i>Back to Marketplace
-        </a>
-    </div>
-</nav>
+<jsp:include page="fragments/farmer-nav.jsp">
+    <jsp:param name="active" value="marketplace" />
+</jsp:include>
 
 <div class="page-header">
     <div class="container">

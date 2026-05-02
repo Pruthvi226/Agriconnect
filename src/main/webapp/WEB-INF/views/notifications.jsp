@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
         body { background: #f0f4f8; min-height: 100vh; }
@@ -102,23 +103,9 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/marketplace">
-            🌾 Agri<span>Connect</span>
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <a href="${pageContext.request.contextPath}/web/marketplace" class="nav-link">
-                <i class="bi bi-shop me-1"></i>Marketplace
-            </a>
-            <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline ms-2">
-                <button type="submit" class="btn-logout">
-                    <i class="bi bi-box-arrow-right me-1"></i>Sign Out
-                </button>
-            </form>
-        </div>
-    </div>
-</nav>
+<jsp:include page="fragments/farmer-nav.jsp">
+    <jsp:param name="active" value="alerts" />
+</jsp:include>
 
 <div class="page-header">
     <div class="container">

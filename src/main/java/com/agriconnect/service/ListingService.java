@@ -1,7 +1,9 @@
 package com.agriconnect.service;
 
 import com.agriconnect.dao.BaseDao;
+import com.agriconnect.dao.FarmerProfileDao;
 import com.agriconnect.dao.ProduceListingDao;
+import com.agriconnect.dao.UserDao;
 import com.agriconnect.dto.ListingRequestDto;
 import com.agriconnect.dto.SearchFiltersDto;
 import com.agriconnect.exception.BusinessValidationException;
@@ -9,8 +11,10 @@ import com.agriconnect.exception.ResourceNotFoundException;
 import com.agriconnect.model.FarmerProfile;
 import com.agriconnect.model.MspRate;
 import com.agriconnect.model.ProduceListing;
+import com.agriconnect.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +25,19 @@ import java.util.List;
 @Transactional
 public class ListingService {
 
+    private static final Logger log = LoggerFactory.getLogger(ListingService.class);
+
     @Autowired
     private ProduceListingDao listingDao;
 
     @Autowired
     private BaseDao<FarmerProfile, Long> farmerDao;
+
+    @Autowired
+    private FarmerProfileDao farmerProfileDao;
+
+    @Autowired
+    private UserDao userDao;
 
     @Autowired
     private MspRateService mspRateService;
@@ -37,7 +49,17 @@ public class ListingService {
     public ProduceListing createListing(ListingRequestDto dto, Long farmerId) {
         FarmerProfile farmer = farmerDao.findById(farmerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Farmer not found"));
+        return createListingForProfile(dto, farmer);
+    }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
+    public ProduceListing createListingForUser(ListingRequestDto dto, Long userId) {
+        FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
+                .orElseGet(() -> createStarterFarmerProfile(userId));
+        return createListingForProfile(dto, farmer);
+    }
+
+    private ProduceListing createListingForProfile(ListingRequestDto dto, FarmerProfile farmer) {
         if (dto.getAvailableFrom().isAfter(dto.getAvailableUntil())) {
             throw new BusinessValidationException("Available From date cannot be after Available Until date");
         }
@@ -68,9 +90,22 @@ public class ListingService {
 
         listingDao.save(listing);
 
-        auditService.log(farmerId, "CREATE", "ProduceListing", listing.getId(), "{}", "{\"cropName\":\"" + dto.getCropName() + "\"}", "127.0.0.1"); // stub IP for now
+        auditService.log(farmer.getId(), "CREATE", "ProduceListing", listing.getId(), "{}", "{\"cropName\":\"" + dto.getCropName() + "\"}", "127.0.0.1"); // stub IP for now
 
         return listing;
+    }
+
+    private FarmerProfile createStarterFarmerProfile(Long userId) {
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        FarmerProfile farmer = new FarmerProfile();
+        farmer.setUser(user);
+        farmer.setVillage("Not specified");
+        farmer.setDistrict("Nashik");
+        farmer.setState("Maharashtra");
+        farmer.setLandAcres(new java.math.BigDecimal("1.00"));
+        farmerDao.save(farmer);
+        return farmer;
     }
 
     public String getMspComparison(Long listingId) {
@@ -97,8 +132,13 @@ public class ListingService {
         );
     }
 
-    @Scheduled(cron = "0 0 1 * * ?") // 1 AM every day
-    public void expireStaleListings() {
+    public List<ProduceListing> getListingsForFarmerUser(Long userId) {
+        return farmerProfileDao.findByUserId(userId)
+                .map(farmer -> listingDao.findByFarmer(farmer.getId(), null))
+                .orElseGet(java.util.Collections::emptyList);
+    }
+
+    public int expireStaleListings() {
         List<ProduceListing> activeListings = listingDao.findByField("status", ProduceListing.Status.ACTIVE);
         LocalDate today = LocalDate.now();
         int expiredCount = 0;
@@ -110,7 +150,7 @@ public class ListingService {
                 expiredCount++;
             }
         }
-        // In a real app, use a logger
-        System.out.println("Expired " + expiredCount + " stale listings.");
+        log.info("Expired {} stale listings", expiredCount);
+        return expiredCount;
     }
 }

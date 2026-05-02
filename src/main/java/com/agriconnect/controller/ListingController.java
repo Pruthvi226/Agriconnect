@@ -5,10 +5,12 @@ import com.agriconnect.dto.ListingRequestDto;
 import com.agriconnect.dto.ListingResponseDto;
 import com.agriconnect.dto.SearchFiltersDto;
 import com.agriconnect.model.ProduceListing;
+import com.agriconnect.security.CustomUserDetails;
 import com.agriconnect.service.ListingService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,9 +25,10 @@ public class ListingController {
     private ListingService listingService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ListingResponseDto>> createListing(@Valid @RequestBody ListingRequestDto dto) {
-        // Stub farmerId = 1L
-        ProduceListing listing = listingService.createListing(dto, 1L);
+    public ResponseEntity<ApiResponse<ListingResponseDto>> createListing(@Valid @RequestBody ListingRequestDto dto,
+                                                                         Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        ProduceListing listing = listingService.createListingForUser(dto, userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(new ListingResponseDto(listing), "Listing created successfully"));
     }
 

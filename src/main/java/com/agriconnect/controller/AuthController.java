@@ -3,6 +3,7 @@ package com.agriconnect.controller;
 import com.agriconnect.dto.ApiResponse;
 import com.agriconnect.dto.UserRegistrationDto;
 import com.agriconnect.model.User;
+import com.agriconnect.security.LoginIdentity;
 import com.agriconnect.security.JwtUtil;
 import com.agriconnect.service.UserService;
 import jakarta.validation.Valid;
@@ -35,7 +36,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegistrationDto dto) {
         User user = userService.register(dto);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(LoginIdentity.format(user));
         return ResponseEntity.ok(ApiResponse.success(jwtUtil.generateToken(userDetails), "User registered"));
     }
 
@@ -43,8 +44,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> login(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        User.Role role = User.Role.valueOf(request.get("role"));
+        String username = LoginIdentity.format(email, role);
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return ResponseEntity.ok(ApiResponse.success(jwtUtil.generateToken(userDetails), "Login successful"));
     }
 

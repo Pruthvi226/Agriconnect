@@ -13,7 +13,15 @@ public class ProduceListingDao extends BaseDaoImpl<ProduceListing, Long> {
     }
 
     public List<Object[]> findNearbyListings(BigDecimal lat, BigDecimal lng, Integer radiusKm, String crop) {
-        String sql = "CALL sp_get_nearby_listings(:lat, :lng, :radius, :crop)";
+        String sql = "SELECT pl.id AS listing_id, pl.farmer_id, pl.crop_name, pl.variety, pl.quantity_kg, " +
+                "pl.asking_price_per_kg, pl.msp_price_per_kg, pl.status, " +
+                "(6371 * ACOS(COS(RADIANS(:lat)) * COS(RADIANS(pl.lat)) * COS(RADIANS(pl.lng) - RADIANS(:lng)) " +
+                "+ SIN(RADIANS(:lat)) * SIN(RADIANS(pl.lat)))) AS distance_km " +
+                "FROM produce_listings pl " +
+                "WHERE pl.status = 'ACTIVE' AND (:crop IS NULL OR pl.crop_name = :crop) " +
+                "AND (6371 * ACOS(COS(RADIANS(:lat)) * COS(RADIANS(pl.lat)) * COS(RADIANS(pl.lng) - RADIANS(:lng)) " +
+                "+ SIN(RADIANS(:lat)) * SIN(RADIANS(pl.lat)))) <= :radius " +
+                "ORDER BY distance_km ASC";
         return sessionFactory.getCurrentSession().createNativeQuery(sql, Object[].class)
                 .setParameter("lat", lat)
                 .setParameter("lng", lng)

@@ -23,5 +23,7 @@
         <mapping class="com.agriconnect.model.Notification"/>
         <mapping class="com.agriconnect.model.AuditLog"/>
         <mapping class="com.agriconnect.model.CriticalAlert"/>
+        <mapping class="com.agriconnect.model.WalletTransaction"/>
+        <mapping class="com.agriconnect.model.PriceHistory"/>
     </session-factory>
 </hibernate-configuration>

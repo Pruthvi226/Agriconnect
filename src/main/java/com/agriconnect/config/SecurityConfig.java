@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -28,6 +30,8 @@ import java.util.Collection;
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
+@EnableAsync
+@EnableScheduling
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
@@ -63,6 +67,9 @@ public class SecurityConfig {
                 .requestMatchers(
                     antMatcher("/api/v1/listings/**"),
                     antMatcher("/api/v1/bids/received"),
+                    antMatcher("/api/v1/bids/*/accept"),
+                    antMatcher("/api/v1/bids/*/reject"),
+                    antMatcher("/api/v1/bids/orders/**"),
                     antMatcher("/web/dashboard/farmer"),
                     antMatcher("/web/dashboard/farmer/**")
                 ).hasRole("FARMER")
@@ -158,7 +165,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 }

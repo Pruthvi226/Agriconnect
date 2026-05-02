@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints = {
+    @UniqueConstraint(name = "uk_users_email_role", columnNames = {"email", "role"})
+})
 public class User {
 
     @Id
@@ -15,7 +17,7 @@ public class User {
     @Column(length = 100)
     private String name;
 
-    @Column(length = 150, unique = true)
+    @Column(length = 150)
     private String email;
 
     @JsonIgnore

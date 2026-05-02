@@ -7,8 +7,9 @@ import com.agriconnect.model.BuyerProfile;
 import com.agriconnect.model.FarmerProfile;
 import com.agriconnect.model.MatchmakingScore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,8 @@ import java.util.List;
 @Service
 @Transactional
 public class MatchmakingService {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchmakingService.class);
 
     @Autowired
     private MatchmakingDao matchmakingDao;
@@ -33,9 +36,8 @@ public class MatchmakingService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Scheduled(cron = "0 0 2 * * ?") // 2 AM every day
     public void computeAllScores() {
-        System.out.println("Starting Smart Matchmaking Engine...");
+        log.info("Starting smart matchmaking recomputation");
         List<FarmerProfile> farmers = farmerDao.findAll();
         List<BuyerProfile> buyers = buyerDao.findAll();
 
@@ -61,7 +63,7 @@ public class MatchmakingService {
                 }
             }
         }
-        System.out.println("Smart Matchmaking Engine complete.");
+        log.info("Smart matchmaking recomputation complete");
     }
 
     private double calculateProximityScore(FarmerProfile farmer, BuyerProfile buyer) {

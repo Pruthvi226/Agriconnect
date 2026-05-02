@@ -2,13 +2,18 @@ package com.agriconnect.service;
 
 import com.agriconnect.dao.BaseDao;
 import com.agriconnect.dao.BidDao;
+import com.agriconnect.dao.FarmerProfileDao;
+import com.agriconnect.dao.NotificationDao;
 import com.agriconnect.dao.ProduceListingDao;
 import com.agriconnect.dao.OrderDao;
+import com.agriconnect.dao.PriceHistoryDao;
+import com.agriconnect.dao.WalletTransactionDao;
 import com.agriconnect.dto.BidRequestDto;
 import com.agriconnect.model.Bid;
 import com.agriconnect.model.BuyerProfile;
 import com.agriconnect.model.Order;
 import com.agriconnect.model.ProduceListing;
+import com.agriconnect.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,9 +41,15 @@ public class BidServiceTest {
     @Mock
     private BaseDao<BuyerProfile, Long> buyerDao;
     @Mock
+    private FarmerProfileDao farmerProfileDao;
+    @Mock
     private OrderDao orderDao;
     @Mock
-    private BaseDao<com.agriconnect.model.Notification, Long> notificationDao;
+    private NotificationDao notificationDao;
+    @Mock
+    private WalletTransactionDao walletTransactionDao;
+    @Mock
+    private PriceHistoryDao priceHistoryDao;
     @Mock
     private AuditService auditService;
 
@@ -87,19 +98,35 @@ public class BidServiceTest {
         bid.setBuyer(buyer);
         bid.setQuantityKg(BigDecimal.valueOf(50));
         bid.setBidPricePerKg(BigDecimal.valueOf(22));
+        bid.setBidStatus(Bid.BidStatus.PENDING);
 
         com.agriconnect.model.FarmerProfile farmer = new com.agriconnect.model.FarmerProfile();
         farmer.setId(2L);
+        User farmerUser = new User();
+        farmerUser.setId(20L);
+        farmer.setUser(farmerUser);
         listing.setFarmerProfile(farmer);
+        listing.setStatus(ProduceListing.Status.ACTIVE);
+        listing.setQuantityKg(BigDecimal.valueOf(50));
+
+        User buyerUser = new User();
+        buyerUser.setId(10L);
+        buyer.setUser(buyerUser);
 
         when(bidDao.findById(1L)).thenReturn(Optional.of(bid));
-        when(bidDao.findByListing(1L)).thenReturn(Collections.singletonList(bid));
+        when(farmerProfileDao.findById(2L)).thenReturn(Optional.of(farmer));
 
         Order order = bidService.acceptBid(1L, 2L);
 
         assertThat(order).isNotNull();
         assertThat(order.getOrderStatus()).isEqualTo(Order.OrderStatus.CONFIRMED);
+        assertThat(order.getPaymentStatus()).isEqualTo(Order.PaymentStatus.PAID);
+        assertThat(listing.getStatus()).isEqualTo(ProduceListing.Status.SOLD);
         verify(orderDao, times(1)).save(any(Order.class));
         verify(bidDao, times(1)).update(bid);
+        verify(bidDao, times(1)).rejectPendingBidsForListingExcept(1L, 1L);
+        verify(walletTransactionDao, times(1)).save(any());
+        verify(priceHistoryDao, times(1)).save(any());
+        verify(notificationDao, times(2)).save(any());
     }
 }

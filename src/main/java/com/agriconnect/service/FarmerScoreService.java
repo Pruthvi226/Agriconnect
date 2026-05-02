@@ -4,8 +4,9 @@ import com.agriconnect.model.FarmerProfile;
 import com.agriconnect.model.Order;
 import com.agriconnect.dao.BaseDao;
 import com.agriconnect.dao.OrderDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,22 +17,27 @@ import java.util.List;
 @Transactional
 public class FarmerScoreService {
 
+    private static final Logger log = LoggerFactory.getLogger(FarmerScoreService.class);
+
     @Autowired
     private BaseDao<FarmerProfile, Long> farmerDao;
 
     @Autowired
     private OrderDao orderDao;
 
-    @Scheduled(cron = "0 0 3 * * ?") // 3 AM every day
-    public void recomputeAllScores() {
-        System.out.println("Starting Nightly Farmer Score Computation in Java...");
+    public void recomputeAllActiveScores() {
+        log.info("Starting farmer score recomputation");
         List<FarmerProfile> farmers = farmerDao.findAll();
         for (FarmerProfile farmer : farmers) {
             double finalScore = calculateScoreForFarmer(farmer);
             farmer.setFarmerScore(BigDecimal.valueOf(finalScore));
             farmerDao.update(farmer);
         }
-        System.out.println("Computed scores for " + farmers.size() + " farmers.");
+        log.info("Computed scores for {} farmers", farmers.size());
+    }
+
+    public void recomputeAllScores() {
+        recomputeAllActiveScores();
     }
 
     private double calculateScoreForFarmer(FarmerProfile farmer) {

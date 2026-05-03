@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,7 +77,8 @@ public class BidServiceTest {
     void testPlaceBid_DuplicatePrevented() {
         when(listingDao.findById(1L)).thenReturn(Optional.of(listing));
         when(buyerDao.findById(1L)).thenReturn(Optional.of(buyer));
-        when(bidDao.findActiveBidsByBuyer(1L)).thenReturn(List.of(new Bid())); // Pretend buyer already has active bids, need to mock carefully
+        when(bidDao.findActiveBidsByBuyer(1L)).thenReturn(List.of(new Bid())); // Pretend buyer already has active bids,
+                                                                               // need to mock carefully
 
         Bid existingBid = new Bid();
         existingBid.setListing(listing);

@@ -15,7 +15,6 @@ import com.agriconnect.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -129,7 +128,8 @@ class FpoServiceTest {
         when(farmerProfileDao.findByUserId(1L)).thenReturn(Optional.of(verifiedFarmer));
         when(fpoGroupDao.findById(50L)).thenReturn(Optional.of(group));
         when(fpoMembershipDao.findActiveByFpo(50L)).thenReturn(List.of(membership));
-        when(produceListingDao.findActiveListingsByFarmersAndCrop(List.of(10L), "Onion")).thenReturn(List.of(listing1, listing2));
+        when(produceListingDao.findActiveListingsByFarmersAndCrop(List.of(10L), "Onion"))
+                .thenReturn(List.of(listing1, listing2));
 
         var fpoListing = fpoService.createFpoListing(dto, 50L, 1L);
 

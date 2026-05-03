@@ -25,6 +25,8 @@
         <jackson.version>2.16.1</jackson.version>
         <jjwt.version>0.11.5</jjwt.version>
         <hikari.version>5.1.0</hikari.version>
+        <agriconnect.build.dir>${java.io.tmpdir}/agriconnect-build</agriconnect.build.dir>
+        <agriconnect.cargo.home>${java.io.tmpdir}/agriconnect-cargo-${maven.build.timestamp}/tomcat10x</agriconnect.cargo.home>
     </properties>
 
     <dependencies>
@@ -239,6 +241,7 @@
     </dependencies>
 
     <build>
+        <directory>${agriconnect.build.dir}</directory>
         <finalName>agriconnect</finalName>
         <resources>
             <resource>
@@ -350,7 +353,7 @@
                         <type>embedded</type>
                     </container>
                     <configuration>
-                        <home>${project.basedir}/.build/agriconnect-cargo-${maven.build.timestamp}/tomcat10x</home>
+                        <home>${agriconnect.cargo.home}</home>
                         <properties>
                             <cargo.servlet.port>${app.port}</cargo.servlet.port>
                         </properties>

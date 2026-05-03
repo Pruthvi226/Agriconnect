@@ -4,6 +4,10 @@
 -- Seed data is intentionally separated into seed-data.sql
 -- ---------------------------------------------------------
 
+-- Note: Database/schema creation is handled by connection configuration
+-- MySQL: Set via connection string or application.properties
+-- H2: Set via connection URL (e.g., jdbc:h2:mem:agriconnect)
+
 DROP TABLE IF EXISTS critical_alerts;
 DROP TABLE IF EXISTS wallet_transactions;
 DROP TABLE IF EXISTS price_history;
@@ -189,7 +193,7 @@ CREATE TABLE msp_rates (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     crop_name VARCHAR(100) NOT NULL,
     season VARCHAR(20) NOT NULL,
-    year INT NOT NULL,
+    marketing_year INT NOT NULL,
     msp_per_kg DECIMAL(8, 2) NOT NULL,
     announced_at DATE NOT NULL
 );

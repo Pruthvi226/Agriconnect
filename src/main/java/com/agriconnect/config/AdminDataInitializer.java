@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.lang.NonNull;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
@@ -45,7 +46,8 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
     private Resource seedScript;
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
+    @SuppressWarnings("null")
+    public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() != null || !INITIALIZED.compareAndSet(false, true)) {
             return;
         }
@@ -59,9 +61,11 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
             boolean originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             try {
-                ScriptUtils.executeSqlScript(connection, new EncodedResource(schemaScript, StandardCharsets.UTF_8));
+                Resource schemaRes = schemaScript;
+                ScriptUtils.executeSqlScript(connection, new EncodedResource(schemaRes, StandardCharsets.UTF_8));
+                byte[] seedBytes = renderSeedScript().getBytes(StandardCharsets.UTF_8);
                 ScriptUtils.executeSqlScript(connection, new EncodedResource(
-                        new ByteArrayResource(renderSeedScript().getBytes(StandardCharsets.UTF_8)),
+                        new ByteArrayResource(seedBytes),
                         StandardCharsets.UTF_8));
                 connection.commit();
                 log.info("Database schema and seed data initialized successfully");
@@ -78,7 +82,7 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
 
     private boolean shouldInitialize(Connection connection) {
         try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM users")) {
+                ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM users")) {
             resultSet.next();
             return resultSet.getLong(1) == 0L;
         } catch (SQLException ex) {
@@ -87,6 +91,7 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
         }
     }
 
+    @SuppressWarnings("null")
     private String renderSeedScript() throws IOException {
         String template = StreamUtils.copyToString(seedScript.getInputStream(), StandardCharsets.UTF_8);
         Matcher matcher = BCRYPT_TOKEN.matcher(template);

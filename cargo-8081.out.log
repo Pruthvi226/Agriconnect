@@ -1,0 +1,17 @@
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/cargo/cargo-maven3-plugin/1.10.12/cargo-maven3-plugin-1.10.12.pom
+Progress (1): 762 BProgress (1): 2.5 kBProgress (1): 5.1 kBProgress (1): 6.4 kB                    [INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.904 s
+[INFO] Finished at: 2026-05-02T23:21:26+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Plugin org.codehaus.cargo:cargo-maven3-plugin:1.10.12 or one of its dependencies could not be resolved:
+[ERROR] 	The following artifacts could not be resolved: org.codehaus.cargo:cargo-maven3-plugin:pom:1.10.12 (absent): Could not transfer artifact org.codehaus.cargo:cargo-maven3-plugin:pom:1.10.12 from/to central (https://repo.maven.apache.org/maven2): C:\Users\pruthviraj\OneDrive\Desktop\jdk\AgriConnect\.m2-local\org\codehaus\cargo\cargo-maven3-plugin\1.10.12\cargo-maven3-plugin-1.10.12.pom.16601638050624465061.tmp.5324378298619252683.tmp
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginResolutionException

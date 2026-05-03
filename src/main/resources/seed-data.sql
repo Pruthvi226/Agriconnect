@@ -56,7 +56,7 @@ INSERT INTO buyer_profiles (id, user_id, company_name, gstin, business_type, pre
 (2, 7, 'FreshFarm Retailers', '07AABCU9603R1ZN', 'RETAILER', '["Wheat","Onion"]', '["Kangra","Moga"]', 200000.00),
 (3, 8, 'GreenOrg Exporters', '24AABCU9603R1ZO', 'EXPORTER', '["Cotton","Rice (Paddy)"]', '["Surat","Hassan"]', 1000000.00);
 
-INSERT INTO msp_rates (id, crop_name, season, year, msp_per_kg, announced_at) VALUES
+INSERT INTO msp_rates (id, crop_name, season, marketing_year, msp_per_kg, announced_at) VALUES
 (1, 'Wheat', 'RABI', 2024, 22.75, '2023-10-15'),
 (2, 'Rice (Paddy)', 'KHARIF', 2024, 21.83, '2024-06-01'),
 (3, 'Cotton', 'KHARIF', 2024, 66.20, '2024-06-05'),

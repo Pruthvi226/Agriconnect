@@ -20,9 +20,6 @@ public class ScheduledTasksService {
     @Autowired
     private ListingService listingService;
 
-    @Autowired
-    private AdvisoryAlertService advisoryAlertService;
-
     @Scheduled(cron = "0 0 2 * * ?")
     public void recomputeFarmerScores() {
         log.info("Scheduled: recomputing all farmer scores");

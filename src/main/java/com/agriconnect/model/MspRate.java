@@ -18,7 +18,7 @@ public class MspRate {
     @Enumerated(EnumType.STRING)
     private Season season;
 
-    @Column(name = "year")
+    @Column(name = "marketing_year")
     private Integer year;
 
     @Column(name = "msp_per_kg", precision = 8, scale = 2)

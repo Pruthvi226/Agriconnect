@@ -24,21 +24,38 @@ public class BidController {
     @PostMapping
     public ResponseEntity<ApiResponse<Bid>> placeBid(@Valid @RequestBody BidRequestDto dto,
                                                      Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("User not authenticated"));
+        }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Bid bid = bidService.placeBidForUser(dto, userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(bid, "Booking request sent successfully"));
     }
 
     @PutMapping("/{id}/accept")
-    public ResponseEntity<ApiResponse<Order>> acceptBid(@PathVariable Long id,
+    public ResponseEntity<ApiResponse<Order>> acceptBid(@PathVariable("id") Long id,
                                                        Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("User not authenticated"));
+        }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Order order = bidService.acceptBidForUser(id, userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(order, "Booking accepted and order created"));
     }
 
+    @PutMapping("/{id}/accept-counter")
+    public ResponseEntity<ApiResponse<Order>> acceptCounterOffer(@PathVariable("id") Long id,
+                                                               Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("User not authenticated"));
+        }
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Order order = bidService.acceptCounterOfferForUser(id, userDetails.getId());
+        return ResponseEntity.ok(ApiResponse.success(order, "Counter offer accepted and order created"));
+    }
+
     @PutMapping("/{id}/reject")
-    public ResponseEntity<ApiResponse<Bid>> rejectBid(@PathVariable Long id,
+    public ResponseEntity<ApiResponse<Bid>> rejectBid(@PathVariable("id") Long id,
                                                      Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Bid bid = bidService.rejectBidForUser(id, userDetails.getId());
@@ -46,24 +63,31 @@ public class BidController {
     }
 
     @PutMapping("/orders/{id}/delivery/{action}")
-    public ResponseEntity<ApiResponse<Order>> updateDelivery(@PathVariable Long id,
-                                                            @PathVariable String action,
+    public ResponseEntity<ApiResponse<Order>> updateDelivery(@PathVariable("id") Long id,
+                                                            @PathVariable("action") String action,
                                                             Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(ApiResponse.error("User not authenticated"));
+        }
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Order order = bidService.updateOrderDeliveryStatus(id, action, userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(order, "Delivery status updated"));
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<List<Bid>>> getMyBids() {
-        // Stub retrieving bids for buyer 1L
-        return ResponseEntity.ok(ApiResponse.success(null, "Not implemented - stub"));
+    public ResponseEntity<ApiResponse<List<Bid>>> getMyBids(Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        List<Bid> bids = bidService.getBidsForBuyerUser(userDetails.getId());
+        return ResponseEntity.ok(ApiResponse.success(bids, "Your active bids"));
     }
 
     @GetMapping("/listings/{listingId}/bid-rank")
-    public ResponseEntity<ApiResponse<com.agriconnect.dto.BidRankDto>> getBidRank(@PathVariable Long listingId) {
-        // Stub buyerId = 1L
-        com.agriconnect.dto.BidRankDto dto = bidService.getAnonymisedBidRankingFull(listingId, 1L);
+    public ResponseEntity<ApiResponse<com.agriconnect.dto.BidRankDto>> getBidRank(@PathVariable("listingId") Long listingId,
+                                                                                 Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        com.agriconnect.dto.BidRankDto dto = bidService.getBidRankForUser(listingId, userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(dto, "Bid rank fetched"));
     }
 }
+
+

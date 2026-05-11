@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"}, classes = {com.agriconnect.config.SecurityConfig.class})
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
 @WebAppConfiguration
 @SuppressWarnings("null")
 public class AuthControllerIT {
@@ -48,6 +48,6 @@ public class AuthControllerIT {
         mockMvc.perform(post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(dto)))
-                .andExpect(status().isNotFound()); // Expect 404 because we haven't implemented AuthController, but NOT 403 Forbidden
+                .andExpect(status().isOk()); 
     }
 }

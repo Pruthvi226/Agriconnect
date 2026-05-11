@@ -17,6 +17,8 @@ INSERT INTO users (id, name, email, password_hash, phone, role, verification_sta
 (10, 'Prof. Anita Rao', 'anita.r@uni.edu', '{{bcrypt:Expert@2024!}}', '7876543211', 'AGRI_EXPERT', 'VERIFIED'),
 (11, 'AgriConnect Admin', 'admin@agriconnect.in', '{{bcrypt:Admin@2024!}}', '7000000000', 'ADMIN', 'VERIFIED');
 
+-- BCrypt hash for all non-admin users (hash of: Farmer@2024! / Buyer@2024! / Expert@2024!)
+-- All share the same hash for demo simplicity: $2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.
 UPDATE users
 SET password_hash = '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.'
 WHERE email LIKE '%@example.com'
@@ -25,6 +27,12 @@ WHERE email LIKE '%@example.com'
    OR email LIKE '%@greenorg.com'
    OR email LIKE '%@kvk.edu'
    OR email LIKE '%@uni.edu';
+
+-- BCrypt hash for Admin@2024! (strength 12) — fixes the unresolved {{bcrypt:Admin@2024!}} placeholder
+-- Generated: BCrypt.hashpw("Admin@2024!", BCrypt.gensalt(12))
+UPDATE users
+SET password_hash = '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.'
+WHERE email = 'admin@agriconnect.in' AND role = 'ADMIN';
 
 INSERT INTO crops (id, name, category) VALUES
 (1, 'Wheat', 'Cereals'),
@@ -62,24 +70,24 @@ INSERT INTO msp_rates (id, crop_name, season, marketing_year, msp_per_kg, announ
 (3, 'Cotton', 'KHARIF', 2024, 66.20, '2024-06-05'),
 (4, 'Maize', 'KHARIF', 2024, 19.60, '2024-06-10');
 
-INSERT INTO produce_listings (id, farmer_id, crop_name, variety, quantity_kg, available_from, available_until, asking_price_per_kg, msp_price_per_kg, quality_grade, description, district, lat, lng, status, view_count) VALUES
-(1, 1, 'Wheat', 'Sharbati', 5000.00, '2026-05-01', '2026-05-15', 25.00, 22.75, 'A', 'Premium wheat lot ready for pickup.', 'Kangra', 32.110900, 76.536300, 'SOLD', 12),
-(2, 1, 'Rice (Paddy)', 'Basmati', 2000.00, '2026-05-03', '2026-05-16', 35.00, 21.83, 'A', 'Aromatic basmati harvest.', 'Kangra', 32.110900, 76.536300, 'ACTIVE', 5),
-(3, 2, 'Cotton', 'BT Cotton', 8000.00, '2026-05-03', '2026-05-18', 70.00, 66.20, 'A', 'High quality cotton bales.', 'Surat', 21.121300, 73.111900, 'ACTIVE', 8),
-(4, 2, 'Wheat', 'Lok-1', 4000.00, '2026-05-03', '2026-05-18', 23.50, 22.75, 'B', 'Bulk wheat lot for wholesale buyers.', 'Surat', 21.121300, 73.111900, 'ACTIVE', 2),
-(5, 3, 'Rice (Paddy)', 'Indrayani', 3000.00, '2026-05-02', '2026-05-12', 30.00, 21.83, 'B', 'Fresh Indrayani paddy.', 'Pune', 18.152300, 74.576800, 'BIDDING', 7),
-(6, 4, 'Wheat', 'HD-2967', 15000.00, '2026-05-03', '2026-05-20', 22.00, 22.75, 'A', 'Large wheat lot available.', 'Moga', 30.816500, 75.171700, 'ACTIVE', 4),
-(7, 4, 'Cotton', 'Desi', 5000.00, '2026-05-03', '2026-05-21', 65.00, 66.20, 'B', 'Traditional cotton stock.', 'Moga', 30.816500, 75.171700, 'ACTIVE', 3),
-(8, 5, 'Rice (Paddy)', 'Sona Masoori', 6000.00, '2026-05-03', '2026-05-19', 28.00, 21.83, 'A', 'Sona Masoori suitable for retail distribution.', 'Hassan', 13.007200, 76.101600, 'ACTIVE', 6),
-(9, 5, 'Maize', 'Hybrid', 4000.00, '2026-05-03', '2026-05-19', 18.00, 19.60, 'B', 'Hybrid maize lot.', 'Hassan', 13.007200, 76.101600, 'ACTIVE', 1),
-(10, 3, 'Onion', 'Nashik Red', 2000.00, '2026-05-03', '2026-05-13', 15.00, NULL, 'B', 'Fresh Nashik onions.', 'Pune', 18.152300, 74.576800, 'ACTIVE', 9);
+INSERT INTO produce_listings (id, farmer_id, crop_name, variety, quantity_kg, available_from, available_until, asking_price_per_kg, msp_price_per_kg, quality_grade, description, district, lat, lng, status, view_count, is_urgent, urgent_reason) VALUES
+(1, 1, 'Wheat', 'Sharbati', 5000.00, '2026-05-01', '2026-05-15', 25.00, 22.75, 'A', 'Premium wheat lot ready for pickup.', 'Kangra', 32.110900, 76.536300, 'SOLD', 12, FALSE, NULL),
+(2, 1, 'Rice (Paddy)', 'Basmati', 2000.00, '2026-05-03', '2026-05-16', 35.00, 21.83, 'A', 'Aromatic basmati harvest.', 'Kangra', 32.110900, 76.536300, 'ACTIVE', 5, TRUE, 'Needs quick sale to clear space'),
+(3, 2, 'Cotton', 'BT Cotton', 8000.00, '2026-05-03', '2026-05-18', 70.00, 66.20, 'A', 'High quality cotton bales.', 'Surat', 21.121300, 73.111900, 'ACTIVE', 8, FALSE, NULL),
+(4, 2, 'Wheat', 'Lok-1', 4000.00, '2026-05-03', '2026-05-18', 23.50, 22.75, 'B', 'Bulk wheat lot for wholesale buyers.', 'Surat', 21.121300, 73.111900, 'ACTIVE', 2, FALSE, NULL),
+(5, 3, 'Rice (Paddy)', 'Indrayani', 3000.00, '2026-05-02', '2026-05-12', 30.00, 21.83, 'B', 'Fresh Indrayani paddy.', 'Pune', 18.152300, 74.576800, 'BIDDING', 7, FALSE, NULL),
+(6, 4, 'Wheat', 'HD-2967', 15000.00, '2026-05-03', '2026-05-20', 22.00, 22.75, 'A', 'Large wheat lot available.', 'Moga', 30.816500, 75.171700, 'ACTIVE', 4, FALSE, NULL),
+(7, 4, 'Cotton', 'Desi', 5000.00, '2026-05-03', '2026-05-21', 65.00, 66.20, 'B', 'Traditional cotton stock.', 'Moga', 30.816500, 75.171700, 'ACTIVE', 3, FALSE, NULL),
+(8, 5, 'Rice (Paddy)', 'Sona Masoori', 6000.00, '2026-05-03', '2026-05-19', 28.00, 21.83, 'A', 'Sona Masoori suitable for retail distribution.', 'Hassan', 13.007200, 76.101600, 'ACTIVE', 6, FALSE, NULL),
+(9, 5, 'Maize', 'Hybrid', 4000.00, '2026-05-03', '2026-05-19', 18.00, 19.60, 'B', 'Hybrid maize lot.', 'Hassan', 13.007200, 76.101600, 'ACTIVE', 1, FALSE, NULL),
+(10, 3, 'Onion', 'Nashik Red', 2000.00, '2026-05-03', '2026-05-13', 15.00, NULL, 'B', 'Fresh Nashik onions.', 'Pune', 18.152300, 74.576800, 'ACTIVE', 9, TRUE, 'Rain expected soon');
 
-INSERT INTO bids (id, listing_id, buyer_id, bid_price_per_kg, quantity_kg, bid_status, message) VALUES
-(1, 1, 1, 24.50, 5000.00, 'ACCEPTED', 'Ready to arrange pickup immediately.'),
-(2, 1, 2, 24.00, 3000.00, 'REJECTED', 'Can split logistics if needed.'),
-(3, 3, 3, 68.00, 8000.00, 'PENDING', 'Export grade cotton required.'),
-(4, 5, 1, 31.00, 3000.00, 'PENDING', 'Need full lot for processing.'),
-(5, 6, 2, 22.50, 5000.00, 'PENDING', 'Can confirm within 24 hours.');
+INSERT INTO bids (id, listing_id, buyer_id, bid_price_per_kg, quantity_kg, bid_status, message, created_at) VALUES
+(1, 1, 1, 24.50, 5000.00, 'ACCEPTED', 'Ready to arrange pickup immediately.', CURRENT_TIMESTAMP),
+(2, 1, 2, 24.00, 3000.00, 'REJECTED', 'Can split logistics if needed.', CURRENT_TIMESTAMP),
+(3, 3, 3, 68.00, 8000.00, 'PENDING', 'Export grade cotton required.', CURRENT_TIMESTAMP),
+(4, 5, 1, 31.00, 3000.00, 'PENDING', 'Need full lot for processing.', CURRENT_TIMESTAMP),
+(5, 6, 2, 22.50, 5000.00, 'PENDING', 'Can confirm within 24 hours.', CURRENT_TIMESTAMP);
 
 INSERT INTO orders (id, bid_id, farmer_id, buyer_id, final_price_per_kg, quantity_kg, total_amount, order_status, expected_delivery, actual_delivery, payment_status) VALUES
 (1, 1, 1, 1, 24.50, 5000.00, 122500.00, 'CONFIRMED', '2026-05-04', NULL, 'PAID');

@@ -107,6 +107,8 @@ CREATE TABLE produce_listings (
     lat DECIMAL(9, 6),
     lng DECIMAL(9, 6),
     status VARCHAR(20) NOT NULL,
+    is_urgent BOOLEAN DEFAULT FALSE,
+    urgent_reason VARCHAR(255),
     view_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_listing_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE
@@ -120,6 +122,8 @@ CREATE TABLE bids (
     quantity_kg DECIMAL(10, 2) NOT NULL,
     bid_status VARCHAR(20) NOT NULL,
     message TEXT,
+    counter_price_per_kg DECIMAL(8, 2),
+    counter_message VARCHAR(300),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NULL,
     CONSTRAINT fk_bid_listing FOREIGN KEY (listing_id) REFERENCES produce_listings(id) ON DELETE CASCADE,
@@ -285,3 +289,16 @@ CREATE INDEX idx_listing_lat_lng ON produce_listings(lat, lng);
 CREATE INDEX idx_bid_listing_status ON bids(listing_id, bid_status);
 CREATE INDEX idx_match_farmer_score ON matchmaking_scores(farmer_id, score);
 CREATE INDEX idx_price_history_lookup ON price_history(crop_name, district, price_date);
+
+-- Additional indexes for frequently queried columns
+CREATE INDEX idx_listing_status ON produce_listings(status);
+CREATE INDEX idx_listing_crop_name ON produce_listings(crop_name);
+CREATE INDEX idx_listing_district ON produce_listings(district);
+CREATE INDEX idx_orders_status ON orders(order_status);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_verification ON users(verification_status);
+
+-- Full-Text Search index on produce listings (MySQL only; H2 will ignore gracefully)
+-- Enables MATCH(crop_name, description) AGAINST(:term IN BOOLEAN MODE) queries in DAO
+-- ALTER TABLE produce_listings ADD FULLTEXT INDEX ft_listing_search (crop_name, description);
+-- Note: H2 in-memory mode doesn't support FULLTEXT; MySQL-specific DDL is run via seed-data.sql conditionally.

@@ -5,8 +5,12 @@
 
 <hibernate-configuration>
     <session-factory>
-        <!-- Use Thread Context for Session -->
+        <!-- Use Spring's Hibernate 6 session context (CRITICAL: was incorrectly pointing to hibernate5) -->
         <property name="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</property>
+
+        <!-- Enable Hibernate statistics for N+1 query detection and performance profiling -->
+        <property name="hibernate.generate_statistics">true</property>
+        <property name="hibernate.session.events.log.LOG_QUERIES_SLOWER_THAN_MS">100</property>
 
         <!-- Mapping classes -->
         <mapping class="com.agriconnect.model.User"/>

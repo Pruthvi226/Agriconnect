@@ -39,7 +39,13 @@ public class Bid {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    public enum BidStatus { PENDING, ACCEPTED, REJECTED, WITHDRAWN, EXPIRED }
+    @Column(name = "counter_price_per_kg", precision = 8, scale = 2)
+    private BigDecimal counterPricePerKg;
+
+    @Column(name = "counter_message", length = 300)
+    private String counterMessage;
+
+    public enum BidStatus { PENDING, ACCEPTED, REJECTED, WITHDRAWN, EXPIRED, COUNTERED }
 
     @PrePersist
     protected void onCreate() {
@@ -68,6 +74,10 @@ public class Bid {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+    public BigDecimal getCounterPricePerKg() { return counterPricePerKg; }
+    public void setCounterPricePerKg(BigDecimal counterPricePerKg) { this.counterPricePerKg = counterPricePerKg; }
+    public String getCounterMessage() { return counterMessage; }
+    public void setCounterMessage(String counterMessage) { this.counterMessage = counterMessage; }
 
     @Override
     public boolean equals(Object o) {

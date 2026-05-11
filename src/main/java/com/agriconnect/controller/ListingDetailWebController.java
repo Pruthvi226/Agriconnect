@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Routes /web/marketplace/listing/{id} to the listing-details JSP view.
@@ -14,10 +15,14 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/web/marketplace/listing")
 public class ListingDetailWebController {
 
+    @Autowired
+    private com.agriconnect.service.ListingService listingService;
+
     @GetMapping("/{id}")
-    public ModelAndView listingDetail(@PathVariable Long id) {
+    public ModelAndView listingDetail(@PathVariable("id") Long id) {
         ModelAndView mav = new ModelAndView("listing-details");
-        // In a full implementation, load the specific listing by id
+        com.agriconnect.model.ProduceListing listing = listingService.getListingById(id);
+        mav.addObject("listing", listing);
         mav.addObject("listingId", id);
         return mav;
     }

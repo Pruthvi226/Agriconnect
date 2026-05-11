@@ -45,7 +45,7 @@ public class ProduceListing {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "TEXT")
     private String photos;
 
     @Column(length = 100)
@@ -62,6 +62,12 @@ public class ProduceListing {
 
     @Column(name = "view_count")
     private Integer viewCount = 0;
+
+    @Column(name = "is_urgent")
+    private Boolean isUrgent = false;
+
+    @Column(name = "urgent_reason", length = 200)
+    private String urgentReason;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -113,6 +119,10 @@ public class ProduceListing {
     public void setViewCount(Integer viewCount) { this.viewCount = viewCount; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Boolean getIsUrgent() { return isUrgent; }
+    public void setIsUrgent(Boolean isUrgent) { this.isUrgent = isUrgent; }
+    public String getUrgentReason() { return urgentReason; }
+    public void setUrgentReason(String urgentReason) { this.urgentReason = urgentReason; }
 
     @Override
     public boolean equals(Object o) {

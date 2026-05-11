@@ -60,11 +60,13 @@ public class SecurityConfig {
                                 antMatcher("/web/register"),
                                 antMatcher("/web/marketplace"),
                                 antMatcher("/web/marketplace/listing/**"),
+                                antMatcher("/api/v1/listings/search"),
+                                antMatcher("/api/v1/listings/*"),
                                 antMatcher("/resources/**"))
                         .permitAll()
                         // FARMER
                         .requestMatchers(
-                                antMatcher("/api/v1/listings/**"),
+                                antMatcher("/api/v1/listings"),
                                 antMatcher("/api/v1/fpo/groups"),
                                 antMatcher("/api/v1/fpo/*/join"),
                                 antMatcher("/api/v1/fpo/memberships/*/approve"),
@@ -73,12 +75,12 @@ public class SecurityConfig {
                                 antMatcher("/api/v1/bids/*/accept"),
                                 antMatcher("/api/v1/bids/*/reject"),
                                 antMatcher("/api/v1/bids/orders/**"),
-                                antMatcher("/web/dashboard/farmer"),
-                                antMatcher("/web/dashboard/farmer/**"),
-                                antMatcher("/web/farmer/fpo/**"))
+                                antMatcher("/web/farmer"),
+                                antMatcher("/web/farmer/**"))
                         .hasRole("FARMER")
                         // BUYER
                         .requestMatchers(
+                                antMatcher("/api/v1/bids"),
                                 antMatcher("/api/v1/bids/**"),
                                 antMatcher("/api/v1/orders/my"),
                                 antMatcher("/web/dashboard/buyer"))
@@ -133,7 +135,7 @@ public class SecurityConfig {
                 for (GrantedAuthority authority : authorities) {
                     String role = authority.getAuthority();
                     if (role.equals("ROLE_FARMER")) {
-                        redirectUrl = "/web/dashboard/farmer";
+                        redirectUrl = "/web/farmer/dashboard";
                         break;
                     } else if (role.equals("ROLE_BUYER")) {
                         redirectUrl = "/web/dashboard/buyer";

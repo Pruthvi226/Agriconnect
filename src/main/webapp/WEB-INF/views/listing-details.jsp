@@ -134,21 +134,11 @@
             box-shadow: 0 6px 20px rgba(37,99,235,0.35);
             color: white;
         }
-
-        .rank-info {
-            background: #eff6ff;
-            border: 2px solid #bfdbfe;
-            border-radius: 12px;
-            padding: 0.875rem;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-        .rank-num { font-size: 1.5rem; font-weight: 800; color: #1d4ed8; }
     </style>
 </head>
 <body>
 
-<jsp:include page="fragments/farmer-nav.jsp">
+<jsp:include page="fragments/navbar-selector.jsp">
     <jsp:param name="active" value="marketplace" />
 </jsp:include>
 
@@ -160,9 +150,9 @@
                 <li class="breadcrumb-item active text-white">Listing Details</li>
             </ol>
         </nav>
-        <h1 class="fw-bold mb-1" style="font-size: 1.6rem;">Wheat — Sharbati</h1>
+        <h1 class="fw-bold mb-1" style="font-size: 1.6rem;">${listing.cropName} — ${listing.variety}</h1>
         <p class="mb-0" style="opacity: 0.8; font-size: 0.9rem;">
-            <i class="bi bi-geo-alt me-1"></i>Nashik, Maharashtra
+            <i class="bi bi-geo-alt me-1"></i>${listing.district}
         </p>
     </div>
 </div>
@@ -178,17 +168,14 @@
                 <div class="row text-center">
                     <div class="col-6 border-end border-white-50">
                         <div class="label">Asking Price</div>
-                        <div class="amount">₹25.00</div>
+                        <div class="amount">₹${listing.askingPricePerKg}</div>
                         <div class="unit">per kg</div>
                     </div>
                     <div class="col-6">
                         <div class="label">MSP Price</div>
-                        <div class="amount">₹22.50</div>
+                        <div class="amount">₹${not empty listing.mspPricePerKg ? listing.mspPricePerKg : 'N/A'}</div>
                         <div class="unit">per kg</div>
                     </div>
-                </div>
-                <div class="mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.2);">
-                    <span class="badge bg-success">▲ Above MSP (+11.1%)</span>
                 </div>
             </div>
 
@@ -200,27 +187,23 @@
                 <div class="card-body">
                     <div class="detail-row">
                         <span class="label">Crop</span>
-                        <span class="value">Wheat</span>
+                        <span class="value">${listing.cropName}</span>
                     </div>
                     <div class="detail-row">
                         <span class="label">Variety</span>
-                        <span class="value">Sharbati</span>
+                        <span class="value">${listing.variety}</span>
                     </div>
                     <div class="detail-row">
                         <span class="label">Available Quantity</span>
-                        <span class="value">5,000 kg</span>
+                        <span class="value">${listing.quantityKg} kg</span>
                     </div>
                     <div class="detail-row">
-                        <span class="label">Harvest Date</span>
-                        <span class="value">April 2026</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Quality Grade</span>
-                        <span class="value"><span class="badge bg-success">Grade A</span></span>
+                        <span class="label">Available From</span>
+                        <span class="value">${listing.availableFrom}</span>
                     </div>
                     <div class="detail-row">
                         <span class="label">Listing Status</span>
-                        <span class="value"><span class="badge bg-primary">Open for Bids</span></span>
+                        <span class="value"><span class="badge bg-primary">${listing.status}</span></span>
                     </div>
                 </div>
             </div>
@@ -234,18 +217,13 @@
                     <div class="farmer-badge">
                         <div class="farmer-avatar">🧑‍🌾</div>
                         <div>
-                            <div class="fw-bold text-dark">Rajesh Kumar</div>
+                            <div class="fw-bold text-dark">${listing.farmer.user.name}</div>
                             <div class="text-muted" style="font-size: 0.8rem;">
-                                <i class="bi bi-geo-alt me-1"></i>Nashik, Maharashtra
+                                <i class="bi bi-geo-alt me-1"></i>${listing.farmer.village}, ${listing.farmer.district}
                             </div>
                             <div class="mt-1">
-                                <span class="badge bg-success me-1">⭐ Top Seller</span>
-                                <span class="badge" style="background: #dcfce7; color: #15803d;">Score: 82.5/100</span>
+                                <span class="badge" style="background: #dcfce7; color: #15803d;">Score: ${listing.farmer.farmerScore}/100</span>
                             </div>
-                        </div>
-                        <div class="ms-auto">
-                            <a href="${pageContext.request.contextPath}/web/dashboard/farmer/profile"
-                               class="btn btn-outline-success btn-sm">View Profile</a>
                         </div>
                     </div>
                 </div>
@@ -260,19 +238,6 @@
                     <small style="opacity: 0.8;">Bids are anonymous to other buyers</small>
                 </div>
                 <div class="bid-card-body">
-                    <!-- Bid Distribution Chart -->
-                    <canvas id="bidChart" height="180" class="mb-3"></canvas>
-
-                    <!-- Your Rank Info -->
-                    <div class="rank-info mb-3" id="myRankInfo" style="display:none;">
-                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Your Current Position</div>
-                        <div class="rank-num">#<span id="rankText"></span></div>
-                        <div class="text-muted" style="font-size: 0.8rem;">of <span id="totalBidsText"></span> bids</div>
-                        <div class="mt-1 text-danger" style="font-size: 0.8rem;">
-                            Delta to highest: <strong><span id="deltaText"></span>%</strong>
-                        </div>
-                    </div>
-
                     <!-- Bid Form -->
                     <form class="bid-form" id="bidForm" onsubmit="submitBid(event)">
                         <div class="mb-3">
@@ -282,14 +247,18 @@
                             <input type="number" class="form-control" id="bidAmount" name="bidAmount"
                                    placeholder="e.g. 24.50" min="1" step="0.50" required>
                             <div class="form-text text-muted" style="font-size: 0.75rem;">
-                                Current asking price: ₹25.00/kg
+                                Current asking price: ₹${listing.askingPricePerKg}/kg
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold" style="font-size: 0.8rem; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Quantity Required (kg)
                             </label>
-                            <input type="number" class="form-control" name="quantityKg" placeholder="e.g. 500" min="1" required>
+                            <input type="number" class="form-control" id="bidQuantity" name="quantityKg" 
+                                   placeholder="e.g. 500" min="1" max="${listing.quantityKg}" required>
+                            <div class="form-text text-muted" style="font-size: 0.75rem;">
+                                Max available: ${listing.quantityKg} kg
+                            </div>
                         </div>
                         <button type="submit" class="btn-bid-submit" id="bidBtn">
                             <i class="bi bi-hammer me-2"></i>Submit Bid
@@ -310,39 +279,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Bid Distribution Chart
-    const ctx = document.getElementById('bidChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['₹20-22', '₹22-24', '₹24-26', '₹26+'],
-            datasets: [{
-                label: 'Number of Bids',
-                data: [2, 5, 3, 1],
-                backgroundColor: ['rgba(59,130,246,0.6)', 'rgba(16,185,129,0.6)', 'rgba(251,191,36,0.6)', 'rgba(239,68,68,0.6)'],
-                borderColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 2,
-                borderRadius: 6,
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f4f8' } } }
-        }
-    });
-
-    // Fetch Bid Rank
-    fetch('${pageContext.request.contextPath}/api/v1/listings/1/bid-rank')
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.success) {
-                document.getElementById('myRankInfo').style.display = 'block';
-                document.getElementById('rankText').innerText = data.data.yourRank;
-                document.getElementById('totalBidsText').innerText = data.data.totalBids;
-                document.getElementById('deltaText').innerText = data.data.highestBidDelta;
-            }
-        }).catch(() => {});
-
     function submitBid(e) {
         e.preventDefault();
         const btn = document.getElementById('bidBtn');
@@ -350,19 +286,29 @@
         btn.disabled = true;
 
         const price = document.getElementById('bidAmount').value;
+        const quantity = document.getElementById('bidQuantity').value;
+        
         fetch('${pageContext.request.contextPath}/api/v1/bids', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ listingId: 1, pricePerKg: parseFloat(price) })
+            body: JSON.stringify({ 
+                listingId: ${listing.id}, 
+                bidPricePerKg: parseFloat(price),
+                quantityKg: parseFloat(quantity),
+                message: 'Bid placed via marketplace'
+            })
         }).then(res => res.json())
           .then(data => {
               if (data && data.success) {
                   btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Bid Placed!';
                   btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                  setTimeout(() => {
+                      window.location.href = '${pageContext.request.contextPath}/web/dashboard/buyer/bids';
+                  }, 1500);
               } else {
                   btn.innerHTML = '<i class="bi bi-hammer me-2"></i>Submit Bid';
                   btn.disabled = false;
-                  alert('Could not place bid. Please ensure you are logged in as a Buyer.');
+                  alert(data.message || 'Could not place bid. Please ensure you are logged in as a Buyer.');
               }
           }).catch(() => {
               btn.innerHTML = '<i class="bi bi-hammer me-2"></i>Submit Bid';
@@ -371,5 +317,6 @@
           });
     }
 </script>
+<jsp:include page="fragments/footer.jsp" />
 </body>
 </html>

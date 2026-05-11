@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"}, classes = {com.agriconnect.config.SecurityConfig.class})
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
 @WebAppConfiguration
 @SuppressWarnings("null")
 public class ListingControllerIT {
@@ -55,7 +55,7 @@ public class ListingControllerIT {
         mockMvc.perform(post("/api/v1/listings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(dto)))
-                .andExpect(status().isForbidden()); // Validating Security intercepts
+                .andExpect(status().isUnauthorized()); // Validating Security intercepts
 
         mockMvc.perform(get("/api/v1/listings/search"))
                 .andExpect(status().isOk()); // Assuming GET /search is not strictly locked or we're validating endpoint existence

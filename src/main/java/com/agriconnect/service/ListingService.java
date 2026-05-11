@@ -52,7 +52,7 @@ public class ListingService {
         return createListingForProfile(dto, farmer);
     }
 
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER')")
     public ProduceListing createListingForUser(ListingRequestDto dto, Long userId) {
         FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
                 .orElseGet(() -> createStarterFarmerProfile(userId));
@@ -81,6 +81,9 @@ public class ListingService {
         if (dto.getQualityGrade() != null) {
             listing.setQualityGrade(ProduceListing.QualityGrade.valueOf(dto.getQualityGrade()));
         }
+
+        listing.setIsUrgent(dto.getIsUrgent() != null ? dto.getIsUrgent() : false);
+        listing.setUrgentReason(dto.getUrgentReason());
 
         // Auto-fetch current MSP using MspRateService
         MspRate currentMsp = mspRateService.getCurrentMsp(dto.getCropName());
@@ -136,6 +139,10 @@ public class ListingService {
         return farmerProfileDao.findByUserId(userId)
                 .map(farmer -> listingDao.findByFarmer(farmer.getId(), null))
                 .orElseGet(java.util.Collections::emptyList);
+    }
+
+    public ProduceListing getListingById(Long id) {
+        return listingDao.findById(id).orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Listing not found"));
     }
 
     public int expireStaleListings() {

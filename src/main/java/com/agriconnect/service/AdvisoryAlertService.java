@@ -83,4 +83,14 @@ public class AdvisoryAlertService {
         }
         System.out.println("Dispatched " + userIds.size() + " notifications.");
     }
+
+    public List<Advisory> getActiveAdvisoriesForDistrict(String district) {
+        String hql = "FROM Advisory a WHERE a.affectedDistricts LIKE :district " +
+                     "AND a.validUntil >= CURRENT_DATE AND a.severity != 'INFO' " +
+                     "ORDER BY a.severity DESC, a.createdAt DESC";
+        return sessionFactory.getCurrentSession().createQuery(hql, Advisory.class)
+                .setParameter("district", "%" + district + "%")
+                .setMaxResults(3)
+                .getResultList();
+    }
 }

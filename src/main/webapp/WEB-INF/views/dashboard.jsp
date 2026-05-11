@@ -339,10 +339,10 @@
                                                 <span><i class="bi bi-shield-check"></i>Grade ${booking.listing.qualityGrade}</span>
                                             </div>
                                             <div class="booking-actions">
-                                                <button type="button" class="btn btn-success btn-sm" onclick="handleBooking(${booking.id}, 'accept', this)">
+                                                <button type="button" class="btn btn-success btn-sm" onclick="handleBooking('${booking.id}', 'accept', this)">
                                                     <i class="bi bi-check-lg me-1"></i>Accept
                                                 </button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="handleBooking(${booking.id}, 'reject', this)">
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="handleBooking('${booking.id}', 'reject', this)">
                                                     <i class="bi bi-x-lg me-1"></i>Reject
                                                 </button>
                                                 <a href="${pageContext.request.contextPath}/web/marketplace/listing/${booking.listing.id}" class="btn btn-outline-success btn-sm">
@@ -391,13 +391,13 @@
                                                 <span class="${order.orderStatus == 'DELIVERED' ? 'on' : ''}">Delivered</span>
                                             </div>
                                             <div class="booking-actions">
-                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="updateDelivery(${order.id}, 'can_deliver', this)">
+                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="updateDelivery('${order.id}', 'can_deliver', this)">
                                                     <i class="bi bi-truck me-1"></i>Can Deliver
                                                 </button>
-                                                <button type="button" class="btn btn-success btn-sm" onclick="updateDelivery(${order.id}, 'delivered', this)">
+                                                <button type="button" class="btn btn-success btn-sm" onclick="updateDelivery('${order.id}', 'delivered', this)">
                                                     <i class="bi bi-check2-all me-1"></i>Delivered
                                                 </button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="updateDelivery(${order.id}, 'cannot_deliver', this)">
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="updateDelivery('${order.id}', 'cannot_deliver', this)">
                                                     <i class="bi bi-slash-circle me-1"></i>Cannot
                                                 </button>
                                             </div>

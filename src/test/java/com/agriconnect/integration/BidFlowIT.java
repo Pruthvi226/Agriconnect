@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"}, classes = {com.agriconnect.config.SecurityConfig.class})
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
 @WebAppConfiguration
 @SuppressWarnings("null")
 public class BidFlowIT {
@@ -37,6 +37,6 @@ public class BidFlowIT {
         mockMvc.perform(post("/api/v1/bids")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"listingId\":1, \"bidPricePerKg\":22, \"quantityKg\":50}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

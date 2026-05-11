@@ -42,15 +42,18 @@ public class ProduceListingDao extends BaseDaoImpl<ProduceListing, Long> {
     }
 
     public List<ProduceListing> searchByFilters(String crop, String district, BigDecimal minPrice, BigDecimal maxPrice, String grade) {
-        StringBuilder hql = new StringBuilder("SELECT l FROM ProduceListing l JOIN FETCH l.farmerProfile f WHERE l.status = 'ACTIVE' ");
+        StringBuilder hql = new StringBuilder("SELECT l FROM ProduceListing l JOIN FETCH l.farmerProfile f WHERE l.status = :activeStatus ");
         
         if (crop != null) hql.append("AND l.cropName = :crop ");
         if (district != null) hql.append("AND l.district = :district ");
         if (minPrice != null) hql.append("AND l.askingPricePerKg >= :minPrice ");
         if (maxPrice != null) hql.append("AND l.askingPricePerKg <= :maxPrice ");
         if (grade != null) hql.append("AND l.qualityGrade = :grade ");
+        
+        hql.append("ORDER BY l.isUrgent DESC, l.createdAt DESC");
 
-        var query = sessionFactory.getCurrentSession().createQuery(hql.toString(), ProduceListing.class);
+        var query = sessionFactory.getCurrentSession().createQuery(hql.toString(), ProduceListing.class)
+                .setParameter("activeStatus", ProduceListing.Status.ACTIVE);
         
         if (crop != null) query.setParameter("crop", crop);
         if (district != null) query.setParameter("district", district);

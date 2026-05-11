@@ -251,7 +251,7 @@
                 <a href="${pageContext.request.contextPath}/web/marketplace" class="btn btn-success px-4">
                     <i class="bi bi-shop me-1"></i>Go to Marketplace
                 </a>
-                <a href="${pageContext.request.contextPath}/web/dashboard/farmer" class="btn btn-outline-secondary ms-2 px-4">
+                <a href="${pageContext.request.contextPath}/web/farmer/dashboard" class="btn btn-outline-secondary ms-2 px-4">
                     <i class="bi bi-grid me-1"></i>Dashboard
                 </a>
             </div>
@@ -336,7 +336,7 @@
                     <div class="fw-bold mt-1">Respond to buyer messages within 6 hours</div>
                     <div class="text-muted small mt-1">Improves response-rate component.</div>
                 </div>
-                <a href="${pageContext.request.contextPath}/web/dashboard/farmer" class="btn btn-success w-100 mt-3">
+                <a href="${pageContext.request.contextPath}/web/farmer/dashboard" class="btn btn-success w-100 mt-3">
                     <i class="bi bi-grid-1x2 me-1"></i>Open Dashboard
                 </a>
             </div>

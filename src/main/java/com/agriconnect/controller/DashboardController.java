@@ -21,113 +21,75 @@ public class DashboardController {
     @Autowired
     private com.agriconnect.service.BidService bidService;
 
-    @GetMapping("/farmer")
-    public ModelAndView farmerDashboard(Authentication authentication) {
-        ModelAndView mav = new ModelAndView("farmer-dashboard");
-        mav.addObject("role", "Farmer");
-        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
+    @Autowired
+    private com.agriconnect.dao.FarmerProfileDao farmerProfileDao;
 
-        List<com.agriconnect.model.Bid> pendingBookings = bidService.getPendingBookingsForFarmerUser(userId);
-        List<com.agriconnect.model.Order> farmerOrders = bidService.getOrdersForFarmerUser(userId);
-        List<com.agriconnect.model.ProduceListing> farmerListings = listingService.getListingsForFarmerUser(userId);
+    @Autowired
+    private com.agriconnect.dao.BuyerProfileDao buyerProfileDao;
 
-        mav.addObject("pendingBookings", pendingBookings);
-        mav.addObject("farmerOrders", farmerOrders);
-        mav.addObject("farmerListings", farmerListings);
-        mav.addObject("pendingBookingCount", pendingBookings.size());
-        mav.addObject("listingCount", farmerListings.size());
-        mav.addObject("activeOrderCount", farmerOrders.stream()
-                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.CONFIRMED
-                        || order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.IN_TRANSIT)
-                .count());
-        mav.addObject("deliveredOrderCount", farmerOrders.stream()
-                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.DELIVERED)
-                .count());
+    @Autowired
+    private com.agriconnect.service.UserService userService;
 
-        mav.addObject("matches", matchmakingService.getRecommendedBuyersForFarmer(1L)); // profile-aware matching still uses the demo seed
-        return mav;
-    }
+    @Autowired
+    private com.agriconnect.service.EarningsService earningsService;
 
-    @GetMapping("/farmer/listings")
-    public ModelAndView farmerListings(Authentication authentication) {
-        ModelAndView mav = new ModelAndView("farmer-listings");
-        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
-        mav.addObject("farmerListings", listingService.getListingsForFarmerUser(userId));
-        return mav;
-    }
-
-    @GetMapping("/farmer/bookings")
-    public ModelAndView farmerBookings(Authentication authentication) {
-        ModelAndView mav = new ModelAndView("farmer-bookings");
-        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
-        List<com.agriconnect.model.Bid> pendingBookings = bidService.getPendingBookingsForFarmerUser(userId);
-        List<com.agriconnect.model.Order> farmerOrders = bidService.getOrdersForFarmerUser(userId);
-        mav.addObject("pendingBookings", pendingBookings);
-        mav.addObject("farmerOrders", farmerOrders);
-        mav.addObject("pendingBookingCount", pendingBookings.size());
-        mav.addObject("activeOrderCount", farmerOrders.stream()
-                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.CONFIRMED
-                        || order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.IN_TRANSIT)
-                .count());
-        return mav;
-    }
+    @Autowired
+    private com.agriconnect.service.AdvisoryAlertService advisoryAlertService;
 
     @GetMapping("/buyer")
-    public ModelAndView buyerDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
+    public ModelAndView buyerDashboard(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer-dashboard");
         mav.addObject("role", "Buyer");
-        // Feature 2: Smart Matchmaking
-        mav.addObject("matches", matchmakingService.getRecommendedFarmersForBuyer(1L)); // stub buyer 1L
+        com.agriconnect.security.CustomUserDetails userDetails = (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        
+        com.agriconnect.model.BuyerProfile buyer = buyerProfileDao.findByUserId(userDetails.getId())
+                .orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Buyer profile not found"));
+        
+        mav.addObject("buyer", buyer);
+        mav.addObject("matches", matchmakingService.getRecommendedFarmersForBuyer(buyer.getId()));
+        return mav;
+    }
+
+    @GetMapping("/buyer/bids")
+    public ModelAndView buyerBids(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer-bids");
+        com.agriconnect.security.CustomUserDetails userDetails = (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        mav.addObject("bids", bidService.getBidsForBuyerUser(userDetails.getId()));
+        return mav;
+    }
+
+    @GetMapping("/buyer/orders")
+    public ModelAndView buyerOrders(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer-orders");
+        com.agriconnect.security.CustomUserDetails userDetails = (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        mav.addObject("orders", bidService.getOrdersForBuyerUser(userDetails.getId()));
         return mav;
     }
 
     @GetMapping("/expert")
     public ModelAndView expertDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
+        ModelAndView mav = new ModelAndView("expert-dashboard");
         mav.addObject("role", "Agri-Expert");
         return mav;
     }
 
     @GetMapping("/admin")
     public ModelAndView adminDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
+        ModelAndView mav = new ModelAndView("admin-dashboard");
         mav.addObject("role", "Administrator");
         
-        // Feature 1: Admin panel aggregate stats
+        // Admin panel aggregate stats
         List<com.agriconnect.model.ProduceListing> allListings = listingService.searchListings(new com.agriconnect.dto.SearchFiltersDto());
-        long belowMspCount = 0;
-        for (com.agriconnect.model.ProduceListing listing : allListings) {
-            if (listing.getMspPricePerKg() != null && listing.getAskingPricePerKg().compareTo(listing.getMspPricePerKg()) < 0) {
-                belowMspCount++;
-            }
-        }
+        long belowMspCount = allListings.stream()
+                .filter(l -> l.getMspPricePerKg() != null && l.getAskingPricePerKg().compareTo(l.getMspPricePerKg()) < 0)
+                .count();
+        
         double belowMspPercentage = allListings.isEmpty() ? 0 : ((double) belowMspCount / allListings.size()) * 100;
         mav.addObject("belowMspPercentage", String.format("%.1f", belowMspPercentage));
+        mav.addObject("allUsers", userService.getAllUsers());
+        mav.addObject("listingCount", allListings.size());
         
         return mav;
     }
 
-    @GetMapping("/farmer/profile")
-    public ModelAndView getFarmerProfile() {
-        ModelAndView mav = new ModelAndView("farmer-profile");
-        // Stub farmer
-        com.agriconnect.model.FarmerProfile farmer = new com.agriconnect.model.FarmerProfile();
-        farmer.setFarmerScore(new java.math.BigDecimal("82.50"));
-        mav.addObject("farmer", farmer);
-        
-        double score = farmer.getFarmerScore().doubleValue();
-        String color = "red";
-        if (score >= 40 && score < 70) color = "orange";
-        else if (score >= 70) color = "green";
-        
-        String badge = "New Farmer";
-        if (score >= 40 && score < 70) badge = "Reliable";
-        else if (score >= 70 && score < 90) badge = "Top Seller";
-        else if (score >= 90) badge = "Elite";
-        
-        mav.addObject("scoreColor", color);
-        mav.addObject("scoreBadge", badge);
-        
-        return mav;
-    }
 }

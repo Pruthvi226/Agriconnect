@@ -6,264 +6,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listings - AgriConnect</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
+    <title>Manage Listings | AgriConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/main.css">
 </head>
-<body>
+<body class="bg-light">
+
 <jsp:include page="fragments/farmer-nav.jsp">
     <jsp:param name="active" value="listings" />
 </jsp:include>
 
-<section class="farmer-hero compact-hero">
-    <div class="container">
-        <span class="farmer-chip"><i class="bi bi-card-checklist"></i> Listing Desk</span>
-        <h1>Add and manage produce listings</h1>
-        <p>Publish clean stock details so buyers can request exact quantities with confidence.</p>
-    </div>
-</section>
-
-<main class="container farmer-page-shell">
-    <section class="workspace-panel listing-builder" id="addListingPanel">
-        <div class="builder-head">
-            <div>
-                <h2><i class="bi bi-plus-square-fill text-success me-2"></i>Add Listing</h2>
-                <div class="text-muted small mt-1">Quantity, quality, price, and pickup clarity are the details buyers act on first.</div>
-            </div>
-            <a href="#myListings" class="btn btn-outline-success btn-sm"><i class="bi bi-list-check me-1"></i>View my listings</a>
-        </div>
-
-        <div id="listingFormStatus" class="form-status mb-3"></div>
-
-        <form id="addListingForm">
-            <div class="row g-3">
-                <div class="col-lg-8">
-                    <div class="listing-form-grid">
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Crop Name</label>
-                            <input type="text" class="form-control" name="cropName" id="listingCropName" placeholder="Wheat" required>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Variety</label>
-                            <input type="text" class="form-control" name="variety" id="listingVariety" placeholder="Sharbati" required>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Quantity kg</label>
-                            <input type="number" class="form-control" name="quantityKg" id="listingQuantity" value="1000" min="1" step="1" required>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Quality</label>
-                            <select class="form-select" name="qualityGrade" id="listingQuality">
-                                <option value="A">Grade A</option>
-                                <option value="B">Grade B</option>
-                                <option value="C">Grade C</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Available From</label>
-                            <input type="date" class="form-control" name="availableFrom" id="availableFrom" required>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Available Until</label>
-                            <input type="date" class="form-control" name="availableUntil" id="availableUntil" required>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Price / kg</label>
-                            <input type="number" class="form-control" name="askingPricePerKg" id="listingPrice" value="25" min="1" step="0.25" required>
-                        </div>
-                        <div>
-                            <label class="form-label text-muted fw-bold small">Pickup Window</label>
-                            <select class="form-select" id="listingPickupWindow">
-                                <option>Within 48 hours</option>
-                                <option>3-5 days</option>
-                                <option>Flexible this week</option>
-                            </select>
-                        </div>
-                        <div class="full">
-                            <label class="form-label text-muted fw-bold small">Buyer Notes</label>
-                            <textarea class="form-control" name="description" id="listingDescription" rows="3" maxlength="500" placeholder="Moisture level, packaging, loading help, pickup point..."></textarea>
-                        </div>
-                    </div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8">
+            
+            <!-- PROGRESS INDICATOR (Rule 6) -->
+            <div class="d-flex justify-content-between mb-4 px-2">
+                <div class="text-center">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mb-1" style="width: 32px; height: 32px;">1</div>
+                    <small class="fw-bold">Crop</small>
                 </div>
-                <div class="col-lg-4">
-                    <div class="listing-preview">
-                        <div class="text-muted small fw-bold text-uppercase">Preview</div>
-                        <h5 class="fw-bold mb-1" id="previewTitle">Wheat</h5>
-                        <div class="text-muted small mb-3" id="previewSubtitle">Sharbati · Grade A</div>
-                        <div class="preview-price mb-1" id="previewPrice">Rs 25/kg</div>
-                        <div class="text-muted small mb-3" id="previewValue">Estimated gross: Rs 25,000</div>
-                        <div class="signal-card mb-3">
-                            <div class="signal-label">Listing Strength</div>
-                            <div class="progress mt-2">
-                                <div class="progress-bar bg-success" id="listingStrengthBar" style="width: 76%"></div>
+                <div class="flex-grow-1 border-bottom mb-4 mx-2 opacity-25"></div>
+                <div class="text-center opacity-50">
+                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mb-1" style="width: 32px; height: 32px;">2</div>
+                    <small>Price</small>
+                </div>
+                <div class="flex-grow-1 border-bottom mb-4 mx-2 opacity-25"></div>
+                <div class="text-center opacity-50">
+                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mb-1" style="width: 32px; height: 32px;">3</div>
+                    <small>Photos</small>
+                </div>
+            </div>
+
+            <!-- MAIN FORM CARD -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-success text-white p-4 border-0">
+                    <h1 class="h3 fw-800 mb-1">List Your Crop</h1>
+                    <p class="mb-0 opacity-75">Tell buyers what you are selling (आप क्या बेच रहे हैं?)</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="addListingForm">
+                        <!-- SECTION A: Crop Details -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Crop (फसल चुनें)</label>
+                            <select class="form-select form-select-lg rounded-3 border-2" name="cropName" id="cropName" required onchange="fetchMsp(this.value)">
+                                <option value="">-- Choose Crop --</option>
+                                <option value="Wheat">Wheat (गेहूं)</option>
+                                <option value="Rice">Rice (चावल/धान)</option>
+                                <option value="Corn">Corn (मक्का)</option>
+                                <option value="Soybean">Soybean (सोयाबीन)</option>
+                                <option value="Onion">Onion (प्याज)</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <label class="form-label fw-bold">Variety (किस्म)</label>
+                                <input type="text" class="form-control form-control-lg rounded-3 border-2" name="variety" placeholder="e.g. Sharbati" required>
                             </div>
-                            <div class="text-muted small mt-2" id="listingStrengthText">Good: enough detail for buyers to request quantity.</div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold">Quality (क्वालिटी)</label>
+                                <select class="form-select form-select-lg rounded-3 border-2" name="qualityGrade">
+                                    <option value="A">Grade A (Best)</option>
+                                    <option value="B">Grade B (Good)</option>
+                                    <option value="C">Grade C (Average)</option>
+                                </select>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success w-100" id="submitListingBtn">
-                            <i class="bi bi-cloud-upload me-1"></i>Publish Listing
-                        </button>
-                        <button type="button" class="btn btn-outline-success w-100 mt-2" onclick="fillPremiumListing()">
-                            <i class="bi bi-magic me-1"></i>Use Example
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </section>
 
-    <section class="workspace-panel mt-3" id="myListings">
-        <div class="panel-title">
-            <div>
-                <h2>My Listings</h2>
-                <div class="text-muted small">Listings you publish here display in the live marketplace.</div>
-            </div>
-            <span class="booking-count active"><i class="bi bi-card-checklist"></i>${farmerListings.size()} total</span>
-        </div>
-
-        <c:choose>
-            <c:when test="${not empty farmerListings}">
-                <div class="listing-table">
-                    <c:forEach var="listing" items="${farmerListings}">
-                        <article class="listing-row-card">
-                            <div>
-                                <h3>${listing.cropName} <span>${listing.variety}</span></h3>
-                                <div class="booking-meta">
-                                    <span><i class="bi bi-box-seam"></i><fmt:formatNumber value="${listing.quantityKg}" maxFractionDigits="0" /> kg available</span>
-                                    <span><i class="bi bi-award"></i>Grade ${listing.qualityGrade}</span>
-                                    <span><i class="bi bi-geo-alt"></i>${listing.district}</span>
+                        <!-- SECTION B: Quantity & Price -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold">Quantity in kg (मात्रा)</label>
+                                <div class="input-group input-group-lg">
+                                    <input type="number" class="form-control rounded-3 border-2" name="quantityKg" value="1000" required>
+                                    <span class="input-group-text bg-light border-2 border-start-0">kg</span>
                                 </div>
-                                <c:if test="${not empty listing.description}">
-                                    <p>${listing.description}</p>
-                                </c:if>
                             </div>
-                            <div class="listing-side">
-                                <strong>Rs ${listing.askingPricePerKg}/kg</strong>
-                                <span class="status-badge live">${listing.status}</span>
-                                <small>Until ${listing.availableUntil}</small>
-                                <a class="btn btn-outline-success btn-sm" href="${pageContext.request.contextPath}/web/marketplace/listing/${listing.id}">
-                                    <i class="bi bi-eye me-1"></i>Open
-                                </a>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold">Your Price per kg (कीमत)</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light border-2 border-end-0">₹</span>
+                                    <input type="number" class="form-control border-2" name="askingPricePerKg" id="askingPrice" value="25" step="0.5" required oninput="compareWithMsp()">
+                                </div>
+                                <div id="mspComparison" class="mt-2 small fw-bold d-none">
+                                    <!-- Dynamic MSP Text -->
+                                </div>
                             </div>
-                        </article>
-                    </c:forEach>
-                </div>
-            </c:when>
-            <c:otherwise>
-                <div class="empty-bookings">
-                    <i class="bi bi-card-checklist"></i>
-                    <strong>No listings yet</strong>
-                    <span>Add a listing above and it will appear here immediately after publishing.</span>
-                </div>
-            </c:otherwise>
-        </c:choose>
-    </section>
-</main>
+                        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <!-- FEATURE 2: URGENT SALE (Rule 2) -->
+                        <div class="p-3 rounded-4 mb-4 border-2 border-dashed" style="background-color: #fff9f0; border: 2px dashed #ffeeba;">
+                            <div class="form-check form-switch d-flex align-items-center">
+                                <input class="form-check-input flex-shrink-0 me-3" type="checkbox" name="isUrgent" id="isUrgent" style="width: 3rem; height: 1.5rem;" onchange="toggleUrgentReason(this.checked)">
+                                <label class="form-check-label" for="isUrgent">
+                                    <span class="d-block fw-800 text-warning-emphasis">Need to sell urgently? (जल्दी बेचना है?)</span>
+                                    <span class="small text-muted">Urgent sales are highlighted to buyers first.</span>
+                                </label>
+                            </div>
+                            <div id="urgentReasonBox" class="mt-3 d-none">
+                                <label class="form-label fw-bold text-danger small">Why is it urgent?</label>
+                                <select class="form-select border-danger border-opacity-25" name="urgentReason">
+                                    <option value="IMMEDIATE_CASH">Need cash for hospital/fees</option>
+                                    <option value="STORAGE_FULL">Storage is full / New crop coming</option>
+                                    <option value="PERISHABLE">Produce might spoil</option>
+                                    <option value="TRAVEL">Traveling out of village</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- SECTION C: Dates -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Available From</label>
+                                <input type="date" class="form-control rounded-3" name="availableFrom" id="availableFrom" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Available Until</label>
+                                <input type="date" class="form-control rounded-3" name="availableUntil" id="availableUntil" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-800 shadow-sm rounded-4" id="submitBtn">
+                            Next: Add Photos & Publish <i class="bi bi-arrow-right-circle ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MY LISTINGS SUMMARY -->
+            <div class="d-flex justify-content-between align-items-center mb-3 px-2">
+                <h2 class="h5 fw-800 mb-0">Your Active Listings</h2>
+                <a href="#myListings" class="small text-decoration-none">View All</a>
+            </div>
+            
+            <c:forEach var="listing" items="${farmerListings}" begin="0" end="2">
+                <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success-subtle p-3 rounded-4 me-3">
+                                <i class="bi bi-box-seam text-success fs-4"></i>
+                            </div>
+                            <div>
+                                <div class="fw-800">${listing.cropName}</div>
+                                <div class="small text-muted">${listing.quantityKg} kg · ₹${listing.askingPricePerKg}/kg</div>
+                            </div>
+                        </div>
+                        <span class="badge ${listing.status == 'ACTIVE' ? 'bg-success' : 'bg-warning'} rounded-pill">
+                            ${listing.status}
+                        </span>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
+</div>
+
+<jsp:include page="fragments/footer.jsp" />
+
 <script>
-    function formatRupees(value) {
-        return 'Rs ' + Math.round(value).toLocaleString('en-IN');
+    let currentMsp = null;
+
+    async function fetchMsp(crop) {
+        if (!crop) return;
+        try {
+            const response = await fetch(`${pageContext.request.contextPath}/api/msp?crop=${crop}`);
+            if (response.ok) {
+                const data = await response.json();
+                currentMsp = data.mspPerKg;
+                compareWithMsp();
+            }
+        } catch (e) { console.error("MSP fetch failed", e); }
     }
 
-    function getTomorrowIso(offsetDays) {
-        const date = new Date();
-        date.setDate(date.getDate() + offsetDays);
-        return date.toISOString().slice(0, 10);
+    function compareWithMsp() {
+        const mspBox = document.getElementById('mspComparison');
+        const askingPrice = parseFloat(document.getElementById('askingPrice').value);
+        
+        if (!currentMsp || !askingPrice) {
+            mspBox.classList.add('d-none');
+            return;
+        }
+
+        mspBox.classList.remove('d-none');
+        if (askingPrice < currentMsp) {
+            mspBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Your price is below MSP (₹${currentMsp}/kg)`;
+            mspBox.className = "mt-2 small fw-bold text-danger";
+        } else {
+            mspBox.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Good price (MSP: ₹${currentMsp}/kg)`;
+            mspBox.className = "mt-2 small fw-bold text-success";
+        }
     }
 
-    function updateListingPreview() {
-        const crop = document.getElementById('listingCropName');
-        const variety = document.getElementById('listingVariety');
-        const quality = document.getElementById('listingQuality');
-        const qty = document.getElementById('listingQuantity');
-        const price = document.getElementById('listingPrice');
-        const description = document.getElementById('listingDescription');
-        const quantityValue = parseFloat(qty.value || '0');
-        const priceValue = parseFloat(price.value || '0');
-        let strength = 45;
-
-        document.getElementById('previewTitle').innerText = crop.value.trim() || 'Wheat';
-        document.getElementById('previewSubtitle').innerText = (variety.value.trim() || 'Sharbati') + ' · Grade ' + (quality.value || 'A');
-        document.getElementById('previewPrice').innerText = 'Rs ' + (priceValue || 0).toFixed(2) + '/kg';
-        document.getElementById('previewValue').innerText = 'Estimated gross: ' + formatRupees(quantityValue * priceValue || 0);
-
-        if (crop.value.trim()) strength += 10;
-        if (variety.value.trim()) strength += 10;
-        if (quantityValue >= 100) strength += 10;
-        if (priceValue >= 1) strength += 10;
-        if (description.value.trim().length > 30) strength += 15;
-        strength = Math.min(strength, 100);
-        document.getElementById('listingStrengthBar').style.width = strength + '%';
-        document.getElementById('listingStrengthText').innerText =
-            strength >= 85 ? 'Excellent: buyers can confidently book this stock.' :
-            strength >= 70 ? 'Good: enough detail for buyers to request quantity.' :
-            'Needs detail: add variety, quantity, and pickup notes.';
+    function toggleUrgentReason(show) {
+        document.getElementById('urgentReasonBox').classList.toggle('d-none', !show);
     }
 
-    function fillPremiumListing() {
-        document.getElementById('listingCropName').value = 'Wheat';
-        document.getElementById('listingVariety').value = 'Sharbati';
-        document.getElementById('listingQuantity').value = '1250';
-        document.getElementById('listingQuality').value = 'A';
-        document.getElementById('listingPrice').value = '26.5';
-        document.getElementById('availableFrom').value = getTomorrowIso(1);
-        document.getElementById('availableUntil').value = getTomorrowIso(7);
-        document.getElementById('listingDescription').value = 'Clean Grade A stock, packed in 50 kg bags, farm-gate pickup available with morning loading support.';
-        updateListingPreview();
-    }
+    // Set default dates
+    const today = new Date();
+    document.getElementById('availableFrom').value = today.toISOString().split('T')[0];
+    today.setDate(today.getDate() + 7);
+    document.getElementById('availableUntil').value = today.toISOString().split('T')[0];
 
-    function showListingStatus(type, message) {
-        const status = document.getElementById('listingFormStatus');
-        status.className = 'form-status mb-3 ' + type;
-        status.innerText = message;
-    }
-
-    document.getElementById('addListingForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const form = event.target;
-        const btn = document.getElementById('submitListingBtn');
-        const payload = {
-            cropName: form.cropName.value.trim(),
-            variety: form.variety.value.trim(),
-            quantityKg: parseFloat(form.quantityKg.value),
-            availableFrom: form.availableFrom.value,
-            availableUntil: form.availableUntil.value,
-            askingPricePerKg: parseFloat(form.askingPricePerKg.value),
-            qualityGrade: form.qualityGrade.value,
-            description: form.description.value.trim()
-        };
-
+    document.getElementById('addListingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
 
-        fetch('${pageContext.request.contextPath}/api/v1/listings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(async response => {
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok || data.success === false) {
-                throw new Error(data.message || 'Could not create listing.');
-            }
-            showListingStatus('success', 'Listing published. It is now visible in Marketplace and My Listings.');
-            setTimeout(() => window.location.href = '${pageContext.request.contextPath}/web/dashboard/farmer/listings#myListings', 700);
-        })
-        .catch(error => showListingStatus('error', error.message))
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-cloud-upload me-1"></i>Publish Listing';
-        });
-    });
+        const formData = new FormData(this);
+        const payload = Object.fromEntries(formData.entries());
+        payload.isUrgent = document.getElementById('isUrgent').checked;
 
-    document.querySelectorAll('#addListingForm input, #addListingForm select, #addListingForm textarea').forEach(function(field) {
-        field.addEventListener('input', updateListingPreview);
-        field.addEventListener('change', updateListingPreview);
+        try {
+            const response = await fetch(`${pageContext.request.contextPath}/api/v1/listings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                window.location.href = `${pageContext.request.contextPath}/web/farmer/listings/${data.data.id}/photos`;
+            } else {
+                alert("Failed to save. Please check your inputs.");
+            }
+        } catch (err) {
+            alert("Network error. Try again.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Next: Add Photos & Publish <i class="bi bi-arrow-right-circle ms-2"></i>';
+        }
     });
-    fillPremiumListing();
 </script>
+
 </body>
 </html>

@@ -98,6 +98,10 @@
                         <input type="radio" name="loginRole" id="login-role-expert" value="AGRI_EXPERT">
                         <label for="login-role-expert"><i class="bi bi-mortarboard me-2"></i>Expert</label>
                     </div>
+                    <div>
+                        <input type="radio" name="loginRole" id="login-role-admin" value="ADMIN">
+                        <label for="login-role-admin"><i class="bi bi-shield-lock me-2"></i>Admin</label>
+                    </div>
                 </div>
             </div>
             <div class="mb-4">

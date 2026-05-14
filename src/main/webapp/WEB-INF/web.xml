@@ -4,35 +4,34 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-    <display-name>AgriConnect Web Application</display-name>
+    <display-name>AgriConnect</display-name>
 
-    <!-- Context Params to load applicationContext.xml and Security Java Config -->
-    <context-param>
-        <param-name>contextClass</param-name>
-        <param-value>org.springframework.web.context.support.XmlWebApplicationContext</param-value>
-    </context-param>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>
-            /WEB-INF/applicationContext.xml
-        </param-value>
+        <param-value>/WEB-INF/spring/app-context.xml</param-value>
     </context-param>
 
-    <!-- Spring ContextLoaderListener -->
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
     <filter>
-        <filter-name>openSessionInViewFilter</filter-name>
-        <filter-class>org.springframework.orm.hibernate5.support.OpenSessionInViewFilter</filter-class>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>openSessionInViewFilter</filter-name>
+        <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- Spring Security Filter -->
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -42,40 +41,35 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!-- Spring MVC DispatcherServlet -->
     <servlet>
         <servlet-name>dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
+            <param-value>/WEB-INF/spring/mvc-context.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
-    <!-- Disable JSP source-map rewriting to avoid Windows file locks during local Cargo runs. -->
-    <servlet>
-        <servlet-name>jsp</servlet-name>
-        <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
-        <init-param>
-            <param-name>suppressSmap</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>mappedfile</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <load-on-startup>3</load-on-startup>
-    </servlet>
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
 
-    <servlet-mapping>
-        <servlet-name>jsp</servlet-name>
-        <url-pattern>*.jsp</url-pattern>
-    </servlet-mapping>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/views/error/403.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/views/error/404.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/views/error/500.jsp</location>
+    </error-page>
 
 </web-app>

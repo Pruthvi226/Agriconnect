@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse" id="buyerNavMenu">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 mt-3 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link app-nav-dashboard ${param.active == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/buyer">
+                    <a class="nav-link app-nav-dashboard ${param.active == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/buyer/dashboard">
                         <i class="bi bi-grid-1x2 me-1"></i>Dashboard
                     </a>
                 </li>
@@ -22,12 +22,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'bids' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/buyer/bids">
+                    <a class="nav-link ${param.active == 'bids' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/buyer/bids">
                         <i class="bi bi-hammer me-1"></i>My Bids
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'orders' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/buyer/orders">
+                    <a class="nav-link ${param.active == 'orders' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/buyer/orders">
                         <i class="bi bi-truck me-1"></i>Orders
                     </a>
                 </li>

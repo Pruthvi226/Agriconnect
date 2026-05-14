@@ -1,8 +1,6 @@
 package com.agriconnect.controller;
 
 import com.agriconnect.dto.EarningsDto;
-import com.agriconnect.dto.ListingResponseDto;
-import com.agriconnect.dto.SearchFiltersDto;
 import com.agriconnect.model.*;
 import com.agriconnect.security.CustomUserDetails;
 import com.agriconnect.service.*;
@@ -167,8 +165,8 @@ public class FarmerWebController {
 
     @PostMapping("/bids/{id}/counter")
     public String counterBid(@PathVariable("id") Long id, 
-                             @RequestParam BigDecimal counterPrice,
-                             @RequestParam String counterMessage,
+                             @RequestParam("counterPrice") BigDecimal counterPrice,
+                             @RequestParam("counterMessage") String counterMessage,
                              Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         bidService.counterBid(id, counterPrice, counterMessage, userDetails.getId());

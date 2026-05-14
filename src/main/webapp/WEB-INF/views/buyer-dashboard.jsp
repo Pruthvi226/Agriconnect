@@ -107,13 +107,13 @@
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="${pageContext.request.contextPath}/web/dashboard/buyer/bids" class="action-btn">
+                        <a href="${pageContext.request.contextPath}/web/buyer/bids" class="action-btn">
                             <div class="action-icon text-primary"><i class="bi bi-hammer"></i></div>
                             <div class="action-label">Track Bids</div>
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="${pageContext.request.contextPath}/web/dashboard/buyer/orders" class="action-btn">
+                        <a href="${pageContext.request.contextPath}/web/buyer/orders" class="action-btn">
                             <div class="action-icon text-info"><i class="bi bi-clock-history"></i></div>
                             <div class="action-label">Order History</div>
                         </a>

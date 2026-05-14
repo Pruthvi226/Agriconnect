@@ -23,6 +23,7 @@ import com.agriconnect.model.ProduceListing;
 import com.agriconnect.model.User;
 import com.agriconnect.model.WalletTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.SessionFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +69,9 @@ public class BidService {
 
     @Autowired
     private AuditService auditService;
+
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @PreAuthorize("hasRole('BUYER')")
     public Bid placeBidForUser(BidRequestDto dto, Long userId) {
@@ -342,6 +346,10 @@ public class BidService {
                 order.setOrderStatus(Order.OrderStatus.DELIVERED);
                 order.setActualDelivery(LocalDate.now());
                 order.setPaymentStatus(Order.PaymentStatus.PAID);
+                sessionFactory.getCurrentSession()
+                        .createNativeMutationQuery("CALL sp_compute_farmer_score(:farmerId)")
+                        .setParameter("farmerId", farmer.getId())
+                        .executeUpdate();
                 break;
             case "CANNOT_DELIVER":
             case "CANCELLED":

@@ -3,8 +3,6 @@ package com.agriconnect.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -21,8 +19,6 @@ import java.util.Map;
  *
  * The richer readiness/DB check lives at /actuator/health.
  */
-@RestController
-@RequestMapping("/health")
 public class HealthController {
 
     /** Captures the exact moment this instance started serving requests. */

@@ -303,7 +303,7 @@
                   btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Bid Placed!';
                   btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                   setTimeout(() => {
-                      window.location.href = '${pageContext.request.contextPath}/web/dashboard/buyer/bids';
+                      window.location.href = '${pageContext.request.contextPath}/web/buyer/bids';
                   }, 1500);
               } else {
                   btn.innerHTML = '<i class="bi bi-hammer me-2"></i>Submit Bid';

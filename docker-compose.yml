@@ -12,7 +12,14 @@ services:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./src/main/resources/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   app:
     build: .
@@ -30,7 +37,8 @@ services:
       HIBERNATE_DEFAULT_SCHEMA:
       HIBERNATE_DDL_AUTO: update
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   adminer:
     image: adminer

@@ -20,7 +20,7 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends curl && \
 RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Deploy as ROOT so context path is /
-COPY --from=build /workspace/target/agriconnect.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=build /tmp/agriconnect-build/agriconnect.war /usr/local/tomcat/webapps/ROOT.war
 
 # Copy and set up the entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

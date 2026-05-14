@@ -68,3 +68,16 @@ docker-compose up --build
 - Rate limiting implemented via `RateLimitFilter` to prevent DDoS and abuse.
 - Encrypted sensitive data (e.g., Aadhaar, Bank Accounts).
 
+## 🎤 Presentation & Demo
+For a complete walkthrough of the platform's features and a step-by-step demo script, refer to the [Presentation Guide](file:///C:/Users/pruthviraj/.gemini/antigravity/brain/8c50986e-40fa-49b6-aea9-d2d62bbf8322/presentation_guide.md).
+
+### Quick Demo Workflow:
+1.  **Register** as a Farmer and Buyer.
+2.  **Farmer**: Create a listing using the **Price Assistant** to check MSP.
+3.  **Buyer**: Search the **Marketplace**, check **Match Scores**, and place a **Bid**.
+4.  **Farmer**: Accept the bid in the **Booking Manager** and update delivery status.
+5.  **Admin**: Monitor **MSP Compliance** on the Admin Dashboard.
+
+---
+*Developed with ❤️ for the Indian Agricultural Ecosystem.*
+

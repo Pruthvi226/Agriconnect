@@ -3,7 +3,7 @@
 
 <nav class="navbar navbar-expand-lg app-navbar">
     <div class="container">
-        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/dashboard/expert">
+        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/expert/dashboard">
             <i class="bi bi-mortarboard me-2"></i>Agri<span>Expert</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#expertNavMenu" aria-label="Toggle navigation">
@@ -12,17 +12,17 @@
         <div class="collapse navbar-collapse" id="expertNavMenu">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 mt-3 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link app-nav-dashboard ${param.active == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/expert">
+                    <a class="nav-link app-nav-dashboard ${param.active == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/expert/dashboard">
                         <i class="bi bi-grid-1x2 me-1"></i>Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'advisory' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/expert/advisory">
+                    <a class="nav-link ${param.active == 'advisory' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/expert/advisory">
                         <i class="bi bi-chat-left-dots me-1"></i>Advisories
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'alerts' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/expert/alerts">
+                    <a class="nav-link ${param.active == 'alerts' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/expert/alerts">
                         <i class="bi bi-exclamation-triangle me-1"></i>Critical Alerts
                     </a>
                 </li>

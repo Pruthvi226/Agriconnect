@@ -116,7 +116,7 @@
                                 </span>
                             </div>
                             <div class="price-row d-flex align-items-end gap-1">
-                                <span class="asking-price">Rs ${fpo.minPricePerKg}</span>
+                                <span class="asking-price">₹ ${fpo.minPricePerKg}</span>
                                 <span class="price-unit mb-1">/ kg min</span>
                             </div>
                             <div class="qty-row">

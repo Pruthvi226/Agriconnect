@@ -1,6 +1,5 @@
 package com.agriconnect.dto;
 
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +37,8 @@ public class ListingRequestDto {
     @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
 
+    private String district;
+
     private Boolean isUrgent = false;
 
     @Size(max = 200, message = "Reason must not exceed 200 characters")
@@ -60,6 +61,8 @@ public class ListingRequestDto {
     public void setQualityGrade(String qualityGrade) { this.qualityGrade = qualityGrade; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getDistrict() { return district; }
+    public void setDistrict(String district) { this.district = district; }
     public Boolean getIsUrgent() { return isUrgent; }
     public void setIsUrgent(Boolean isUrgent) { this.isUrgent = isUrgent; }
     public String getUrgentReason() { return urgentReason; }

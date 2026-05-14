@@ -2,11 +2,13 @@
 -- AgriConnect Database Schema
 -- Compatible with MySQL 8.x and H2 (MODE=MySQL)
 -- Seed data is intentionally separated into seed-data.sql
+-- Stored procedures must be run separately from deploy/sp_compute_farmer_score.sql
+-- and deploy/sp_get_nearby_listings.sql because JDBC batch execution does not
+-- understand MySQL DELIMITER blocks.
 -- ---------------------------------------------------------
 
--- Note: Database/schema creation is handled by connection configuration
--- MySQL: Set via connection string or application.properties
--- H2: Set via connection URL (e.g., jdbc:h2:mem:agriconnect)
+CREATE DATABASE IF NOT EXISTS agriconnect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE agriconnect;
 
 DROP TABLE IF EXISTS critical_alerts;
 DROP TABLE IF EXISTS wallet_transactions;
@@ -83,8 +85,8 @@ CREATE TABLE buyer_profiles (
     company_name VARCHAR(200),
     gstin VARCHAR(20),
     business_type VARCHAR(30),
-    preferred_crops TEXT,
-    preferred_districts TEXT,
+    preferred_crops JSON,
+    preferred_districts JSON,
     credit_limit DECIMAL(12, 2),
     CONSTRAINT uk_buyer_profiles_gstin UNIQUE (gstin),
     CONSTRAINT fk_buyer_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -102,7 +104,7 @@ CREATE TABLE produce_listings (
     msp_price_per_kg DECIMAL(8, 2),
     quality_grade VARCHAR(5),
     description TEXT,
-    photos TEXT,
+    photos JSON,
     district VARCHAR(100),
     lat DECIMAL(9, 6),
     lng DECIMAL(9, 6),
@@ -157,7 +159,7 @@ CREATE TABLE advisories (
     crop_name VARCHAR(100),
     advisory_type VARCHAR(30),
     severity VARCHAR(20),
-    affected_districts TEXT,
+    affected_districts JSON,
     valid_until DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_advisory_expert FOREIGN KEY (expert_id) REFERENCES users(id) ON DELETE CASCADE
@@ -187,7 +189,7 @@ CREATE TABLE matchmaking_scores (
     farmer_id BIGINT NOT NULL,
     buyer_id BIGINT NOT NULL,
     score DECIMAL(5, 2),
-    factors TEXT,
+    factors JSON,
     computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_match_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE,
     CONSTRAINT fk_match_buyer FOREIGN KEY (buyer_id) REFERENCES buyer_profiles(id) ON DELETE CASCADE

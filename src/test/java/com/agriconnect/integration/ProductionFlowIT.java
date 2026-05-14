@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -33,12 +31,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
+@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/app-context.xml", "file:src/main/webapp/WEB-INF/spring/mvc-context.xml"})
 @WebAppConfiguration
 @Transactional
 @DirtiesContext
 @SuppressWarnings("null")
 public class ProductionFlowIT {
+    
+    static {
+        System.setProperty("DB_DRIVER", "org.h2.Driver");
+        System.setProperty("DB_URL", "jdbc:h2:mem:agriconnect;DB_CLOSE_DELAY=-1;MODE=MySQL");
+        System.setProperty("DB_USER", "sa");
+        System.setProperty("DB_PASS", "");
+        System.setProperty("HIBERNATE_DDL_AUTO", "update");
+    }
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -63,6 +69,7 @@ public class ProductionFlowIT {
                 .apply(springSecurity())
                 .build();
         mapper.findAndRegisterModules();
+        mapper.setPropertyNamingStrategy(com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE);
         seedData();
     }
 
@@ -124,7 +131,7 @@ public class ProductionFlowIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(listingDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.cropName").value("Wheat"))
+                .andExpect(jsonPath("$.data.crop_name").value("Wheat"))
                 .andReturn();
         
         // Extract Listing ID
@@ -169,6 +176,6 @@ public class ProductionFlowIT {
                 .with(user(buyer))
                 .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderStatus").value("CONFIRMED"));
+                .andExpect(jsonPath("$.data.order_status").value("CONFIRMED"));
     }
 }

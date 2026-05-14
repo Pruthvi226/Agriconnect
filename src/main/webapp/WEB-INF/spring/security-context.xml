@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <security:http pattern="/static/**" security="none" />
+    <security:http pattern="/resources/**" security="none" />
+    <security:http pattern="/health" security="none" />
+
+    <!-- JWT Stateless Security for API -->
+    <security:http pattern="/api/**" use-expressions="true" create-session="stateless" entry-point-ref="jwtEntryPoint">
+        <security:csrf disabled="true" />
+        <security:intercept-url pattern="/api/auth/**" access="permitAll" />
+        <security:intercept-url pattern="/api/**" access="authenticated" />
+        <security:custom-filter ref="rateLimitFilter" before="SECURITY_CONTEXT_FILTER" />
+        <security:custom-filter ref="jwtAuthenticationFilter" before="FORM_LOGIN_FILTER" />
+    </security:http>
+
+    <!-- Form Login Security for Web -->
+    <security:http use-expressions="true" create-session="ifRequired">
+        <security:csrf />
+        <security:intercept-url pattern="/auth/**" access="permitAll" />
+        <security:intercept-url pattern="/web/login" access="permitAll" />
+        <security:intercept-url pattern="/web/register" access="permitAll" />
+        <security:intercept-url pattern="/web/admin/**" access="hasRole('ADMIN')" />
+        <security:intercept-url pattern="/web/farmer/**" access="hasRole('FARMER')" />
+        <security:intercept-url pattern="/web/buyer/**" access="hasRole('BUYER')" />
+        <security:intercept-url pattern="/web/expert/**" access="hasRole('AGRI_EXPERT')" />
+        <security:intercept-url pattern="/**" access="authenticated" />
+
+        <security:form-login
+            login-page="/auth/login"
+            login-processing-url="/auth/login"
+            default-target-url="/dashboard"
+            authentication-failure-url="/auth/login?error=true"
+            username-parameter="username"
+            password-parameter="password" />
+
+        <security:logout
+            logout-url="/auth/logout"
+            logout-success-url="/auth/login?logout=true"
+            delete-cookies="JSESSIONID" />
+
+        <security:session-management session-fixation-protection="migrateSession">
+            <security:concurrency-control max-sessions="1" expired-url="/auth/login?expired=true" />
+        </security:session-management>
+    </security:http>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider user-service-ref="userDetailsService">
+            <security:password-encoder ref="passwordEncoder" />
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <bean id="jwtEntryPoint" class="org.springframework.security.web.authentication.HttpStatusEntryPoint">
+        <constructor-arg value="UNAUTHORIZED" />
+    </bean>
+
+</beans>

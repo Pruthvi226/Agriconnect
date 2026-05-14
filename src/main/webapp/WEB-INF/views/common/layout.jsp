@@ -1,55 +1,39 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${param.title} | AgriConnect</title>
-    
-    <!-- Bootstrap 5.3 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts - Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/main.css">
-    
-    <style>
-        /* Mobile First Overrides (Rule 5) */
-        @media (max-width: 768px) {
-            .navbar-brand { font-size: 1.2rem; }
-            .btn { width: 100%; margin-bottom: 10px; }
-            .stat-card { margin-bottom: 15px; }
-        }
-    </style>
-</head>
-<body class="${param.bodyClass}">
-
-    <!-- Redesign: Navbar will be included per role via fragments, or a global one here -->
-    <jsp:include page="/WEB-INF/views/fragments/navbar.jsp" />
-
-    <main class="container-fluid p-0">
-        <jsp:doBody />
-    </main>
-
-    <footer class="bg-dark text-white py-4 mt-5">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-12">
-                    <p class="mb-2 fw-bold">AgriConnect © 2024</p>
-                    <nav class="d-flex justify-content-center gap-3">
-                        <a href="${pageContext.request.contextPath}/web/msp-checker" class="text-white-50 text-decoration-none">MSP Checker</a>
-                        <a href="#" class="text-white-50 text-decoration-none">Help</a>
-                        <a href="#" class="text-white-50 text-decoration-none">Contact</a>
-                    </nav>
-                </div>
-            </div>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="${pageContext.request.contextPath}/dashboard">AgriConnect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto">
+                <sec:authorize access="hasRole('FARMER')">
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/farmer/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/farmer/listings">Listings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/farmer/bids">Bids</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/farmer/orders">Orders</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('BUYER')">
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/buyer/dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/buyer/search">Search</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/buyer/bids">Bids</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/buyer/orders">Orders</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('ADMIN')">
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/admin/users">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/admin/msp">MSP</a></li>
+                </sec:authorize>
+                <sec:authorize access="hasRole('AGRI_EXPERT')">
+                    <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/expert/advisories">Advisories</a></li>
+                </sec:authorize>
+            </ul>
+            <a class="btn btn-outline-light btn-sm me-2" href="${pageContext.request.contextPath}/api/notifications">Notifications <span class="badge text-bg-light">${unreadCount}</span></a>
+            <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="d-flex">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                <button class="btn btn-light btn-sm" type="submit">Logout</button>
+            </form>
         </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </div>
+</nav>

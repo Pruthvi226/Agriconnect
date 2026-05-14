@@ -1,38 +1,27 @@
 -- ---------------------------------------------------------
 -- AgriConnect Seed Data
--- Password placeholders are replaced with BCrypt hashes at startup.
--- Default admin credentials: admin@agriconnect.in / Admin@2024!
+-- Default credentials:
+--   admin@agriconnect.com / Admin@123
+--   farmer users / Farmer@123
+--   buyer users / Buyer@123
+--   expert users / Expert@123
 -- ---------------------------------------------------------
 
 INSERT INTO users (id, name, email, password_hash, phone, role, verification_status) VALUES
-(1, 'Ramesh Kumar', 'ramesh@example.com', '{{bcrypt:Farmer@2024!}}', '9876543210', 'FARMER', 'VERIFIED'),
-(2, 'Suresh Singh', 'suresh@example.com', '{{bcrypt:Farmer@2024!}}', '9876543211', 'FARMER', 'VERIFIED'),
-(3, 'Amit Patel', 'amit@example.com', '{{bcrypt:Farmer@2024!}}', '9876543212', 'FARMER', 'PENDING'),
-(4, 'Vikram Yadav', 'vikram@example.com', '{{bcrypt:Farmer@2024!}}', '9876543213', 'FARMER', 'VERIFIED'),
-(5, 'Sunil Sharma', 'sunil@example.com', '{{bcrypt:Farmer@2024!}}', '9876543214', 'FARMER', 'VERIFIED'),
-(6, 'AgriFoods Ltd', 'contact@agrifoods.com', '{{bcrypt:Buyer@2024!}}', '8876543210', 'BUYER', 'VERIFIED'),
-(7, 'FreshFarm Corp', 'sales@freshfarm.com', '{{bcrypt:Buyer@2024!}}', '8876543211', 'BUYER', 'VERIFIED'),
-(8, 'GreenOrg Inc', 'info@greenorg.com', '{{bcrypt:Buyer@2024!}}', '8876543212', 'BUYER', 'PENDING'),
-(9, 'Dr. Ravi Verma', 'ravi.v@kvk.edu', '{{bcrypt:Expert@2024!}}', '7876543210', 'AGRI_EXPERT', 'VERIFIED'),
-(10, 'Prof. Anita Rao', 'anita.r@uni.edu', '{{bcrypt:Expert@2024!}}', '7876543211', 'AGRI_EXPERT', 'VERIFIED'),
-(11, 'AgriConnect Admin', 'admin@agriconnect.in', '{{bcrypt:Admin@2024!}}', '7000000000', 'ADMIN', 'VERIFIED');
+(1, 'Ramesh Kumar', 'ramesh@example.com', '$2a$12$NsFm2mYFgfZyXLudOkDRXuBY0mlTj2P1irXZv3ZpwJh43sLzesvgK', '9876543210', 'FARMER', 'VERIFIED'),
+(2, 'Suresh Singh', 'suresh@example.com', '$2a$12$NsFm2mYFgfZyXLudOkDRXuBY0mlTj2P1irXZv3ZpwJh43sLzesvgK', '9876543211', 'FARMER', 'VERIFIED'),
+(3, 'Amit Patel', 'amit@example.com', '$2a$12$NsFm2mYFgfZyXLudOkDRXuBY0mlTj2P1irXZv3ZpwJh43sLzesvgK', '9876543212', 'FARMER', 'PENDING'),
+(4, 'Vikram Yadav', 'vikram@example.com', '$2a$12$NsFm2mYFgfZyXLudOkDRXuBY0mlTj2P1irXZv3ZpwJh43sLzesvgK', '9876543213', 'FARMER', 'VERIFIED'),
+(5, 'Sunil Sharma', 'sunil@example.com', '$2a$12$NsFm2mYFgfZyXLudOkDRXuBY0mlTj2P1irXZv3ZpwJh43sLzesvgK', '9876543214', 'FARMER', 'VERIFIED'),
+(6, 'AgriFoods Ltd', 'contact@agrifoods.com', '$2a$12$86Yf.FaqxINm9jkzaNDIxeeHtmAxyq60mbw5g.PIDUEVnVAVLXwVS', '8876543210', 'BUYER', 'VERIFIED'),
+(7, 'FreshFarm Corp', 'sales@freshfarm.com', '$2a$12$86Yf.FaqxINm9jkzaNDIxeeHtmAxyq60mbw5g.PIDUEVnVAVLXwVS', '8876543211', 'BUYER', 'VERIFIED'),
+(8, 'GreenOrg Inc', 'info@greenorg.com', '$2a$12$86Yf.FaqxINm9jkzaNDIxeeHtmAxyq60mbw5g.PIDUEVnVAVLXwVS', '8876543212', 'BUYER', 'PENDING'),
+(9, 'Dr. Ravi Verma', 'ravi.v@kvk.edu', '$2a$12$hBifVCUi2g0vu9oC7voEpeREqiWAc8kSDah9vB/dwc08wVCZoKqZe', '7876543210', 'AGRI_EXPERT', 'VERIFIED'),
+(10, 'Prof. Anita Rao', 'anita.r@uni.edu', '$2a$12$hBifVCUi2g0vu9oC7voEpeREqiWAc8kSDah9vB/dwc08wVCZoKqZe', '7876543211', 'AGRI_EXPERT', 'VERIFIED'),
+(11, 'Admin User', 'admin@agriconnect.com', '$2a$12$3oS38aj2nZHuYz8WWk1gq.LTRuNfg1/ehjhlUUOM7oD50sD46zk9.', '9000000000', 'ADMIN', 'VERIFIED');
 
--- BCrypt hash for all non-admin users (hash of: Farmer@2024! / Buyer@2024! / Expert@2024!)
--- All share the same hash for demo simplicity: $2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.
-UPDATE users
-SET password_hash = '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.'
-WHERE email LIKE '%@example.com'
-   OR email LIKE '%@agrifoods.com'
-   OR email LIKE '%@freshfarm.com'
-   OR email LIKE '%@greenorg.com'
-   OR email LIKE '%@kvk.edu'
-   OR email LIKE '%@uni.edu';
 
 -- BCrypt hash for Admin@2024! (strength 12) — fixes the unresolved {{bcrypt:Admin@2024!}} placeholder
--- Generated: BCrypt.hashpw("Admin@2024!", BCrypt.gensalt(12))
-UPDATE users
-SET password_hash = '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.'
-WHERE email = 'admin@agriconnect.in' AND role = 'ADMIN';
 
 INSERT INTO crops (id, name, category) VALUES
 (1, 'Wheat', 'Cereals'),

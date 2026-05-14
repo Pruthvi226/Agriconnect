@@ -45,6 +45,9 @@ public class ListingService {
     @Autowired
     private AuditService auditService;
 
+    @Autowired(required = false)
+    private MatchmakingService matchmakingService;
+
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER') and #farmerId == authentication.principal.id")
     public ProduceListing createListing(ListingRequestDto dto, Long farmerId) {
         FarmerProfile farmer = farmerDao.findById(farmerId)
@@ -73,7 +76,7 @@ public class ListingService {
         listing.setAvailableUntil(dto.getAvailableUntil());
         listing.setAskingPricePerKg(dto.getAskingPricePerKg());
         listing.setDescription(dto.getDescription());
-        listing.setDistrict(farmer.getDistrict());
+        listing.setDistrict(dto.getDistrict() != null && !dto.getDistrict().isBlank() ? dto.getDistrict() : farmer.getDistrict());
         listing.setLat(farmer.getLat());
         listing.setLng(farmer.getLng());
         listing.setStatus(ProduceListing.Status.ACTIVE);
@@ -94,6 +97,10 @@ public class ListingService {
         listingDao.save(listing);
 
         auditService.log(farmer.getId(), "CREATE", "ProduceListing", listing.getId(), "{}", "{\"cropName\":\"" + dto.getCropName() + "\"}", "127.0.0.1"); // stub IP for now
+
+        if (matchmakingService != null) {
+            matchmakingService.computeAllScores();
+        }
 
         return listing;
     }

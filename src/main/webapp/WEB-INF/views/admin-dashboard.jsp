@@ -43,7 +43,7 @@
                 <div class="msp-percent mb-2">${belowMspPercentage}%</div>
                 <div class="fw-bold mb-3">Listings below MSP</div>
                 <p class="small text-muted mb-4">A high percentage indicates market instability or urgent need for intervention.</p>
-                <a href="${pageContext.request.contextPath}/web/dashboard/admin/msp" class="btn btn-warning w-100 fw-bold">Review MSP Policy</a>
+                <a href="${pageContext.request.contextPath}/web/admin/msp" class="btn btn-warning w-100 fw-bold">Review MSP Policy</a>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
             <div class="stat-card h-100">
                 <div class="section-title d-flex justify-content-between">
                     <span><i class="bi bi-people"></i> Verification Queue</span>
-                    <a href="${pageContext.request.contextPath}/web/dashboard/admin/users" class="small text-decoration-none">View All</a>
+                    <a href="${pageContext.request.contextPath}/web/admin/users" class="small text-decoration-none">View All</a>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">

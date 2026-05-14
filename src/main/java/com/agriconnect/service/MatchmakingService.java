@@ -57,6 +57,59 @@ public class MatchmakingService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    public MatchmakingScore computeAndSaveScore(Long farmerId, Long buyerId) {
+        FarmerProfile farmer = farmerDao.findById(farmerId)
+                .orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Farmer not found"));
+        BuyerProfile buyer = buyerDao.findById(buyerId)
+                .orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Buyer not found"));
+
+        List<ProduceListing> listings = produceListingDao.findByFarmer(farmerId, ProduceListing.Status.ACTIVE);
+        Set<String> farmerCrops = listings.stream()
+                .map(ProduceListing::getCropName)
+                .filter(java.util.Objects::nonNull)
+                .map(value -> value.trim().toLowerCase())
+                .collect(Collectors.toSet());
+        Set<String> preferredCrops = parseJsonArray(buyer.getPreferredCrops()).stream()
+                .map(value -> value.trim().toLowerCase())
+                .collect(Collectors.toSet());
+        Set<String> preferredDistricts = parseJsonArray(buyer.getPreferredDistricts()).stream()
+                .map(value -> value.trim().toLowerCase())
+                .collect(Collectors.toSet());
+
+        double cropPoints = 0.0;
+        if (!farmerCrops.isEmpty() && !preferredCrops.isEmpty()) {
+            long overlap = farmerCrops.stream().filter(preferredCrops::contains).count();
+            cropPoints = ((double) overlap / preferredCrops.size()) * 40.0;
+        }
+
+        double districtPoints;
+        String farmerDistrict = farmer.getDistrict() == null ? "" : farmer.getDistrict().trim().toLowerCase();
+        if (!farmerDistrict.isBlank() && preferredDistricts.contains(farmerDistrict)) {
+            districtPoints = 30.0;
+        } else {
+            districtPoints = calculateProximityScore(farmer, buyer) * 0.30;
+        }
+
+        double farmerScorePoints = farmer.getFarmerScore() == null
+                ? 15.0
+                : Math.min(30.0, farmer.getFarmerScore().doubleValue() / 100.0 * 30.0);
+        double total = Math.min(100.0, cropPoints + districtPoints + farmerScorePoints);
+
+        MatchmakingScore score = new MatchmakingScore();
+        score.setFarmer(farmer);
+        score.setBuyer(buyer);
+        score.setScore(BigDecimal.valueOf(total).setScale(2, java.math.RoundingMode.HALF_UP));
+        score.setFactors(String.format(
+                "{\"cropMatch\":%.2f,\"districtMatch\":%.2f,\"farmerScore\":%.2f}",
+                cropPoints, districtPoints, farmerScorePoints));
+        matchmakingDao.save(score);
+        return score;
+    }
+
+    public double computeScore(Long farmerId, Long buyerId) {
+        return computeAndSaveScore(farmerId, buyerId).getScore().doubleValue();
+    }
+
     /**
      * Recomputes match scores for all farmer–buyer pairs and persists them.
      * Skips pairs that score below the minimum threshold of 5.0.
@@ -270,6 +323,17 @@ public class MatchmakingService {
         } catch (Exception e) {
             // Try plain string (non-JSON)
             return buyer.getPreferredDistricts().trim();
+        }
+    }
+
+    private List<String> parseJsonArray(String json) {
+        if (json == null || json.isBlank()) {
+            return Collections.emptyList();
+        }
+        try {
+            return mapper.readValue(json, new TypeReference<List<String>>() {});
+        } catch (Exception ex) {
+            return List.of(json);
         }
     }
 }

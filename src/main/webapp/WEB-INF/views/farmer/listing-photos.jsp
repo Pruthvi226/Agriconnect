@@ -56,10 +56,10 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <a href="${pageContext.request.contextPath}/web/dashboard/farmer/listings" class="btn btn-success btn-lg py-3 fw-800 rounded-4 shadow-sm">
+                        <a href="${pageContext.request.contextPath}/web/farmer/listings" class="btn btn-success btn-lg py-3 fw-800 rounded-4 shadow-sm">
                             Finish & Publish Listing <i class="bi bi-check-circle ms-2"></i>
                         </a>
-                        <a href="${pageContext.request.contextPath}/web/dashboard/farmer/listings" class="btn btn-link text-muted">Skip for now</a>
+                        <a href="${pageContext.request.contextPath}/web/farmer/listings" class="btn btn-link text-muted">Skip for now</a>
                     </div>
                 </div>
             </div>

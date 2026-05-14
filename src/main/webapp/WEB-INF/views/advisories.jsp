@@ -105,7 +105,7 @@
             🌾 Agri<span>Connect</span>
         </a>
         <div class="d-flex align-items-center gap-2">
-            <a href="${pageContext.request.contextPath}/web/dashboard/expert" class="nav-link">
+            <a href="${pageContext.request.contextPath}/web/expert/dashboard" class="nav-link">
                 <i class="bi bi-grid me-1"></i>Dashboard
             </a>
             <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline ms-2">

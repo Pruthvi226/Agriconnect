@@ -53,7 +53,8 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
         }
 
         try (Connection connection = dataSource.getConnection()) {
-            if (!shouldInitialize(connection)) {
+            Long userCount = getUserCount(connection);
+            if (userCount != null && userCount > 0L) {
                 log.info("AdminDataInitializer skipped because users table already contains data");
                 return;
             }
@@ -61,8 +62,10 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
             boolean originalAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             try {
-                Resource schemaRes = schemaScript;
-                ScriptUtils.executeSqlScript(connection, new EncodedResource(schemaRes, StandardCharsets.UTF_8));
+                if (userCount == null) {
+                    Resource schemaRes = schemaScript;
+                    ScriptUtils.executeSqlScript(connection, new EncodedResource(schemaRes, StandardCharsets.UTF_8));
+                }
                 byte[] seedBytes = renderSeedScript().getBytes(StandardCharsets.UTF_8);
                 ScriptUtils.executeSqlScript(connection, new EncodedResource(
                         new ByteArrayResource(seedBytes),
@@ -80,14 +83,14 @@ public class AdminDataInitializer implements ApplicationListener<ContextRefreshe
         }
     }
 
-    private boolean shouldInitialize(Connection connection) {
+    private Long getUserCount(Connection connection) {
         try (Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM users")) {
             resultSet.next();
-            return resultSet.getLong(1) == 0L;
+            return resultSet.getLong(1);
         } catch (SQLException ex) {
             log.info("Users table not available yet; schema initialization will run");
-            return true;
+            return null;
         }
     }
 

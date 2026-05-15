@@ -31,7 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/app-context.xml", "file:src/main/webapp/WEB-INF/spring/mvc-context.xml"})
+@ContextConfiguration(locations = {
+        "classpath:test-app-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/security-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/mvc-context.xml"
+})
 @WebAppConfiguration
 @Transactional
 @DirtiesContext

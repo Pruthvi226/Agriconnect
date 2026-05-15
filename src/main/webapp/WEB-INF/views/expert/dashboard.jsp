@@ -8,14 +8,17 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Expert Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/static/css/agriconnect.css" rel="stylesheet">
 </head>
 <body>
-<jsp:include page="../common/layout.jsp" />
+<jsp:include page="../fragments/expert-nav.jsp">
+    <jsp:param name="active" value="dashboard" />
+</jsp:include>
 <main class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4">Advisories</h1>
-        <a class="btn btn-primary" href="${pageContext.request.contextPath}/expert/advisories/new">Create Advisory</a>
+        <h1 class="h4">Expert Dashboard</h1>
+        <a class="btn btn-success" href="${pageContext.request.contextPath}/web/advisories">Create Advisory</a>
     </div>
     <table class="table table-striped">
         <thead><tr><th>Title</th><th>Crop</th><th>Type</th><th>Severity</th><th>Valid Until</th></tr></thead>

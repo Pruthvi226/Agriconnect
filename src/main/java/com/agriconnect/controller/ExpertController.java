@@ -44,13 +44,13 @@ public class ExpertController {
     }
 
     @PostMapping("/advisories")
-    public String create(@RequestParam String title,
-                         @RequestParam String body,
-                         @RequestParam(required = false) String cropName,
-                         @RequestParam String advisoryType,
-                         @RequestParam String severity,
-                         @RequestParam String affectedDistricts,
-                         @RequestParam String validUntil,
+    public String create(@RequestParam("title") String title,
+                         @RequestParam("body") String body,
+                         @RequestParam(value = "cropName", required = false) String cropName,
+                         @RequestParam("advisoryType") String advisoryType,
+                         @RequestParam("severity") String severity,
+                         @RequestParam("affectedDistricts") String affectedDistricts,
+                         @RequestParam("validUntil") String validUntil,
                          Authentication authentication) {
         AdvisoryRequestDto dto = new AdvisoryRequestDto();
         dto.setTitle(title);

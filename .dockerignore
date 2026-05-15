@@ -1,0 +1,12 @@
+.git
+.idea
+target
+.build
+uploads
+cargo-dev*.log
+*.iml
+.classpath
+.project
+.settings
+Thumbs.db
+.DS_Store

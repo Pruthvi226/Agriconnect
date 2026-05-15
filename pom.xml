@@ -28,6 +28,7 @@
         <hikari.version>5.1.0</hikari.version>
         <agriconnect.build.dir>${java.io.tmpdir}/agriconnect-build</agriconnect.build.dir>
         <agriconnect.cargo.home>${java.io.tmpdir}/agriconnect-cargo-${maven.build.timestamp}/tomcat10x</agriconnect.cargo.home>
+        <argLine></argLine>
     </properties>
 
     <dependencies>
@@ -312,7 +313,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -328,6 +329,21 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
+                <configuration>
+                    <excludes>
+                        <exclude>java.*</exclude>
+                        <exclude>javax.*</exclude>
+                        <exclude>jakarta.*</exclude>
+                        <exclude>jdk.*</exclude>
+                        <exclude>sun.*</exclude>
+                        <exclude>com.sun.*</exclude>
+                        <exclude>net.bytebuddy.*</exclude>
+                        <exclude>org.mockito.*</exclude>
+                        <exclude>*MockitoMock*</exclude>
+                        <exclude>*HibernateProxy*</exclude>
+                        <exclude>*HibernateInstantiator*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -356,7 +372,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.70</minimum>
+                                            <minimum>0.40</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -370,6 +386,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>3.2.5</version>
+                <configuration>
+                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

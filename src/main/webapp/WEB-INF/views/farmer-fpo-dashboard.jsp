@@ -31,6 +31,7 @@
             <section class="workspace-panel">
                 <div class="panel-title"><h2>Create FPO group</h2></div>
                 <form method="post" action="${pageContext.request.contextPath}/web/farmer/fpo/groups" class="mini-form-grid">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                     <div class="full">
                         <label class="form-label">Group name</label>
                         <input class="form-control" name="groupName" required>
@@ -66,6 +67,7 @@
                                     <span>Requested</span>
                                     <span>
                                         <form method="post" action="${pageContext.request.contextPath}/web/farmer/fpo/memberships/${membership.id}/approve">
+                                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                             <button class="btn btn-sm btn-success" type="submit">Approve</button>
                                         </form>
                                     </span>
@@ -103,6 +105,7 @@
                         </div>
                         <div class="col-lg-6">
                             <form method="post" action="${pageContext.request.contextPath}/web/farmer/fpo/${group.id}/listings" class="mini-form-grid">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                 <div>
                                     <label class="form-label">Crop</label>
                                     <input class="form-control" name="cropName" required>

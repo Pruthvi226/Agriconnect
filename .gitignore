@@ -1,6 +1,9 @@
 # Build output — never commit compiled artefacts
 .build/
 target/
+cargo-dev*.log
+uploads/
+.env
 
 # IDE
 .idea/
@@ -13,4 +16,3 @@ target/
 # OS
 .DS_Store
 Thumbs.db
-

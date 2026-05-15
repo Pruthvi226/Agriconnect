@@ -42,6 +42,11 @@
         .listing-card:hover {
             border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-hover);
         }
+        .listing-photo {
+            height: 150px; background: #f0fdf4; display: flex; align-items: center; justify-content: center;
+            color: #15803d; font-size: 2rem; overflow: hidden;
+        }
+        .listing-photo img { width: 100%; height: 100%; object-fit: cover; }
         .card-top { padding: 1.25rem 1.25rem 0.75rem; }
         .crop-icon {
             width: 44px; height: 44px; background: linear-gradient(135deg, #dcfce7, #bbf7d0);
@@ -141,18 +146,18 @@
         <form method="get" action="${pageContext.request.contextPath}/web/marketplace" class="row g-2 align-items-end">
             <div class="col-md-4">
                 <label class="form-label text-muted fw-semibold" style="font-size: 0.78rem;">SEARCH CROP</label>
-                <input type="text" class="form-control" name="crop" placeholder="e.g. Wheat, Rice, Onion...">
+                <input type="text" class="form-control" name="cropName" value="${filters.cropName}" placeholder="e.g. Wheat, Rice, Onion...">
             </div>
             <div class="col-md-3">
                 <label class="form-label text-muted fw-semibold" style="font-size: 0.78rem;">DISTRICT</label>
-                <input type="text" class="form-control" name="district" placeholder="e.g. Nashik">
+                <input type="text" class="form-control" name="district" value="${filters.district}" placeholder="e.g. Nashik">
             </div>
             <div class="col-md-3">
                 <label class="form-label text-muted fw-semibold" style="font-size: 0.78rem;">MSP STATUS</label>
                 <select class="form-select" name="mspFilter" style="border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.875rem;">
-                    <option value="">All listings</option>
-                    <option value="ABOVE_MSP">Above MSP</option>
-                    <option value="BELOW_MSP">Below MSP</option>
+                    <option value="" ${empty mspFilter ? 'selected' : ''}>All listings</option>
+                    <option value="ABOVE_MSP" ${mspFilter == 'ABOVE_MSP' ? 'selected' : ''}>Above MSP</option>
+                    <option value="BELOW_MSP" ${mspFilter == 'BELOW_MSP' ? 'selected' : ''}>Below MSP</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -173,6 +178,16 @@
                 <c:forEach var="listing" items="${listings}">
                     <div class="col-md-6 col-lg-4">
                         <div class="listing-card">
+                            <div class="listing-photo">
+                                <c:choose>
+                                    <c:when test="${not empty listing.firstPhotoUrl}">
+                                        <img src="${pageContext.request.contextPath}/uploads/${listing.firstPhotoUrl}" alt="${listing.cropName}">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="bi bi-image"></i>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                             <div class="card-top">
                                 <div class="d-flex align-items-start gap-3 mb-2">
                                     <div class="crop-icon">🌾</div>

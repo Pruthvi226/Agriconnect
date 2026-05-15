@@ -46,15 +46,23 @@
                     <p class="mb-0 opacity-75">Tell buyers what you are selling (आप क्या बेच रहे हैं?)</p>
                 </div>
                 <div class="card-body p-4">
-                    <form id="addListingForm">
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger rounded-3">${error}</div>
+                    </c:if>
+                    <c:if test="${not empty msg}">
+                        <div class="alert alert-success rounded-3">${msg}</div>
+                    </c:if>
+
+                    <form id="addListingForm" method="post" action="${pageContext.request.contextPath}/web/farmer/listings">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <!-- SECTION A: Crop Details -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">Select Crop (फसल चुनें)</label>
                             <select class="form-select form-select-lg rounded-3 border-2" name="cropName" id="cropName" required onchange="fetchMsp(this.value)">
                                 <option value="">-- Choose Crop --</option>
                                 <option value="Wheat">Wheat (गेहूं)</option>
-                                <option value="Rice">Rice (चावल/धान)</option>
-                                <option value="Corn">Corn (मक्का)</option>
+                                <option value="Rice (Paddy)">Rice (चावल/धान)</option>
+                                <option value="Maize">Maize (मक्का)</option>
                                 <option value="Soybean">Soybean (सोयाबीन)</option>
                                 <option value="Onion">Onion (प्याज)</option>
                             </select>
@@ -137,13 +145,13 @@
 
             <!-- MY LISTINGS SUMMARY -->
             <div class="d-flex justify-content-between align-items-center mb-3 px-2">
-                <h2 class="h5 fw-800 mb-0">Your Active Listings</h2>
-                <a href="#myListings" class="small text-decoration-none">View All</a>
+                <h2 class="h5 fw-800 mb-0">Your Listings</h2>
+                <span class="small text-muted">Withdraw or reactivate without leaving this page</span>
             </div>
             
-            <c:forEach var="listing" items="${farmerListings}" begin="0" end="2">
+            <c:forEach var="listing" items="${farmerListings}">
                 <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center gap-3">
                         <div class="d-flex align-items-center">
                             <div class="bg-success-subtle p-3 rounded-4 me-3">
                                 <i class="bi bi-box-seam text-success fs-4"></i>
@@ -156,6 +164,27 @@
                         <span class="badge ${listing.status == 'ACTIVE' ? 'bg-success' : 'bg-warning'} rounded-pill">
                             ${listing.status}
                         </span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-end mt-3">
+                        <a href="${pageContext.request.contextPath}/web/farmer/listings/${listing.id}/photos" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-images me-1"></i>Photos
+                        </a>
+                        <c:if test="${listing.status != 'WITHDRAWN' && listing.status != 'SOLD'}">
+                            <form action="${pageContext.request.contextPath}/web/farmer/listings/${listing.id}/withdraw" method="post">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-eye-slash me-1"></i>Withdraw
+                                </button>
+                            </form>
+                        </c:if>
+                        <c:if test="${listing.status == 'WITHDRAWN' || listing.status == 'EXPIRED'}">
+                            <form action="${pageContext.request.contextPath}/web/farmer/listings/${listing.id}/reactivate" method="post">
+                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Reactivate
+                                </button>
+                            </form>
+                        </c:if>
                     </div>
                 </div>
             </c:forEach>
@@ -209,35 +238,10 @@
     today.setDate(today.getDate() + 7);
     document.getElementById('availableUntil').value = today.toISOString().split('T')[0];
 
-    document.getElementById('addListingForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+    document.getElementById('addListingForm').addEventListener('submit', function() {
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
-
-        const formData = new FormData(this);
-        const payload = Object.fromEntries(formData.entries());
-        payload.isUrgent = document.getElementById('isUrgent').checked;
-
-        try {
-            const response = await fetch(`${pageContext.request.contextPath}/api/v1/listings`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                window.location.href = `${pageContext.request.contextPath}/web/farmer/listings/${data.data.id}/photos`;
-            } else {
-                alert("Failed to save. Please check your inputs.");
-            }
-        } catch (err) {
-            alert("Network error. Try again.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = 'Next: Add Photos & Publish <i class="bi bi-arrow-right-circle ms-2"></i>';
-        }
     });
 </script>
 

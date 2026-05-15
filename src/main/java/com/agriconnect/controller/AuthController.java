@@ -3,16 +3,17 @@ package com.agriconnect.controller;
 import com.agriconnect.dto.ApiResponse;
 import com.agriconnect.dto.UserRegistrationDto;
 import com.agriconnect.model.User;
+import com.agriconnect.security.CustomUserDetails;
 import com.agriconnect.security.LoginIdentity;
 import com.agriconnect.security.JwtUtil;
 import com.agriconnect.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -25,9 +26,6 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
@@ -36,8 +34,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegistrationDto dto) {
         User user = userService.register(dto);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(LoginIdentity.format(user));
-        return ResponseEntity.ok(ApiResponse.success(jwtUtil.generateToken(userDetails), "User registered"));
+        return ResponseEntity.ok(ApiResponse.success(jwtUtil.generateToken(new CustomUserDetails(user)), "User registered"));
     }
 
     @PostMapping("/login")
@@ -46,8 +43,8 @@ public class AuthController {
         String password = request.get("password");
         User.Role role = User.Role.valueOf(request.get("role"));
         String username = LoginIdentity.format(email, role);
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return ResponseEntity.ok(ApiResponse.success(jwtUtil.generateToken(userDetails), "Login successful"));
     }
 

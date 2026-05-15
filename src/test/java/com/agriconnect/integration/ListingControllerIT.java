@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -22,7 +23,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"})
+@ContextConfiguration(locations = {
+        "classpath:test-app-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/security-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/mvc-context.xml"
+})
 @WebAppConfiguration
 @SuppressWarnings("null")
 public class ListingControllerIT {
@@ -35,7 +40,9 @@ public class ListingControllerIT {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext)
+                .apply(springSecurity())
+                .build();
         mapper.findAndRegisterModules();
     }
 

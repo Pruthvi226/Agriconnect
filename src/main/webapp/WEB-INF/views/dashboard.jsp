@@ -80,7 +80,8 @@
                     </a>
                 </li>
                 <li class="nav-item ms-2">
-                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                    <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="d-inline">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <button type="submit" class="btn-logout">
                             <i class="bi bi-box-arrow-right me-1"></i>Sign Out
                         </button>

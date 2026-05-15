@@ -52,6 +52,7 @@
         </c:if>
 
         <form action="${pageContext.request.contextPath}/web/register" method="post" id="registerForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             <div class="row g-2 mb-3">
                 <div class="col-md-6">
                     <label class="form-label text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">Full Name</label>

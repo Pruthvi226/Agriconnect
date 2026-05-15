@@ -1,18 +1,22 @@
 package com.agriconnect.controller;
 
 import com.agriconnect.dto.EarningsDto;
+import com.agriconnect.dto.ListingRequestDto;
 import com.agriconnect.model.*;
 import com.agriconnect.security.CustomUserDetails;
 import com.agriconnect.service.*;
 import com.agriconnect.dao.FarmerProfileDao;
 import com.agriconnect.exception.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -90,6 +94,50 @@ public class FarmerWebController {
         Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         mav.addObject("farmerListings", listingService.getListingsForFarmerUser(userId));
         return mav;
+    }
+
+    @PostMapping("/listings")
+    public String createListing(@Valid @ModelAttribute ListingRequestDto dto,
+                                BindingResult bindingResult,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("error", bindingResult.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:/web/farmer/listings";
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        ProduceListing listing = listingService.createListingForUser(dto, userDetails.getId());
+        redirectAttributes.addFlashAttribute("msg", "Listing created. Add photos to improve buyer trust.");
+        return "redirect:/web/farmer/listings/" + listing.getId() + "/photos";
+    }
+
+    @PostMapping("/listings/{id}/withdraw")
+    public String withdrawListing(@PathVariable("id") Long id,
+                                  Authentication authentication,
+                                  RedirectAttributes redirectAttributes) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            listingService.withdrawListingForUser(id, userDetails.getId());
+            redirectAttributes.addFlashAttribute("msg", "Listing withdrawn from the marketplace.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/web/farmer/listings";
+    }
+
+    @PostMapping("/listings/{id}/reactivate")
+    public String reactivateListing(@PathVariable("id") Long id,
+                                    Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            listingService.reactivateListingForUser(id, userDetails.getId());
+            redirectAttributes.addFlashAttribute("msg", "Listing reactivated and visible to buyers.");
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/web/farmer/listings";
     }
 
     @GetMapping("/listings/{id}/photos")

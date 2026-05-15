@@ -38,7 +38,7 @@ public class UserService {
         user.setName(dto.getName() != null ? dto.getName().trim() : "Anonymous");
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
-        user.setPhone(dto.getPhone() != null ? dto.getPhone().trim() : "");
+        user.setPhone(normalizePhone(dto.getPhone()));
         user.setRole(role);
         user.setVerificationStatus(User.VerificationStatus.PENDING);
         userDao.save(user);
@@ -59,6 +59,14 @@ public class UserService {
         }
 
         return user;
+    }
+
+    private String normalizePhone(String phone) {
+        if (phone == null) {
+            return "";
+        }
+        String digits = phone.replaceAll("[^0-9]", "");
+        return digits.startsWith("91") && digits.length() == 12 ? digits.substring(2) : digits;
     }
 
     /**

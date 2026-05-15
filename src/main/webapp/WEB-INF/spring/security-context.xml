@@ -10,10 +10,21 @@
     <security:http pattern="/resources/**" security="none" />
     <security:http pattern="/health" security="none" />
 
+    <security:method-security pre-post-enabled="true" />
+
+    <bean id="webSecurityExpressionHandler"
+          class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler" />
+
     <!-- JWT Stateless Security for API -->
     <security:http pattern="/api/**" use-expressions="true" create-session="stateless" entry-point-ref="jwtEntryPoint">
         <security:csrf disabled="true" />
         <security:intercept-url pattern="/api/auth/**" access="permitAll" />
+        <security:intercept-url pattern="/api/v1/auth/**" access="permitAll" />
+        <security:intercept-url pattern="/api/v1/listings/search" access="permitAll" />
+        <security:intercept-url pattern="/api/v1/listings/*/msp-comparison" access="permitAll" />
+        <security:intercept-url pattern="/api/msp" access="permitAll" />
+        <security:intercept-url pattern="/api/farmer/**" access="hasRole('FARMER')" />
+        <security:intercept-url pattern="/api/v1/advisories/**" access="hasRole('AGRI_EXPERT')" />
         <security:intercept-url pattern="/api/**" access="authenticated" />
         <security:custom-filter ref="rateLimitFilter" before="SECURITY_CONTEXT_FILTER" />
         <security:custom-filter ref="jwtAuthenticationFilter" before="FORM_LOGIN_FILTER" />
@@ -22,13 +33,26 @@
     <!-- Form Login Security for Web -->
     <security:http use-expressions="true" create-session="ifRequired">
         <security:csrf />
+        <security:intercept-url pattern="/" access="permitAll" />
         <security:intercept-url pattern="/auth/**" access="permitAll" />
+        <security:intercept-url pattern="/web" access="permitAll" />
         <security:intercept-url pattern="/web/login" access="permitAll" />
+        <security:intercept-url pattern="/web/register" method="GET" access="permitAll" />
+        <security:intercept-url pattern="/web/register" method="POST" access="permitAll" />
         <security:intercept-url pattern="/web/register" access="permitAll" />
+        <security:intercept-url pattern="/web/marketplace" access="permitAll" />
+        <security:intercept-url pattern="/web/marketplace/**" access="permitAll" />
+        <security:intercept-url pattern="/web/msp-checker" access="permitAll" />
         <security:intercept-url pattern="/web/admin/**" access="hasRole('ADMIN')" />
         <security:intercept-url pattern="/web/farmer/**" access="hasRole('FARMER')" />
         <security:intercept-url pattern="/web/buyer/**" access="hasRole('BUYER')" />
         <security:intercept-url pattern="/web/expert/**" access="hasRole('AGRI_EXPERT')" />
+        <security:intercept-url pattern="/farmer/**" access="hasRole('FARMER')" />
+        <security:intercept-url pattern="/buyer/**" access="hasRole('BUYER')" />
+        <security:intercept-url pattern="/expert/**" access="hasRole('AGRI_EXPERT')" />
+        <security:intercept-url pattern="/web/advisories" method="POST" access="hasRole('AGRI_EXPERT')" />
+        <security:intercept-url pattern="/web/advisories/**" access="authenticated" />
+        <security:intercept-url pattern="/web/notifications/**" access="authenticated" />
         <security:intercept-url pattern="/**" access="authenticated" />
 
         <security:form-login

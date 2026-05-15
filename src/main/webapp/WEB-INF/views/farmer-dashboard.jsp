@@ -133,6 +133,7 @@
                                         </div>
                                         <div class="d-flex gap-2">
                                             <form action="${pageContext.request.contextPath}/web/farmer/bids/${bid.id}/accept" method="post" class="flex-grow-1">
+                                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                 <button type="submit" class="btn btn-success w-100 btn-sm">
                                                     <i class="bi bi-check-circle"></i> Accept
                                                 </button>

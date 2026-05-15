@@ -4,6 +4,7 @@ import com.agriconnect.dao.BidDao;
 import com.agriconnect.dao.ProduceListingDao;
 import com.agriconnect.dao.UserDao;
 import com.agriconnect.dao.BuyerProfileDao;
+import com.agriconnect.dao.OrderDao;
 import com.agriconnect.dao.NotificationDao;
 import com.agriconnect.dto.BidRequestDto;
 import com.agriconnect.model.Bid;
@@ -11,6 +12,7 @@ import com.agriconnect.model.ProduceListing;
 import com.agriconnect.model.User;
 import com.agriconnect.model.BuyerProfile;
 import com.agriconnect.model.FarmerProfile;
+import com.agriconnect.model.Order;
 import com.agriconnect.exception.BusinessValidationException;
 import com.agriconnect.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +40,7 @@ public class BidServiceTest {
     @Mock private ProduceListingDao listingDao;
     @Mock private BuyerProfileDao buyerProfileDao;
     @Mock private UserDao userDao;
+    @Mock private OrderDao orderDao;
     @Mock private AuditService auditService;
     @Mock private NotificationDao notificationDao;
 
@@ -105,5 +108,27 @@ public class BidServiceTest {
 
         assertThrows(BusinessValidationException.class, 
             () -> bidService.placeBidForUser(validDto, buyerUserId));
+    }
+
+    @Test
+    void confirmDeliveryForBuyerUser_MarksOrderDelivered() {
+        Order order = new Order();
+        order.setId(300L);
+        order.setBuyer(buyer);
+        order.setFarmer(listing.getFarmerProfile());
+        order.setBid(new Bid());
+        order.getBid().setListing(listing);
+        order.setOrderStatus(Order.OrderStatus.CONFIRMED);
+
+        when(orderDao.findById(300L)).thenReturn(Optional.of(order));
+
+        Order result = bidService.confirmDeliveryForBuyerUser(300L, buyerUserId);
+
+        assertEquals(Order.OrderStatus.DELIVERED, result.getOrderStatus());
+        assertEquals(Order.PaymentStatus.PAID, result.getPaymentStatus());
+        assertNotNull(result.getActualDelivery());
+        verify(orderDao).update(order);
+        verify(notificationDao).save(any(com.agriconnect.model.Notification.class));
+        verify(auditService).log(eq(buyerUserId), eq("CONFIRM_DELIVERY"), eq("Order"), eq(300L), anyString(), anyString(), anyString());
     }
 }

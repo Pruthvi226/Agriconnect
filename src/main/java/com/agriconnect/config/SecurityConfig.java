@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 antMatcher("/health"), // Render liveness probe (no DB dependency)
                                 antMatcher("/actuator/health"), // detailed readiness probe
+                                antMatcher("/auth/**"),
+                                antMatcher("/api/auth/**"),
                                 antMatcher("/api/v1/auth/**"),
                                 antMatcher("/"),
                                 antMatcher("/web"),
@@ -60,12 +62,15 @@ public class SecurityConfig {
                                 antMatcher("/web/register"),
                                 antMatcher("/web/marketplace"),
                                 antMatcher("/web/marketplace/listing/**"),
+                                antMatcher("/web/msp-checker"),
+                                antMatcher("/api/msp"),
                                 antMatcher("/api/v1/listings/search"),
-                                antMatcher("/api/v1/listings/*"),
+                                antMatcher("/api/v1/listings/*/msp-comparison"),
                                 antMatcher("/resources/**"))
                         .permitAll()
                         // FARMER
                         .requestMatchers(
+                                antMatcher("/api/farmer/**"),
                                 antMatcher("/api/v1/listings"),
                                 antMatcher("/api/v1/fpo/groups"),
                                 antMatcher("/api/v1/fpo/*/join"),
@@ -75,6 +80,7 @@ public class SecurityConfig {
                                 antMatcher("/api/v1/bids/*/accept"),
                                 antMatcher("/api/v1/bids/*/reject"),
                                 antMatcher("/api/v1/bids/orders/**"),
+                                antMatcher("/farmer/**"),
                                 antMatcher("/web/farmer"),
                                 antMatcher("/web/farmer/**"))
                         .hasRole("FARMER")
@@ -83,13 +89,16 @@ public class SecurityConfig {
                                 antMatcher("/api/v1/bids"),
                                 antMatcher("/api/v1/bids/**"),
                                 antMatcher("/api/v1/orders/my"),
+                                antMatcher("/buyer/**"),
+                                antMatcher("/web/buyer/**"),
                                 antMatcher("/web/dashboard/buyer"))
                         .hasRole("BUYER")
                         // EXPERT
                         .requestMatchers(
                                 antMatcher("/api/v1/advisories/**"),
-                                antMatcher("/web/dashboard/expert"),
-                                antMatcher("/web/advisories"))
+                                antMatcher("/expert/**"),
+                                antMatcher("/web/expert/**"),
+                                antMatcher("/web/dashboard/expert"))
                         .hasRole("AGRI_EXPERT")
                         // ADMIN
                         .requestMatchers(
@@ -99,20 +108,23 @@ public class SecurityConfig {
                                 antMatcher("/actuator/metrics"))
                         .hasRole("ADMIN")
                         // Notifications for authenticated users
-                        .requestMatchers(antMatcher("/web/notifications")).authenticated()
+                        .requestMatchers(
+                                antMatcher("/web/notifications/**"),
+                                antMatcher("/web/advisories/**"))
+                        .authenticated()
                         // ANY OTHER
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .formLogin(form -> form
-                        .loginPage("/web/login")
-                        .loginProcessingUrl("/login")
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
                         .successHandler(roleBasedSuccessHandler())
-                        .failureUrl("/web/login?error=true")
+                        .failureUrl("/auth/login?error=true")
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/web/login?logout=true")
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout=true")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .permitAll())
@@ -138,13 +150,13 @@ public class SecurityConfig {
                         redirectUrl = "/web/farmer/dashboard";
                         break;
                     } else if (role.equals("ROLE_BUYER")) {
-                        redirectUrl = "/web/dashboard/buyer";
+                        redirectUrl = "/web/buyer/dashboard";
                         break;
                     } else if (role.equals("ROLE_AGRI_EXPERT")) {
-                        redirectUrl = "/web/dashboard/expert";
+                        redirectUrl = "/web/expert/dashboard";
                         break;
                     } else if (role.equals("ROLE_ADMIN")) {
-                        redirectUrl = "/web/dashboard/admin";
+                        redirectUrl = "/web/admin/dashboard";
                         break;
                     }
                 }

@@ -61,14 +61,20 @@ class MarketplaceWebController {
     private FpoService fpoService;
 
     @GetMapping
-    public ModelAndView getMarketplace() {
+    public ModelAndView getMarketplace(@ModelAttribute SearchFiltersDto filters,
+                                       @RequestParam(value = "mspFilter", required = false) String mspFilter) {
         ModelAndView mav = new ModelAndView("marketplace");
-        List<ProduceListing> listings = listingService.searchListings(new SearchFiltersDto());
-        List<ListingResponseDto> dtos = listings.stream().map(ListingResponseDto::new).toList();
+        List<ProduceListing> listings = listingService.searchListings(filters);
+        List<ListingResponseDto> dtos = listings.stream()
+                .map(ListingResponseDto::new)
+                .filter(dto -> mspFilter == null || mspFilter.isBlank() || mspFilter.equals(dto.getMspBadge()))
+                .toList();
         
         List<FpoListingResponseDto> fpoListings = fpoService.getFpoListingsForBuyer();
         mav.addObject("fpoListings", fpoListings);
         mav.addObject("listings", dtos);
+        mav.addObject("filters", filters);
+        mav.addObject("mspFilter", mspFilter);
         return mav;
     }
 

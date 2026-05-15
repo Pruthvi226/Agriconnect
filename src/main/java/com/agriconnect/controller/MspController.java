@@ -25,7 +25,7 @@ public class MspController {
 
     @GetMapping("/api/msp")
     @ResponseBody
-    public ResponseEntity<MspRate> getMspForCrop(@RequestParam String crop) {
+    public ResponseEntity<MspRate> getMspForCrop(@RequestParam("crop") String crop) {
         MspRate rate = mspService.getCurrentMsp(crop);
         if (rate == null) {
             return ResponseEntity.notFound().build();

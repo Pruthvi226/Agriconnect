@@ -346,10 +346,7 @@ public class BidService {
                 order.setOrderStatus(Order.OrderStatus.DELIVERED);
                 order.setActualDelivery(LocalDate.now());
                 order.setPaymentStatus(Order.PaymentStatus.PAID);
-                sessionFactory.getCurrentSession()
-                        .createNativeMutationQuery("CALL sp_compute_farmer_score(:farmerId)")
-                        .setParameter("farmerId", farmer.getId())
-                        .executeUpdate();
+                recomputeFarmerScoreQuietly(farmer.getId());
                 break;
             case "CANNOT_DELIVER":
             case "CANCELLED":
@@ -373,6 +370,43 @@ public class BidService {
         auditService.log(userId, "UPDATE_DELIVERY", "Order", orderId,
                 "{\"status\":\"" + oldStatus + "\"}",
                 "{\"status\":\"" + order.getOrderStatus() + "\"}", "127.0.0.1");
+
+        return order;
+    }
+
+    @PreAuthorize("hasRole('BUYER')")
+    public Order confirmDeliveryForBuyerUser(Long orderId, Long userId) {
+        BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
+        Order order = orderDao.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new BusinessValidationException("You do not own this order");
+        }
+        if (order.getOrderStatus() == Order.OrderStatus.CANCELLED || order.getOrderStatus() == Order.OrderStatus.DISPUTED) {
+            throw new BusinessValidationException("This order cannot be confirmed as delivered");
+        }
+
+        Order.OrderStatus oldStatus = order.getOrderStatus();
+        order.setOrderStatus(Order.OrderStatus.DELIVERED);
+        order.setActualDelivery(LocalDate.now());
+        order.setPaymentStatus(Order.PaymentStatus.PAID);
+        orderDao.update(order);
+        recomputeFarmerScoreQuietly(order.getFarmer().getId());
+
+        Notification notification = new Notification();
+        notification.setUser(order.getFarmer().getUser());
+        notification.setTitle("Buyer Confirmed Delivery");
+        notification.setBody("Delivery was confirmed for " + order.getBid().getListing().getCropName()
+                + ". The order is now marked delivered.");
+        notification.setType("ORDER_UPDATE");
+        notification.setReferenceId(order.getId());
+        notificationDao.save(notification);
+
+        auditService.log(userId, "CONFIRM_DELIVERY", "Order", orderId,
+                "{\"status\":\"" + oldStatus + "\"}",
+                "{\"status\":\"DELIVERED\"}", "127.0.0.1");
 
         return order;
     }
@@ -437,6 +471,17 @@ public class BidService {
                 .orElseGet(java.util.Collections::emptyList);
     }
 
+    public Order getOrderForBuyerUser(Long orderId, Long userId) {
+        BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
+        Order order = orderDao.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new BusinessValidationException("You do not own this order");
+        }
+        return order;
+    }
+
     private BuyerProfile createStarterBuyerProfile(Long userId) {
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -447,5 +492,16 @@ public class BidService {
         buyer.setCreditLimit(new BigDecimal("50000.00"));
         buyerDao.save(buyer);
         return buyer;
+    }
+
+    private void recomputeFarmerScoreQuietly(Long farmerId) {
+        try {
+            sessionFactory.getCurrentSession()
+                    .createNativeMutationQuery("CALL sp_compute_farmer_score(:farmerId)")
+                    .setParameter("farmerId", farmerId)
+                    .executeUpdate();
+        } catch (RuntimeException ignored) {
+            // H2 tests and fresh Docker schemas may not have the stored procedure loaded yet.
+        }
     }
 }

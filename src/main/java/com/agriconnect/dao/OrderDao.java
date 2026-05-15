@@ -8,6 +8,7 @@ public interface OrderDao {
     void save(Order order);
     void update(Order order);
     Optional<Order> findById(Long id);
+    List<Order> findAll();
     List<Order> findByFarmerId(Long farmerId);
     List<Order> findByBuyerId(Long buyerId);
     List<Order> findByFarmer(Long farmerId, Order.OrderStatus status);

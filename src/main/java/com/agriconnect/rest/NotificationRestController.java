@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
+@Transactional
 public class NotificationRestController {
 
     @Autowired
@@ -34,12 +36,26 @@ public class NotificationRestController {
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Map<String, Object>> markAsRead(@PathVariable("id") Long id) {
-        Notification notification = notificationDao.findById(id)
+    public ResponseEntity<Map<String, Object>> markAsRead(@PathVariable("id") Long id, Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        Notification notification = notificationDao.findByUserAndId(user.getId(), id)
                 .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
         notification.setIsRead(true);
         notificationDao.update(notification);
         return ResponseEntity.ok(toMap(notification));
+    }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<Map<String, Object>> markAllRead(Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        int updated = notificationDao.markAllRead(user.getId());
+        return ResponseEntity.ok(Map.of("updated", updated, "unreadCount", notificationDao.countUnread(user.getId())));
+    }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Map<String, Object>> unreadCount(Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok(Map.of("unreadCount", notificationDao.countUnread(user.getId())));
     }
 
     private Map<String, Object> toMap(Notification notification) {

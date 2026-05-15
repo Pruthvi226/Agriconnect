@@ -31,11 +31,11 @@ public class Advisory {
     @Column(name = "crop_name", length = 100)
     private String cropName;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = AdvisoryTypeConverter.class)
     @Column(name = "advisory_type")
     private AdvisoryType advisoryType;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = SeverityConverter.class)
     private Severity severity;
 
     @Column(name = "affected_districts", columnDefinition = "JSON")
@@ -47,8 +47,75 @@ public class Advisory {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    public enum AdvisoryType { PEST, DISEASE, WEATHER, MARKET, TECHNIQUE }
-    public enum Severity { INFO, WARNING, CRITICAL }
+    public enum AdvisoryType {
+        PEST, DISEASE, WEATHER, MARKET, TECHNIQUE;
+
+        public static AdvisoryType fromExternalValue(String value) {
+            String normalized = normalizeEnumValue(value, "Advisory type");
+            return switch (normalized) {
+                case "PEST_ALERT", "PEST_WARNING" -> PEST;
+                case "DISEASE_ALERT", "DISEASE_WARNING" -> DISEASE;
+                case "WEATHER_ALERT", "WEATHER_WARNING" -> WEATHER;
+                case "MARKET_ALERT", "MARKET_UPDATE" -> MARKET;
+                case "BEST_PRACTICES", "GOVERNMENT", "GOVERNMENT_SCHEME" -> TECHNIQUE;
+                default -> AdvisoryType.valueOf(normalized);
+            };
+        }
+    }
+
+    public enum Severity {
+        INFO, WARNING, CRITICAL;
+
+        public static Severity fromExternalValue(String value) {
+            String normalized = normalizeEnumValue(value, "Severity");
+            return switch (normalized) {
+                case "LOW", "NORMAL" -> INFO;
+                case "HIGH", "MEDIUM" -> WARNING;
+                case "URGENT" -> CRITICAL;
+                default -> Severity.valueOf(normalized);
+            };
+        }
+    }
+
+    public static class AdvisoryTypeConverter implements AttributeConverter<AdvisoryType, String> {
+        @Override
+        public String convertToDatabaseColumn(AdvisoryType attribute) {
+            return attribute == null ? null : attribute.name();
+        }
+
+        @Override
+        public AdvisoryType convertToEntityAttribute(String dbData) {
+            if (dbData == null || dbData.isBlank()) {
+                return null;
+            }
+            return AdvisoryType.fromExternalValue(dbData);
+        }
+    }
+
+    public static class SeverityConverter implements AttributeConverter<Severity, String> {
+        @Override
+        public String convertToDatabaseColumn(Severity attribute) {
+            return attribute == null ? null : attribute.name();
+        }
+
+        @Override
+        public Severity convertToEntityAttribute(String dbData) {
+            if (dbData == null || dbData.isBlank()) {
+                return null;
+            }
+            return Severity.fromExternalValue(dbData);
+        }
+    }
+
+    private static String normalizeEnumValue(String value, String label) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(label + " is required");
+        }
+        return value.trim()
+                .toUpperCase()
+                .replace('-', '_')
+                .replace(' ', '_');
+    }
 
     @PrePersist
     protected void onCreate() {

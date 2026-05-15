@@ -18,11 +18,15 @@ public class ListingDetailWebController {
     @Autowired
     private com.agriconnect.service.ListingService listingService;
 
+    @Autowired
+    private com.agriconnect.service.PhotoService photoService;
+
     @GetMapping("/{id}")
     public ModelAndView listingDetail(@PathVariable("id") Long id) {
         ModelAndView mav = new ModelAndView("listing-details");
         com.agriconnect.model.ProduceListing listing = listingService.getListingById(id);
         mav.addObject("listing", listing);
+        mav.addObject("photoPaths", photoService.getPhotoPaths(listing));
         mav.addObject("listingId", id);
         return mav;
     }

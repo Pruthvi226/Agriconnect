@@ -7,6 +7,8 @@ import com.agriconnect.model.Advisory;
 import com.agriconnect.model.CriticalAlert;
 import com.agriconnect.model.Notification;
 import com.agriconnect.model.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -34,8 +36,11 @@ public class AdvisoryAlertService {
     @Autowired
     private SessionFactory sessionFactory;
 
+    @Autowired(required = false)
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('AGRI_EXPERT') and #expertId == authentication.principal.id")
-    public void publishAdvisory(AdvisoryRequestDto dto, Long expertId) {
+    public Advisory publishAdvisory(AdvisoryRequestDto dto, Long expertId) {
         User expert = userDao.findById(expertId).orElseThrow();
 
         Advisory advisory = new Advisory();
@@ -43,9 +48,9 @@ public class AdvisoryAlertService {
         advisory.setTitle(dto.getTitle());
         advisory.setBody(dto.getBody());
         advisory.setCropName(dto.getCropName());
-        advisory.setAdvisoryType(Advisory.AdvisoryType.valueOf(dto.getAdvisoryType()));
-        advisory.setSeverity(Advisory.Severity.valueOf(dto.getSeverity()));
-        advisory.setAffectedDistricts(dto.getAffectedDistricts().toString()); // Simple JSON stringification
+        advisory.setAdvisoryType(parseAdvisoryType(dto.getAdvisoryType()));
+        advisory.setSeverity(parseSeverity(dto.getSeverity()));
+        advisory.setAffectedDistricts(writeAffectedDistricts(dto.getAffectedDistricts()));
         advisory.setValidUntil(dto.getValidUntil());
         
         advisoryDao.save(advisory);
@@ -58,17 +63,32 @@ public class AdvisoryAlertService {
 
         // Feature 3: specific async query
         sendBulkNotifications(dto.getAffectedDistricts(), dto.getCropName(), advisory);
+        return advisory;
     }
 
     @Async
     public void sendBulkNotifications(List<String> affectedDistricts, String cropName, Advisory advisory) {
         System.out.println("Async Bulk Notification started.");
         
-        String hql = "SELECT DISTINCT l.farmerProfile.user.id FROM ProduceListing l WHERE l.district IN (:districts) AND l.cropName = :cropName AND l.status = 'ACTIVE'";
-        List<Long> userIds = sessionFactory.getCurrentSession().createQuery(hql, Long.class)
+        StringBuilder hql = new StringBuilder("""
+                SELECT DISTINCT l.farmerProfile.user.id
+                FROM ProduceListing l
+                WHERE l.district IN (:districts)
+                  AND l.status IN (:statuses)
+                """);
+        boolean targetCrop = cropName != null && !cropName.isBlank();
+        if (targetCrop) {
+            hql.append(" AND LOWER(l.cropName) = :cropName");
+        }
+        var query = sessionFactory.getCurrentSession().createQuery(hql.toString(), Long.class)
                 .setParameterList("districts", affectedDistricts)
-                .setParameter("cropName", cropName)
-                .getResultList();
+                .setParameterList("statuses", List.of(
+                        com.agriconnect.model.ProduceListing.Status.ACTIVE,
+                        com.agriconnect.model.ProduceListing.Status.BIDDING));
+        if (targetCrop) {
+            query.setParameter("cropName", cropName.toLowerCase());
+        }
+        List<Long> userIds = query.getResultList();
 
         for (Long userId : userIds) {
             User user = userDao.findById(userId).orElse(null);
@@ -85,12 +105,41 @@ public class AdvisoryAlertService {
     }
 
     public List<Advisory> getActiveAdvisoriesForDistrict(String district) {
+        if (district == null || district.isBlank()) {
+            return List.of();
+        }
         String hql = "FROM Advisory a WHERE a.affectedDistricts LIKE :district " +
-                     "AND a.validUntil >= CURRENT_DATE AND a.severity != 'INFO' " +
+                     "AND a.validUntil >= CURRENT_DATE AND a.severity != :infoSeverity " +
                      "ORDER BY a.severity DESC, a.createdAt DESC";
         return sessionFactory.getCurrentSession().createQuery(hql, Advisory.class)
                 .setParameter("district", "%" + district + "%")
+                .setParameter("infoSeverity", Advisory.Severity.INFO)
                 .setMaxResults(3)
                 .getResultList();
+    }
+
+    public List<Advisory> getAllAdvisories() {
+        return advisoryDao.findAll();
+    }
+
+    public Advisory getAdvisory(Long id) {
+        return advisoryDao.findById(id)
+                .orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Advisory not found"));
+    }
+
+    private Advisory.AdvisoryType parseAdvisoryType(String value) {
+        return Advisory.AdvisoryType.fromExternalValue(value);
+    }
+
+    private Advisory.Severity parseSeverity(String value) {
+        return Advisory.Severity.fromExternalValue(value);
+    }
+
+    private String writeAffectedDistricts(List<String> districts) {
+        try {
+            return objectMapper.writeValueAsString(districts);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalArgumentException("Could not encode affected districts", ex);
+        }
     }
 }

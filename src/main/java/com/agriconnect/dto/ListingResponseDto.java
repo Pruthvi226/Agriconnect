@@ -1,10 +1,16 @@
 package com.agriconnect.dto;
 
 import com.agriconnect.model.ProduceListing;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ListingResponseDto {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private Long id;
     private String cropName;
     private String variety;
@@ -14,6 +20,8 @@ public class ListingResponseDto {
     private BigDecimal mspDiffPercent;
     private String mspBadge; // BELOW_MSP, AT_MSP, ABOVE_MSP
     private String district;
+    private List<String> photos = new ArrayList<>();
+    private String firstPhotoUrl;
 
     public ListingResponseDto(ProduceListing listing) {
         this.id = listing.getId();
@@ -23,6 +31,8 @@ public class ListingResponseDto {
         this.askingPrice = listing.getAskingPricePerKg();
         this.mspPrice = listing.getMspPricePerKg();
         this.district = listing.getDistrict();
+        this.photos = readPhotos(listing.getPhotos());
+        this.firstPhotoUrl = this.photos.isEmpty() ? null : this.photos.get(0);
 
         if (this.mspPrice != null && this.askingPrice != null) {
             BigDecimal diff = this.askingPrice.subtract(this.mspPrice);
@@ -59,4 +69,19 @@ public class ListingResponseDto {
     public void setMspBadge(String mspBadge) { this.mspBadge = mspBadge; }
     public String getDistrict() { return district; }
     public void setDistrict(String district) { this.district = district; }
+    public List<String> getPhotos() { return photos; }
+    public void setPhotos(List<String> photos) { this.photos = photos; }
+    public String getFirstPhotoUrl() { return firstPhotoUrl; }
+    public void setFirstPhotoUrl(String firstPhotoUrl) { this.firstPhotoUrl = firstPhotoUrl; }
+
+    private List<String> readPhotos(String photosJson) {
+        if (photosJson == null || photosJson.isBlank()) {
+            return new ArrayList<>();
+        }
+        try {
+            return new ArrayList<>(OBJECT_MAPPER.readValue(photosJson, new TypeReference<List<String>>() {}));
+        } catch (Exception ex) {
+            return new ArrayList<>();
+        }
+    }
 }

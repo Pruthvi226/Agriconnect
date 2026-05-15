@@ -17,13 +17,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'advisory' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/expert/advisory">
+                    <a class="nav-link ${param.active == 'advisories' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/advisories">
                         <i class="bi bi-chat-left-dots me-1"></i>Advisories
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'alerts' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/expert/alerts">
-                        <i class="bi bi-exclamation-triangle me-1"></i>Critical Alerts
+                    <a class="nav-link ${param.active == 'alerts' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/notifications">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Alerts
                     </a>
                 </li>
                 <li class="nav-item">
@@ -32,7 +32,8 @@
                     </a>
                 </li>
                 <li class="nav-item ms-lg-2">
-                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                    <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="d-inline">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <button type="submit" class="btn app-nav-signout">
                             <i class="bi bi-box-arrow-right me-1"></i>Sign Out
                         </button>

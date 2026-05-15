@@ -8,8 +8,8 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <!-- Component-scan: com.agriconnect.controller, com.agriconnect.rest -->
-    <context:component-scan base-package="com.agriconnect.controller, com.agriconnect.rest" />
+    <!-- Component-scan: web controllers, REST controllers, and ControllerAdvice handlers -->
+    <context:component-scan base-package="com.agriconnect.controller, com.agriconnect.rest, com.agriconnect.exception" />
 
     <!-- Enable <mvc:annotation-driven> with Jackson message converter -->
     <mvc:annotation-driven>
@@ -30,6 +30,9 @@
     <!-- <mvc:resources mapping="/static/**" location="/static/"/> -->
     <mvc:resources mapping="/static/**" location="/static/" />
     <mvc:resources mapping="/resources/**" location="/resources/" />
+    <mvc:resources mapping="/uploads/**" location="file:uploads/" />
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
 
     <!-- <mvc:default-servlet-handler/> -->
     <mvc:default-servlet-handler />

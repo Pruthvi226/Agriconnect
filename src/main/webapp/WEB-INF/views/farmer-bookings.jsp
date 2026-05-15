@@ -60,11 +60,12 @@
                                                     <i class="bi bi-building text-primary me-2"></i>
                                                     <span class="fw-bold">${bid.buyer.companyName}</span>
                                                 </div>
-                                                <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>${bid.buyer.user.district || 'Location N/A'}</div>
+                                                <div class="small text-muted"><i class="bi bi-telephone me-1"></i>${not empty bid.buyer.user.phone ? bid.buyer.user.phone : 'Contact pending'}</div>
                                             </div>
                                             <div class="col-12 col-md-4">
                                                 <div class="d-grid gap-2">
                                                     <form action="${pageContext.request.contextPath}/web/farmer/bids/${bid.id}/accept" method="post">
+                                                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                         <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Accept Deal</button>
                                                     </form>
                                                     <div class="d-flex gap-2">
@@ -72,6 +73,7 @@
                                                             Counter
                                                         </button>
                                                         <form action="${pageContext.request.contextPath}/web/farmer/bids/${bid.id}/reject" method="post" class="flex-grow-1">
+                                                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                             <button type="submit" class="btn btn-outline-danger w-100 fw-bold">Reject</button>
                                                         </form>
                                                     </div>
@@ -139,12 +141,14 @@
                                     <div class="d-flex gap-2">
                                         <c:if test="${order.orderStatus == 'CONFIRMED'}">
                                             <form action="${pageContext.request.contextPath}/web/farmer/orders/${order.id}/status" method="post" class="flex-grow-1">
+                                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                 <input type="hidden" name="action" value="IN_TRANSIT">
                                                 <button type="submit" class="btn btn-primary w-100 fw-bold">Start Delivery</button>
                                             </form>
                                         </c:if>
                                         <c:if test="${order.orderStatus == 'IN_TRANSIT'}">
                                             <form action="${pageContext.request.contextPath}/web/farmer/orders/${order.id}/status" method="post" class="flex-grow-1">
+                                                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                                                 <input type="hidden" name="action" value="DELIVERED">
                                                 <button type="submit" class="btn btn-success w-100 fw-bold">Mark Delivered</button>
                                             </form>
@@ -177,6 +181,7 @@
             </div>
             <div class="modal-body p-4">
                 <form id="counterForm" method="post">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                     <div class="mb-3">
                         <label class="form-label fw-bold">Buyer Offered</label>
                         <div class="h4 fw-800 text-muted" id="offeredPriceLabel">₹25.00</div>

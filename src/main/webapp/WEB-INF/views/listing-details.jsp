@@ -64,6 +64,15 @@
 
         .info-card .card-body { padding: 1.5rem; }
 
+        .photo-hero {
+            background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+            overflow: hidden; min-height: 260px; display: flex; align-items: center; justify-content: center;
+        }
+        .photo-hero img { width: 100%; height: 320px; object-fit: cover; }
+        .photo-placeholder { color: #15803d; font-size: 3rem; }
+        .photo-thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 0.75rem; }
+        .photo-thumb { height: 92px; border-radius: 14px; object-fit: cover; width: 100%; border: 2px solid #e2e8f0; }
+
         .price-display {
             background: linear-gradient(135deg, #0a4f2c, #16783a);
             color: white;
@@ -163,6 +172,24 @@
         <!-- LEFT: Listing Info -->
         <div class="col-lg-7">
 
+            <c:choose>
+                <c:when test="${not empty photoPaths}">
+                    <div class="photo-hero mb-3">
+                        <img src="${pageContext.request.contextPath}/uploads/${photoPaths[0]}" alt="${listing.cropName}">
+                    </div>
+                    <div class="photo-thumbs mb-4">
+                        <c:forEach var="path" items="${photoPaths}">
+                            <img class="photo-thumb" src="${pageContext.request.contextPath}/uploads/${path}" alt="${listing.cropName}">
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <div class="photo-hero mb-4">
+                        <div class="photo-placeholder"><i class="bi bi-image"></i></div>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+
             <!-- Price Block -->
             <div class="price-display mb-4">
                 <div class="row text-center">
@@ -217,12 +244,12 @@
                     <div class="farmer-badge">
                         <div class="farmer-avatar">🧑‍🌾</div>
                         <div>
-                            <div class="fw-bold text-dark">${listing.farmer.user.name}</div>
+                            <div class="fw-bold text-dark">${listing.farmerProfile.user.name}</div>
                             <div class="text-muted" style="font-size: 0.8rem;">
-                                <i class="bi bi-geo-alt me-1"></i>${listing.farmer.village}, ${listing.farmer.district}
+                                <i class="bi bi-geo-alt me-1"></i>${listing.farmerProfile.village}, ${listing.farmerProfile.district}
                             </div>
                             <div class="mt-1">
-                                <span class="badge" style="background: #dcfce7; color: #15803d;">Score: ${listing.farmer.farmerScore}/100</span>
+                                <span class="badge" style="background: #dcfce7; color: #15803d;">Score: ${listing.farmerProfile.farmerScore}/100</span>
                             </div>
                         </div>
                     </div>
@@ -239,12 +266,18 @@
                 </div>
                 <div class="bid-card-body">
                     <!-- Bid Form -->
-                    <form class="bid-form" id="bidForm" onsubmit="submitBid(event)">
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-danger rounded-3">${error}</div>
+                    </c:if>
+                    <form class="bid-form" id="bidForm" method="post" action="${pageContext.request.contextPath}/web/buyer/bids">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <input type="hidden" name="listingId" value="${listing.id}" />
+                        <input type="hidden" name="message" value="Bid placed via marketplace" />
                         <div class="mb-3">
                             <label class="form-label fw-semibold" style="font-size: 0.8rem; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">
                                 Your Bid Price (₹/kg)
                             </label>
-                            <input type="number" class="form-control" id="bidAmount" name="bidAmount"
+                            <input type="number" class="form-control" id="bidAmount" name="bidPricePerKg"
                                    placeholder="e.g. 24.50" min="1" step="0.50" required>
                             <div class="form-text text-muted" style="font-size: 0.75rem;">
                                 Current asking price: ₹${listing.askingPricePerKg}/kg
@@ -279,43 +312,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function submitBid(e) {
-        e.preventDefault();
+    document.getElementById('bidForm').addEventListener('submit', function() {
         const btn = document.getElementById('bidBtn');
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Placing bid...';
         btn.disabled = true;
-
-        const price = document.getElementById('bidAmount').value;
-        const quantity = document.getElementById('bidQuantity').value;
-        
-        fetch('${pageContext.request.contextPath}/api/v1/bids', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                listingId: ${listing.id}, 
-                bidPricePerKg: parseFloat(price),
-                quantityKg: parseFloat(quantity),
-                message: 'Bid placed via marketplace'
-            })
-        }).then(res => res.json())
-          .then(data => {
-              if (data && data.success) {
-                  btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Bid Placed!';
-                  btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                  setTimeout(() => {
-                      window.location.href = '${pageContext.request.contextPath}/web/buyer/bids';
-                  }, 1500);
-              } else {
-                  btn.innerHTML = '<i class="bi bi-hammer me-2"></i>Submit Bid';
-                  btn.disabled = false;
-                  alert(data.message || 'Could not place bid. Please ensure you are logged in as a Buyer.');
-              }
-          }).catch(() => {
-              btn.innerHTML = '<i class="bi bi-hammer me-2"></i>Submit Bid';
-              btn.disabled = false;
-              alert('Network error. Please try again.');
-          });
-    }
+    });
 </script>
 <jsp:include page="fragments/footer.jsp" />
 </body>

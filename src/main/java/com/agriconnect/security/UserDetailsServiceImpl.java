@@ -7,7 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -15,8 +16,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     @Override
-    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LoginIdentity.Parsed identity;
         try {
@@ -25,11 +28,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("Invalid login identity", ex);
         }
 
-        User user = identity.hasRole()
-                ? userDao.findByEmailAndRole(identity.getEmail(), identity.getRole())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"))
-                : userDao.findByEmail(identity.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return new CustomUserDetails(user);
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        transaction.setReadOnly(true);
+        return transaction.execute(status -> {
+            User user = identity.hasRole()
+                    ? userDao.findByEmailAndRole(identity.getEmail(), identity.getRole())
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"))
+                    : userDao.findByEmail(identity.getEmail())
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return new CustomUserDetails(user);
+        });
     }
 }

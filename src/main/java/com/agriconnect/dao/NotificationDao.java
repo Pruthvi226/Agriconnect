@@ -22,4 +22,19 @@ public class NotificationDao extends BaseDaoImpl<Notification, Long> {
                 .setParameter("userId", userId)
                 .getResultList();
     }
+
+    public java.util.Optional<Notification> findByUserAndId(Long userId, Long notificationId) {
+        String hql = "FROM Notification n WHERE n.id = :notificationId AND n.user.id = :userId";
+        return sessionFactory.getCurrentSession().createQuery(hql, Notification.class)
+                .setParameter("notificationId", notificationId)
+                .setParameter("userId", userId)
+                .uniqueResultOptional();
+    }
+
+    public int markAllRead(Long userId) {
+        String hql = "UPDATE Notification n SET n.isRead = true WHERE n.user.id = :userId AND n.isRead = false";
+        return sessionFactory.getCurrentSession().createMutationQuery(hql)
+                .setParameter("userId", userId)
+                .executeUpdate();
+    }
 }

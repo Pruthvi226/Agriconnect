@@ -38,6 +38,10 @@
                 </div>
             </div>
 
+            <c:if test="${not empty msg}">
+                <div class="alert alert-success rounded-4 border-0">${msg}</div>
+            </c:if>
+
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                 <div class="card-header bg-success text-white p-4 border-0">
                     <h1 class="h3 fw-800 mb-1">Add Photos (फोटो जोड़ें)</h1>
@@ -76,6 +80,9 @@
 
 <script>
     var currentListingId = ${listingId};
+    const contextPath = '${pageContext.request.contextPath}';
+    const csrfHeader = '${_csrf.headerName}';
+    const csrfToken = '${_csrf.token}';
     
     async function uploadPhoto(file) {
         if (!file) return;
@@ -88,14 +95,16 @@
         formData.append('file', file);
         
         try {
-            const response = await fetch(`${pageContext.request.contextPath}/api/farmer/listings/${currentListingId}/photos`, {
+            const response = await fetch(contextPath + '/web/farmer/listings/' + currentListingId + '/photos', {
                 method: 'POST',
+                headers: { [csrfHeader]: csrfToken },
+                credentials: 'same-origin',
                 body: formData
             });
             
             if (response.ok) {
                 const data = await response.json();
-                addPhotoToGrid(data.filename);
+                addPhotoToGrid(data.path);
             } else {
                 alert("Upload failed. Please try a smaller image.");
             }
@@ -106,13 +115,13 @@
         }
     }
 
-    function addPhotoToGrid(filename) {
+    function addPhotoToGrid(path) {
         const grid = document.getElementById('photoGrid');
         const col = document.createElement('div');
         col.className = 'col-4';
         col.innerHTML = `
             <div class="position-relative rounded-4 overflow-hidden border" style="height: 120px;">
-                <img src="${pageContext.request.contextPath}/uploads/${filename}" class="w-100 h-100 object-fit-cover">
+                <img src="` + contextPath + `/uploads/` + path + `" class="w-100 h-100 object-fit-cover">
                 <div class="position-absolute top-0 end-0 p-1">
                     <button class="btn btn-danger btn-sm rounded-circle p-0" style="width: 24px; height: 24px;"><i class="bi bi-x"></i></button>
                 </div>

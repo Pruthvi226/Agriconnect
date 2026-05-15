@@ -27,12 +27,18 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link ${param.active == 'msp-compliance' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/admin/msp-compliance">
+                        <i class="bi bi-shield-check me-1"></i>MSP Compliance
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link ${param.active == 'audit' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/admin/audit">
                         <i class="bi bi-journal-text me-1"></i>Audit Logs
                     </a>
                 </li>
                 <li class="nav-item ms-lg-2">
-                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                    <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="d-inline">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <button type="submit" class="btn app-nav-signout">
                             <i class="bi bi-box-arrow-right me-1"></i>Sign Out
                         </button>

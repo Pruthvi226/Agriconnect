@@ -152,6 +152,48 @@ public class ListingService {
         return listingDao.findById(id).orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Listing not found"));
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER')")
+    public ProduceListing withdrawListingForUser(Long listingId, Long userId) {
+        ProduceListing listing = getOwnedListing(listingId, userId);
+        if (listing.getStatus() == ProduceListing.Status.SOLD) {
+            throw new BusinessValidationException("Sold listings cannot be withdrawn");
+        }
+        ProduceListing.Status oldStatus = listing.getStatus();
+        listing.setStatus(ProduceListing.Status.WITHDRAWN);
+        listingDao.update(listing);
+        auditService.log(userId, "WITHDRAW_LISTING", "ProduceListing", listingId,
+                "{\"status\":\"" + oldStatus + "\"}", "{\"status\":\"WITHDRAWN\"}", "127.0.0.1");
+        return listing;
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER')")
+    public ProduceListing reactivateListingForUser(Long listingId, Long userId) {
+        ProduceListing listing = getOwnedListing(listingId, userId);
+        if (listing.getStatus() != ProduceListing.Status.WITHDRAWN && listing.getStatus() != ProduceListing.Status.EXPIRED) {
+            throw new BusinessValidationException("Only withdrawn or expired listings can be reactivated");
+        }
+        if (listing.getAvailableUntil() != null && listing.getAvailableUntil().isBefore(LocalDate.now())) {
+            throw new BusinessValidationException("Extend the availability date before reactivating this listing");
+        }
+        ProduceListing.Status oldStatus = listing.getStatus();
+        listing.setStatus(ProduceListing.Status.ACTIVE);
+        listingDao.update(listing);
+        auditService.log(userId, "REACTIVATE_LISTING", "ProduceListing", listingId,
+                "{\"status\":\"" + oldStatus + "\"}", "{\"status\":\"ACTIVE\"}", "127.0.0.1");
+        return listing;
+    }
+
+    public List<ProduceListing> getBelowMspListings() {
+        return listingDao.findAll().stream()
+                .filter(listing -> listing.getStatus() == ProduceListing.Status.ACTIVE
+                        || listing.getStatus() == ProduceListing.Status.BIDDING)
+                .filter(listing -> listing.getMspPricePerKg() != null
+                        && listing.getAskingPricePerKg() != null
+                        && listing.getAskingPricePerKg().compareTo(listing.getMspPricePerKg()) < 0)
+                .sorted((left, right) -> left.getAskingPricePerKg().compareTo(right.getAskingPricePerKg()))
+                .toList();
+    }
+
     public int expireStaleListings() {
         List<ProduceListing> activeListings = listingDao.findByField("status", ProduceListing.Status.ACTIVE);
         LocalDate today = LocalDate.now();
@@ -166,5 +208,16 @@ public class ListingService {
         }
         log.info("Expired {} stale listings", expiredCount);
         return expiredCount;
+    }
+
+    private ProduceListing getOwnedListing(Long listingId, Long userId) {
+        FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Farmer profile not found"));
+        ProduceListing listing = listingDao.findById(listingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
+        if (!listing.getFarmerProfile().getId().equals(farmer.getId())) {
+            throw new BusinessValidationException("You can update only your own listings");
+        }
+        return listing;
     }
 }

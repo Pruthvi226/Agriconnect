@@ -73,7 +73,8 @@
             </div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/login" method="post" id="loginForm">
+        <form action="${pageContext.request.contextPath}/auth/login" method="post" id="loginForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             <input type="hidden" id="username" name="username">
             <div class="mb-3">
                 <label for="loginEmail" class="form-label text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">Email Address</label>

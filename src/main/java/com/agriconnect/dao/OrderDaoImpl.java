@@ -31,6 +31,13 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
+    public List<Order> findAll() {
+        return sessionFactory.getCurrentSession()
+                .createQuery("FROM Order o ORDER BY o.createdAt DESC", Order.class)
+                .getResultList();
+    }
+
+    @Override
     public List<Order> findByFarmerId(Long farmerId) {
         String hql = "FROM Order o WHERE o.farmer.id = :farmerId";
         return sessionFactory.getCurrentSession().createQuery(hql, Order.class)

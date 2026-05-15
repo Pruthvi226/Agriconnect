@@ -59,9 +59,14 @@ AgriConnect/
 
 ### Docker Setup
 To run the entire stack (App + DB) using Docker:
-```bash
-docker-compose up --build
+```powershell
+Copy-Item .env.example .env
+docker compose up --build
 ```
+
+The web app is available at `http://localhost:8081`, MySQL is exposed on
+`localhost:3307`, and Adminer is available at `http://localhost:8082`.
+Uploaded listing photos are stored in the `upload_data` Docker volume.
 
 ## 🔒 Security
 - JWT-based authentication for REST APIs.
@@ -70,6 +75,7 @@ docker-compose up --build
 
 ## 🎤 Presentation & Demo
 For a complete walkthrough of the platform's features and a step-by-step demo script, refer to the [Presentation Guide](file:///C:/Users/pruthviraj/.gemini/antigravity/brain/8c50986e-40fa-49b6-aea9-d2d62bbf8322/presentation_guide.md).
+Seeded login accounts and demo rows are documented in [DEMO_DATA_DETAILS.md](DEMO_DATA_DETAILS.md).
 
 ### Quick Demo Workflow:
 1.  **Register** as a Farmer and Buyer.
@@ -80,4 +86,3 @@ For a complete walkthrough of the platform's features and a step-by-step demo sc
 
 ---
 *Developed with ❤️ for the Indian Agricultural Ecosystem.*
-

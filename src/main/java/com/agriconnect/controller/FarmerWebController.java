@@ -10,7 +10,6 @@ import com.agriconnect.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -164,8 +163,10 @@ public class FarmerWebController {
     }
 
     @GetMapping("/earnings")
-    public String showEarnings(@AuthenticationPrincipal CustomUserDetails user, Model model) {
-        if (user == null) return "redirect:/web/login";
+    public String showEarnings(Authentication authentication, Model model) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails user)) {
+            return "redirect:/web/login";
+        }
         EarningsDto earnings = earningsService.getEarningsForFarmer(user.getId());
         model.addAttribute("earnings", earnings);
         return "farmer/earnings";

@@ -300,6 +300,9 @@
                     <release>${maven.compiler.release}</release>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <debug>true</debug>
+                    <debuglevel>source,lines,vars</debuglevel>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
             <plugin>

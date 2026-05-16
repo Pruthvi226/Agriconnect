@@ -38,7 +38,7 @@ public class JwtTokenProvider implements InitializingBean {
         if (principal instanceof CustomUserDetails userDetails) {
             subject = userDetails.getUsername();
             userId = userDetails.getId();
-            role = userDetails.getUser().getRole().name();
+            role = userDetails.getRole() != null ? userDetails.getRole().name() : null;
         } else {
             subject = authentication.getName();
         }

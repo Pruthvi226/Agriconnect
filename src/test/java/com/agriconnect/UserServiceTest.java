@@ -61,6 +61,22 @@ class UserServiceTest {
         assertThat(details.getAuthorities()).extracting("authority").containsExactly("ROLE_BUYER");
     }
 
+    @Test
+    void customUserDetailsKeepsIdentitySnapshotWithoutEntityReference() {
+        User user = new User();
+        user.setId(42L);
+        user.setEmail("farmer.snapshot@example.com");
+        user.setRole(User.Role.FARMER);
+        user.setPasswordHash("hash");
+
+        CustomUserDetails details = new CustomUserDetails(user);
+        details.setUser(null);
+
+        assertThat(details.getId()).isEqualTo(42L);
+        assertThat(details.getUsername()).isEqualTo("farmer.snapshot@example.com|FARMER");
+        assertThat(details.getAuthorities()).extracting("authority").containsExactly("ROLE_FARMER");
+    }
+
     private UserRegistrationDto registration(String name, String email, String role) {
         UserRegistrationDto dto = new UserRegistrationDto();
         dto.setName(name);

@@ -42,7 +42,7 @@ public class AuthRestController {
         CustomUserDetails details = (CustomUserDetails) authentication.getPrincipal();
         return ResponseEntity.ok(Map.of(
                 "token", token,
-                "role", details.getUser().getRole().name(),
+                "role", details.getRole().name(),
                 "userId", details.getId()));
     }
 

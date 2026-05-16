@@ -9,6 +9,7 @@
     <security:http pattern="/static/**" security="none" />
     <security:http pattern="/resources/**" security="none" />
     <security:http pattern="/health" security="none" />
+    <security:http pattern="/actuator/health" security="none" />
 
     <security:method-security pre-post-enabled="true" />
 

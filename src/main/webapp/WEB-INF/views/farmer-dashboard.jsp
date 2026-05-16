@@ -56,6 +56,13 @@
                 <small>Delivered orders</small>
             </span>
         </a>
+        <a class="metric-tile" href="${pageContext.request.contextPath}/web/farmer/consultations">
+            <span class="metric-icon green"><i class="bi bi-camera-video"></i></span>
+            <span>
+                <strong>Expert Help</strong>
+                <small>Book a consultation</small>
+            </span>
+        </a>
     </div>
 
     <div class="row g-3 mt-1">
@@ -82,6 +89,11 @@
                         <i class="bi bi-clipboard2-check"></i>
                         <strong>Manage bookings</strong>
                         <span>Accept, reject, and update delivery status.</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/web/farmer/consultations" class="clean-action">
+                        <i class="bi bi-camera-video"></i>
+                        <strong>Talk to an expert</strong>
+                        <span>Book 30 or 60 minute crop consultations with verified advisors.</span>
                     </a>
                 </div>
             </section>

@@ -4,18 +4,18 @@
 -- Default admin credentials: admin@agriconnect.in / Admin@2024!
 -- ---------------------------------------------------------
 
-INSERT INTO users (id, name, email, password_hash, phone, role, verification_status) VALUES
-(1, 'Ramesh Kumar', 'ramesh@example.com', '{{bcrypt:Farmer@2024!}}', '9876543210', 'FARMER', 'VERIFIED'),
-(2, 'Suresh Singh', 'suresh@example.com', '{{bcrypt:Farmer@2024!}}', '9876543211', 'FARMER', 'VERIFIED'),
-(3, 'Amit Patel', 'amit@example.com', '{{bcrypt:Farmer@2024!}}', '9876543212', 'FARMER', 'PENDING'),
-(4, 'Vikram Yadav', 'vikram@example.com', '{{bcrypt:Farmer@2024!}}', '9876543213', 'FARMER', 'VERIFIED'),
-(5, 'Sunil Sharma', 'sunil@example.com', '{{bcrypt:Farmer@2024!}}', '9876543214', 'FARMER', 'VERIFIED'),
-(6, 'AgriFoods Ltd', 'contact@agrifoods.com', '{{bcrypt:Buyer@2024!}}', '8876543210', 'BUYER', 'VERIFIED'),
-(7, 'FreshFarm Corp', 'sales@freshfarm.com', '{{bcrypt:Buyer@2024!}}', '8876543211', 'BUYER', 'VERIFIED'),
-(8, 'GreenOrg Inc', 'info@greenorg.com', '{{bcrypt:Buyer@2024!}}', '8876543212', 'BUYER', 'PENDING'),
-(9, 'Dr. Ravi Verma', 'ravi.v@kvk.edu', '{{bcrypt:Expert@2024!}}', '7876543210', 'AGRI_EXPERT', 'VERIFIED'),
-(10, 'Prof. Anita Rao', 'anita.r@uni.edu', '{{bcrypt:Expert@2024!}}', '7876543211', 'AGRI_EXPERT', 'VERIFIED'),
-(11, 'AgriConnect Admin', 'admin@agriconnect.in', '{{bcrypt:Admin@2024!}}', '7000000000', 'ADMIN', 'VERIFIED');
+INSERT INTO users (id, name, email, password_hash, phone, role, verification_status, specialisation, consultation_fee_30min, consultation_fee_60min, languages_spoken, total_sessions, avg_rating) VALUES
+(1, 'Ramesh Kumar', 'ramesh@example.com', '{{bcrypt:Farmer@2024!}}', '9876543210', 'FARMER', 'VERIFIED', NULL, NULL, NULL, NULL, 0, 0.00),
+(2, 'Suresh Singh', 'suresh@example.com', '{{bcrypt:Farmer@2024!}}', '9876543211', 'FARMER', 'VERIFIED', NULL, NULL, NULL, NULL, 0, 0.00),
+(3, 'Amit Patel', 'amit@example.com', '{{bcrypt:Farmer@2024!}}', '9876543212', 'FARMER', 'PENDING', NULL, NULL, NULL, NULL, 0, 0.00),
+(4, 'Vikram Yadav', 'vikram@example.com', '{{bcrypt:Farmer@2024!}}', '9876543213', 'FARMER', 'VERIFIED', NULL, NULL, NULL, NULL, 0, 0.00),
+(5, 'Sunil Sharma', 'sunil@example.com', '{{bcrypt:Farmer@2024!}}', '9876543214', 'FARMER', 'VERIFIED', NULL, NULL, NULL, NULL, 0, 0.00),
+(6, 'AgriFoods Ltd', 'contact@agrifoods.com', '{{bcrypt:Buyer@2024!}}', '8876543210', 'BUYER', 'VERIFIED', NULL, NULL, NULL, NULL, 0, 0.00),
+(7, 'FreshFarm Corp', 'sales@freshfarm.com', '{{bcrypt:Buyer@2024!}}', '8876543211', 'BUYER', 'VERIFIED', NULL, NULL, NULL, NULL, 0, 0.00),
+(8, 'GreenOrg Inc', 'info@greenorg.com', '{{bcrypt:Buyer@2024!}}', '8876543212', 'BUYER', 'PENDING', NULL, NULL, NULL, NULL, 0, 0.00),
+(9, 'Dr. Ravi Verma', 'ravi.v@kvk.edu', '{{bcrypt:Expert@2024!}}', '7876543210', 'AGRI_EXPERT', 'VERIFIED', 'Crop disease, pest management, and cereals', 499.00, 899.00, '["Hindi","English"]', 12, 4.70),
+(10, 'Prof. Anita Rao', 'anita.r@uni.edu', '{{bcrypt:Expert@2024!}}', '7876543211', 'AGRI_EXPERT', 'VERIFIED', 'Soil health, horticulture, and post-harvest', 599.00, 999.00, '["English","Marathi","Hindi"]', 18, 4.85),
+(11, 'AgriConnect Admin', 'admin@agriconnect.in', '{{bcrypt:Admin@2024!}}', '7000000000', 'ADMIN', 'VERIFIED', NULL, NULL, NULL, '["English","Hindi"]', 0, 0.00);
 
 UPDATE users
 SET password_hash = '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lnm.'
@@ -93,3 +93,9 @@ INSERT INTO price_history (id, crop_name, district, accepted_price, price_date, 
 INSERT INTO notifications (id, user_id, title, body, type, is_read, reference_id) VALUES
 (1, 6, 'Bid Accepted', 'Your bid was accepted. Pickup confirmed.', 'ORDER_CREATED', FALSE, 1),
 (2, 1, 'Bid Accepted Successfully', 'You accepted a bid. Your earnings have been credited.', 'WALLET_CREDIT', FALSE, 1);
+
+INSERT INTO booking_slots (id, provider_id, slot_date, start_time, end_time, district, crop_focus, notes, slot_status) VALUES
+(1, 9, '2026-05-05', '10:00:00', '10:30:00', 'Kangra', 'Wheat', 'Disease triage slot', 'OPEN'),
+(2, 9, '2026-05-05', '11:00:00', '12:00:00', 'Surat', 'Cotton', 'Pest management deep dive', 'OPEN'),
+(3, 10, '2026-05-06', '15:00:00', '15:30:00', 'Pune', 'Onion', 'Post-harvest handling review', 'OPEN'),
+(4, 10, '2026-05-06', '16:00:00', '17:00:00', 'Hassan', 'Rice (Paddy)', 'Horticulture and storage planning', 'OPEN');

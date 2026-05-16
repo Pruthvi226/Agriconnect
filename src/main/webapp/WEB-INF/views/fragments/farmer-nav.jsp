@@ -32,6 +32,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link ${param.active == 'consultations' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/consultations">
+                        <i class="bi bi-camera-video me-1"></i>Experts
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link ${param.active == 'profile' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/farmer/profile">
                         <i class="bi bi-person-badge me-1"></i>Profile
                     </a>

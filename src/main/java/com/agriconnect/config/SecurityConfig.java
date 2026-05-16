@@ -61,6 +61,8 @@ public class SecurityConfig {
                     antMatcher("/web/register"),
                     antMatcher("/web/marketplace"),
                     antMatcher("/web/marketplace/listing/**"),
+                    antMatcher("/chain/**"),
+                    antMatcher("/qr/**"),
                     antMatcher("/resources/**")
                 ).permitAll()
                 // FARMER
@@ -97,6 +99,8 @@ public class SecurityConfig {
                     antMatcher("/web/admin/**"),
                     antMatcher("/web/dashboard/admin"),
                     antMatcher("/api/v1/admin/**"),
+                    antMatcher("/api/v1/orders/*/qr-download"),
+                    antMatcher("/api/v1/orders/*/supply-chain"),
                     antMatcher("/actuator/metrics")
                 ).hasRole("ADMIN")
                 // Notifications for authenticated users

@@ -54,4 +54,18 @@ public class OrderDao extends BaseDaoImpl<Order, Long> {
         stats.put("totalRevenue", result[1] != null ? result[1] : BigDecimal.ZERO);
         return stats;
     }
+
+    public java.util.Optional<Order> findDetailedById(Long orderId) {
+        String hql = "SELECT o FROM Order o " +
+                "JOIN FETCH o.bid b " +
+                "JOIN FETCH b.listing l " +
+                "JOIN FETCH o.farmer f " +
+                "JOIN FETCH f.user fu " +
+                "JOIN FETCH o.buyer buyer " +
+                "JOIN FETCH buyer.user bu " +
+                "WHERE o.id = :orderId";
+        return sessionFactory.getCurrentSession().createQuery(hql, Order.class)
+                .setParameter("orderId", orderId)
+                .uniqueResultOptional();
+    }
 }

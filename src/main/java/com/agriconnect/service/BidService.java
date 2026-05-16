@@ -69,6 +69,9 @@ public class BidService {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private OrderService orderService;
+
     @PreAuthorize("hasRole('BUYER') and #userId == authentication.principal.id")
     public Bid placeBidForUser(BidRequestDto dto, Long userId) {
         BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
@@ -264,51 +267,7 @@ public class BidService {
 
     @PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
     public Order updateOrderDeliveryStatus(Long orderId, String action, Long userId) {
-        FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Farmer profile not found"));
-        Order order = orderDao.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
-        if (!order.getFarmer().getId().equals(farmer.getId())) {
-            throw new BusinessValidationException("You do not own this order");
-        }
-
-        Order.OrderStatus oldStatus = order.getOrderStatus();
-        String normalized = action == null ? "" : action.trim().toUpperCase();
-        switch (normalized) {
-            case "CAN_DELIVER":
-            case "IN_TRANSIT":
-                order.setOrderStatus(Order.OrderStatus.IN_TRANSIT);
-                break;
-            case "DELIVERED":
-                order.setOrderStatus(Order.OrderStatus.DELIVERED);
-                order.setActualDelivery(LocalDate.now());
-                order.setPaymentStatus(Order.PaymentStatus.PAID);
-                break;
-            case "CANNOT_DELIVER":
-            case "CANCELLED":
-                order.setOrderStatus(Order.OrderStatus.CANCELLED);
-                order.setPaymentStatus(Order.PaymentStatus.REFUNDED);
-                break;
-            default:
-                throw new BusinessValidationException("Unsupported delivery action");
-        }
-
-        orderDao.update(order);
-
-        Notification notification = new Notification();
-        notification.setUser(order.getBuyer().getUser());
-        notification.setTitle("Order Delivery Updated");
-        notification.setBody("Your " + order.getBid().getListing().getCropName() + " order is now "
-                + order.getOrderStatus().name().replace('_', ' ').toLowerCase() + ".");
-        notification.setType("ORDER_UPDATE");
-        notificationDao.save(notification);
-
-        auditService.log(userId, "UPDATE_DELIVERY", "Order", orderId,
-                "{\"status\":\"" + oldStatus + "\"}",
-                "{\"status\":\"" + order.getOrderStatus() + "\"}", "127.0.0.1");
-
-        return order;
+        return orderService.updateDeliveryStatus(orderId, action, userId);
     }
 
     public List<Bid> getPendingBookingsForFarmerUser(Long userId) {

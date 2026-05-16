@@ -30,5 +30,6 @@
         <mapping class="com.agriconnect.model.ExpertConsultation"/>
         <mapping class="com.agriconnect.model.ConsultationReview"/>
         <mapping class="com.agriconnect.model.ExpertWalletTransaction"/>
+        <mapping class="com.agriconnect.model.SupplyChainToken"/>
     </session-factory>
 </hibernate-configuration>

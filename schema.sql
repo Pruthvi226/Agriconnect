@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS consultation_reviews;
 DROP TABLE IF EXISTS expert_consultations;
 DROP TABLE IF EXISTS booking_slots;
 DROP TABLE IF EXISTS wallet_transactions;
+DROP TABLE IF EXISTS supply_chain_tokens;
 DROP TABLE IF EXISTS price_history;
 DROP TABLE IF EXISTS demand_forecast_cache;
 DROP TABLE IF EXISTS audit_logs;
@@ -312,6 +313,18 @@ CREATE TABLE demand_forecast_cache (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     report_json TEXT NOT NULL,
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE supply_chain_tokens (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(64) NOT NULL,
+    order_id BIGINT NOT NULL,
+    qr_image_path VARCHAR(500),
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    scan_count INT DEFAULT 0,
+    CONSTRAINT uk_supply_chain_token UNIQUE (token),
+    CONSTRAINT uk_supply_chain_order UNIQUE (order_id),
+    CONSTRAINT fk_supply_chain_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_farmer_lat_lng ON farmer_profiles(lat, lng);

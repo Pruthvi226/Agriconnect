@@ -1,4 +1,0 @@
-#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
-#Sat May 02 23:21:26 IST 2026
-@default-central-https\://repo.maven.apache.org/maven2/.lastUpdated=1777744286490
-https\://repo.maven.apache.org/maven2/.error=Could not transfer artifact org.codehaus.cargo\:cargo-maven3-plugin\:pom\:1.10.12 from/to central (https\://repo.maven.apache.org/maven2)\: C\:\\Users\\pruthviraj\\OneDrive\\Desktop\\jdk\\AgriConnect\\.m2-local\\org\\codehaus\\cargo\\cargo-maven3-plugin\\1.10.12\\cargo-maven3-plugin-1.10.12.pom.16601638050624465061.tmp.5324378298619252683.tmp

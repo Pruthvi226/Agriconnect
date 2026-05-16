@@ -25,5 +25,6 @@
         <mapping class="com.agriconnect.model.CriticalAlert"/>
         <mapping class="com.agriconnect.model.WalletTransaction"/>
         <mapping class="com.agriconnect.model.PriceHistory"/>
+        <mapping class="com.agriconnect.model.DemandForecastCache"/>
     </session-factory>
 </hibernate-configuration>

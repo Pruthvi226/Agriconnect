@@ -104,6 +104,52 @@
 
     <section class="workspace-panel mt-3">
         <div class="panel-title">
+            <div>
+                <h2>What to grow next season</h2>
+                <div class="text-muted small">Built from the last 90 days of buyer demand and six months of accepted price movement.</div>
+            </div>
+            <span class="priority-pill">Forecast</span>
+        </div>
+        <c:choose>
+            <c:when test="${not empty forecastTopCrops}">
+                <div class="compact-table">
+                    <c:forEach var="crop" items="${forecastTopCrops}">
+                        <c:set var="trend" value="${forecastTrendMap[crop.cropName]}" />
+                        <div class="compact-row">
+                            <span>
+                                <strong>${crop.cropName}</strong>
+                                <small>${crop.bidCount} buyer signals in the last 90 days</small>
+                            </span>
+                            <span>Avg bid Rs <fmt:formatNumber value="${crop.avgPrice}" minFractionDigits="2" maxFractionDigits="2" />/kg</span>
+                            <span>
+                                <c:choose>
+                                    <c:when test="${not empty trend and trend.direction == 'UP'}">
+                                        <span class="status-badge success"><i class="bi bi-arrow-up-right"></i> Up <fmt:formatNumber value="${trend.changePercent}" minFractionDigits="0" maxFractionDigits="2" />%</span>
+                                    </c:when>
+                                    <c:when test="${not empty trend and trend.direction == 'DOWN'}">
+                                        <span class="status-badge danger"><i class="bi bi-arrow-down-right"></i> Down <fmt:formatNumber value="${0 - trend.changePercent}" minFractionDigits="0" maxFractionDigits="2" />%</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="status-badge neutral"><i class="bi bi-arrow-left-right"></i> Flat</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </span>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <div class="empty-bookings">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <strong>Forecast is warming up</strong>
+                    <span>As more bids and accepted prices come in, AgriConnect will highlight the strongest crops and districts for your next cycle.</span>
+                </div>
+            </c:otherwise>
+        </c:choose>
+    </section>
+
+    <section class="workspace-panel mt-3">
+        <div class="panel-title">
             <h2>Recent Listings</h2>
             <a href="${pageContext.request.contextPath}/web/dashboard/farmer/listings" class="btn btn-sm btn-outline-success">Open listings</a>
         </div>

@@ -50,19 +50,19 @@
                 </li>
                 <c:if test="${role == 'Farmer'}">
                 <li class="nav-item">
-                    <a class="nav-link active" href="${pageContext.request.contextPath}/web/dashboard/farmer">
+                    <a class="nav-link active" href="${pageContext.request.contextPath}/web/farmer/dashboard">
                         <i class="bi bi-grid me-1"></i>Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/web/dashboard/farmer/profile">
+                    <a class="nav-link" href="${pageContext.request.contextPath}/web/farmer/profile">
                         <i class="bi bi-person me-1"></i>My Profile
                     </a>
                 </li>
                 </c:if>
                 <c:if test="${role == 'Buyer'}">
                 <li class="nav-item">
-                    <a class="nav-link active" href="${pageContext.request.contextPath}/web/dashboard/buyer">
+                    <a class="nav-link active" href="${pageContext.request.contextPath}/web/buyer/dashboard">
                         <i class="bi bi-grid me-1"></i>Dashboard
                     </a>
                 </li>
@@ -80,7 +80,8 @@
                     </a>
                 </li>
                 <li class="nav-item ms-2">
-                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                    <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="d-inline">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <button type="submit" class="btn-logout">
                             <i class="bi bi-box-arrow-right me-1"></i>Sign Out
                         </button>
@@ -185,7 +186,7 @@
                     <i class="bi bi-graph-up-arrow"></i>
                     <span><strong>Market Prices</strong><span>Compare with MSP</span></span>
                 </a>
-                <a href="${pageContext.request.contextPath}/web/dashboard/farmer/profile" class="farmer-action">
+                <a href="${pageContext.request.contextPath}/web/farmer/profile" class="farmer-action">
                     <i class="bi bi-shield-check"></i>
                     <span><strong>Trust Score</strong><span>Improve buyer confidence</span></span>
                 </a>
@@ -269,8 +270,8 @@
                                 </div>
                                 <span class="preview-chip"><i class="bi bi-shield-check"></i>MSP Guard</span>
                             </div>
-                            <div class="preview-price mb-1" id="previewPrice">Rs 25/kg</div>
-                            <div class="text-muted small mb-3" id="previewValue">Estimated gross: Rs 25,000</div>
+                            <div class="preview-price mb-1" id="previewPrice">₹ 25/kg</div>
+                            <div class="text-muted small mb-3" id="previewValue">Estimated gross: ₹ 25,000</div>
                             <div class="signal-card mb-3">
                                 <div class="signal-label">Listing Strength</div>
                                 <div class="progress mt-2">
@@ -327,7 +328,7 @@
                                                 </div>
                                                 <div class="booking-amount">
                                                     <span>Booking value</span>
-                                                    <strong>Rs <fmt:formatNumber value="${booking.bidPricePerKg * booking.quantityKg}" maxFractionDigits="0" /></strong>
+                                                    <strong>₹ <fmt:formatNumber value="${booking.bidPricePerKg * booking.quantityKg}" maxFractionDigits="0" /></strong>
                                                 </div>
                                             </div>
                                             <c:if test="${not empty booking.message}">
@@ -339,10 +340,10 @@
                                                 <span><i class="bi bi-shield-check"></i>Grade ${booking.listing.qualityGrade}</span>
                                             </div>
                                             <div class="booking-actions">
-                                                <button type="button" class="btn btn-success btn-sm" onclick="handleBooking(${booking.id}, 'accept', this)">
+                                                <button type="button" class="btn btn-success btn-sm" onclick="handleBooking('${booking.id}', 'accept', this)">
                                                     <i class="bi bi-check-lg me-1"></i>Accept
                                                 </button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="handleBooking(${booking.id}, 'reject', this)">
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="handleBooking('${booking.id}', 'reject', this)">
                                                     <i class="bi bi-x-lg me-1"></i>Reject
                                                 </button>
                                                 <a href="${pageContext.request.contextPath}/web/marketplace/listing/${booking.listing.id}" class="btn btn-outline-success btn-sm">
@@ -391,13 +392,13 @@
                                                 <span class="${order.orderStatus == 'DELIVERED' ? 'on' : ''}">Delivered</span>
                                             </div>
                                             <div class="booking-actions">
-                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="updateDelivery(${order.id}, 'can_deliver', this)">
+                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="updateDelivery('${order.id}', 'can_deliver', this)">
                                                     <i class="bi bi-truck me-1"></i>Can Deliver
                                                 </button>
-                                                <button type="button" class="btn btn-success btn-sm" onclick="updateDelivery(${order.id}, 'delivered', this)">
+                                                <button type="button" class="btn btn-success btn-sm" onclick="updateDelivery('${order.id}', 'delivered', this)">
                                                     <i class="bi bi-check2-all me-1"></i>Delivered
                                                 </button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="updateDelivery(${order.id}, 'cannot_deliver', this)">
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="updateDelivery('${order.id}', 'cannot_deliver', this)">
                                                     <i class="bi bi-slash-circle me-1"></i>Cannot
                                                 </button>
                                             </div>
@@ -456,7 +457,7 @@
                         <div class="col-md-4">
                             <div class="signal-card">
                                 <div class="signal-label">Market Avg</div>
-                                <div class="signal-value" id="marketAvg">Rs 25.40</div>
+                                <div class="signal-value" id="marketAvg">₹ 25.40</div>
                                 <span class="text-muted small">Nearby district rate</span>
                             </div>
                         </div>
@@ -470,7 +471,7 @@
                         <div class="col-md-4">
                             <div class="signal-card">
                                 <div class="signal-label">Expected Value</div>
-                                <div class="signal-value" id="expectedValue">Rs 30,000</div>
+                                <div class="signal-value" id="expectedValue">₹ 30,000</div>
                                 <span class="text-muted small">Before logistics</span>
                             </div>
                         </div>
@@ -565,15 +566,15 @@
                         <tbody>
                             <tr>
                                 <td>Onion</td>
-                                <td><span class="text-success fw-bold">Rs 23.80/kg</span><br><small class="text-muted">+9% this week</small></td>
+                                <td><span class="text-success fw-bold">₹ 23.80/kg</span><br><small class="text-muted">+9% this week</small></td>
                             </tr>
                             <tr>
                                 <td>Wheat</td>
-                                <td><span class="text-success fw-bold">Rs 25.40/kg</span><br><small class="text-muted">Above MSP</small></td>
+                                <td><span class="text-success fw-bold">₹ 25.40/kg</span><br><small class="text-muted">Above MSP</small></td>
                             </tr>
                             <tr>
                                 <td>Tomato</td>
-                                <td><span class="text-warning fw-bold">Rs 19.60/kg</span><br><small class="text-muted">Volatile demand</small></td>
+                                <td><span class="text-warning fw-bold">₹ 19.60/kg</span><br><small class="text-muted">Volatile demand</small></td>
                             </tr>
                         </tbody>
                     </table>
@@ -637,7 +638,7 @@
                             <span class="text-warning">Add</span>
                         </div>
                     </div>
-                    <a href="${pageContext.request.contextPath}/web/dashboard/farmer/profile" class="btn btn-success w-100 mt-3">
+                    <a href="${pageContext.request.contextPath}/web/farmer/profile" class="btn btn-success w-100 mt-3">
                         <i class="bi bi-person-check me-1"></i>Update Profile
                     </a>
                 </div>
@@ -739,7 +740,7 @@
                 </a>
             </div>
             <div class="col-6 col-md-3">
-                <a href="${pageContext.request.contextPath}/web/dashboard/farmer/profile" class="action-btn">
+                <a href="${pageContext.request.contextPath}/web/farmer/profile" class="action-btn">
                     <div class="action-icon">⭐</div>
                     <div class="action-label">Farmer Score</div>
                 </a>

@@ -1,21 +1,28 @@
 :root {
-    --primary: #1a9e4a;
+    --primary: #198754;      /* Green - Good News */
     --primary-dark: #0d6e31;
-    --primary-gradient: linear-gradient(135deg, #0a4f2c 0%, #16783a 40%, #1a9e4a 70%, #0d6e31 100%);
-    --bg-color: #f4f7f6;
-    --card-bg: rgba(255, 255, 255, 0.95);
-    --text-primary: #1a202c;
-    --text-secondary: #718096;
-    --glass-bg: rgba(255, 255, 255, 0.2);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 15px 40px rgba(26, 158, 74, 0.15);
+    --primary-gradient: linear-gradient(135deg, #0a4f2c 0%, #198754 100%);
+    --warning: #ffc107;      /* Yellow - Attention */
+    --danger: #dc3545;       /* Red - Urgent */
+    --info: #0d6efd;         /* Blue - Neutral */
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255, 255, 255, 0.24);
+    --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.08);
+    --shadow-hover: 0 20px 40px -15px rgba(0,0,0,0.12);
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg-color);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(25, 135, 84, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(13, 110, 253, 0.05) 0px, transparent 50%);
     color: var(--text-primary);
+    font-size: 16px; 
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -103,26 +110,37 @@ body.auth-page {
 }
 
 /* Buttons */
-.btn-primary-custom {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    border-radius: 12px;
-    padding: 0.875rem 1.5rem;
+/* Thumb-friendly Buttons (Rule 5) */
+.btn {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-weight: 600;
+    border-radius: 12px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    gap: 0.5rem;
+}
+
+.btn-primary-custom {
+    background-color: var(--primary);
+    border: none;
     color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(26, 158, 74, 0.2);
 }
 
 .btn-primary-custom:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(26, 158, 74, 0.4);
+    background-color: var(--primary-dark);
     color: white;
 }
 
-.btn-primary-custom:active {
-    transform: translateY(0) scale(0.98);
-}
+/* Status Badges (Rule 2) */
+.badge-active { background-color: var(--primary) !important; color: white; }
+.badge-bidding { background-color: var(--warning) !important; color: #000; }
+.badge-sold { background-color: var(--info) !important; color: white; }
+.badge-urgent { background-color: var(--danger) !important; color: white; }
+.badge-msp-ok { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+.badge-msp-low { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
 
 /* Navbar */
 .app-navbar,
@@ -361,17 +379,30 @@ body.auth-page {
 }
 
 /* ---- DASHBOARD STATS ---- */
-.stat-card {
-    background: white; border-radius: 20px; padding: 1.5rem; border: none;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s;
+/* Farmer Dashboard (Rule 1 & Part 2) */
+.farmer-stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
 }
-.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
-.stat-icon.green { background: #dcfce7; }
-.stat-icon.blue { background: #dbeafe; }
-.stat-icon.orange { background: #ffedd5; }
-.stat-icon.red { background: #fee2e2; }
-.stat-value { font-size: 1.75rem; font-weight: 800; color: #1a202c; line-height: 1; margin-bottom: 0.25rem; }
-.stat-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
+
+.farmer-stat-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.farmer-card {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.farmer-card:hover {
+    transform: translateY(-5px);
+}
 
 .section-title {
     font-size: 1.1rem; font-weight: 700; color: #1a202c; margin-bottom: 1rem;
@@ -1395,4 +1426,44 @@ body.auth-page {
     .lane-title {
         display: block;
     }
+}
+/* Trade Desk Tabs */
+.nav-pills .nav-link {
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
+}
+
+/* Order Progress Tracker */
+.order-progress-container {
+    padding: 10px 0;
+}
+
+.order-progress-container .progress {
+    background-color: #e9ecef;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .farmer-stat-value { font-size: 2rem; }
+    .farmer-stat-label { font-size: 1.1rem; }
+    .card-body { padding: 1.25rem !important; }
+}
+
+/* Custom shadow */
+.shadow-premium {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+}
+
+.border-2 {
+    border-width: 2px !important;
+}
+
+.fw-800 {
+    font-weight: 800 !important;
 }

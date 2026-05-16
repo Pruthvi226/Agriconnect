@@ -9,43 +9,43 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("/web")
 public class WebAuthController {
 
     @Autowired
     private UserService userService;
 
-    @GetMapping("/login")
+    @GetMapping({"/auth/login", "/web/login"})
     public ModelAndView loginPage() {
         return new ModelAndView("login");
     }
 
-    @GetMapping("/register")
+    @GetMapping({"/auth/register", "/web/register"})
     public ModelAndView registerPage() {
-        return new ModelAndView("register");
+        ModelAndView mav = new ModelAndView("register");
+        mav.addObject("registration", new UserRegistrationDto());
+        return mav;
     }
 
-    @PostMapping("/register")
+    @PostMapping({"/auth/register", "/web/register"})
     public String register(@Valid @ModelAttribute UserRegistrationDto dto,
                            BindingResult bindingResult,
                            RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("error", bindingResult.getAllErrors().get(0).getDefaultMessage());
-            return "redirect:/web/register";
+            return "redirect:/auth/register";
         }
 
         try {
             userService.register(dto);
             redirectAttributes.addFlashAttribute("msg", "Registration successful. Please log in.");
-            return "redirect:/web/login";
+            return "redirect:/auth/login?registered=true";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/web/register";
+            return "redirect:/auth/register";
         }
     }
 }

@@ -12,7 +12,7 @@
         <div class="collapse navbar-collapse" id="farmerNavMenu">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 mt-3 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link app-nav-dashboard ${param.active == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/farmer">
+                    <a class="nav-link app-nav-dashboard ${param.active == 'dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/dashboard">
                         <i class="bi bi-grid-1x2 me-1"></i>Dashboard
                     </a>
                 </li>
@@ -22,32 +22,36 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'listings' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/farmer/listings">
+                    <a class="nav-link ${param.active == 'listings' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/listings">
                         <i class="bi bi-card-checklist me-1"></i>Listings
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'bookings' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/farmer/bookings">
+                    <a class="nav-link ${param.active == 'bookings' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/bookings">
                         <i class="bi bi-clipboard2-check me-1"></i>Bookings
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'consultations' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/consultations">
-                        <i class="bi bi-camera-video me-1"></i>Experts
+                    <a class="nav-link ${param.active == 'earnings' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/earnings">
+                        <i class="bi bi-wallet2 me-1"></i>Earnings
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link ${param.active == 'profile' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/dashboard/farmer/profile">
+                    <a class="nav-link ${param.active == 'profile' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/farmer/profile">
                         <i class="bi bi-person-badge me-1"></i>Profile
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link ${param.active == 'alerts' ? 'active' : ''}" href="${pageContext.request.contextPath}/web/notifications">
                         <i class="bi bi-bell me-1"></i>Alerts
+                        <c:if test="${unreadCount > 0}">
+                            <span class="badge rounded-pill bg-danger ms-1" style="font-size: 0.7rem;">${unreadCount}</span>
+                        </c:if>
                     </a>
                 </li>
                 <li class="nav-item ms-lg-2">
-                    <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline">
+                    <form action="${pageContext.request.contextPath}/auth/logout" method="post" class="d-inline">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
                         <button type="submit" class="btn app-nav-signout">
                             <i class="bi bi-box-arrow-right me-1"></i>Sign Out
                         </button>

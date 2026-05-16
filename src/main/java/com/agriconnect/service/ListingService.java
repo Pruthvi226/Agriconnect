@@ -45,6 +45,9 @@ public class ListingService {
     @Autowired
     private AuditService auditService;
 
+    @Autowired(required = false)
+    private MatchmakingService matchmakingService;
+
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER') and #farmerId == authentication.principal.id")
     public ProduceListing createListing(ListingRequestDto dto, Long farmerId) {
         FarmerProfile farmer = farmerDao.findById(farmerId)
@@ -52,7 +55,7 @@ public class ListingService {
         return createListingForProfile(dto, farmer);
     }
 
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER')")
     public ProduceListing createListingForUser(ListingRequestDto dto, Long userId) {
         FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
                 .orElseGet(() -> createStarterFarmerProfile(userId));
@@ -73,7 +76,7 @@ public class ListingService {
         listing.setAvailableUntil(dto.getAvailableUntil());
         listing.setAskingPricePerKg(dto.getAskingPricePerKg());
         listing.setDescription(dto.getDescription());
-        listing.setDistrict(farmer.getDistrict());
+        listing.setDistrict(dto.getDistrict() != null && !dto.getDistrict().isBlank() ? dto.getDistrict() : farmer.getDistrict());
         listing.setLat(farmer.getLat());
         listing.setLng(farmer.getLng());
         listing.setStatus(ProduceListing.Status.ACTIVE);
@@ -81,6 +84,9 @@ public class ListingService {
         if (dto.getQualityGrade() != null) {
             listing.setQualityGrade(ProduceListing.QualityGrade.valueOf(dto.getQualityGrade()));
         }
+
+        listing.setIsUrgent(dto.getIsUrgent() != null ? dto.getIsUrgent() : false);
+        listing.setUrgentReason(dto.getUrgentReason());
 
         // Auto-fetch current MSP using MspRateService
         MspRate currentMsp = mspRateService.getCurrentMsp(dto.getCropName());
@@ -91,6 +97,10 @@ public class ListingService {
         listingDao.save(listing);
 
         auditService.log(farmer.getId(), "CREATE", "ProduceListing", listing.getId(), "{}", "{\"cropName\":\"" + dto.getCropName() + "\"}", "127.0.0.1"); // stub IP for now
+
+        if (matchmakingService != null) {
+            matchmakingService.computeAllScores();
+        }
 
         return listing;
     }
@@ -138,6 +148,52 @@ public class ListingService {
                 .orElseGet(java.util.Collections::emptyList);
     }
 
+    public ProduceListing getListingById(Long id) {
+        return listingDao.findById(id).orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Listing not found"));
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER')")
+    public ProduceListing withdrawListingForUser(Long listingId, Long userId) {
+        ProduceListing listing = getOwnedListing(listingId, userId);
+        if (listing.getStatus() == ProduceListing.Status.SOLD) {
+            throw new BusinessValidationException("Sold listings cannot be withdrawn");
+        }
+        ProduceListing.Status oldStatus = listing.getStatus();
+        listing.setStatus(ProduceListing.Status.WITHDRAWN);
+        listingDao.update(listing);
+        auditService.log(userId, "WITHDRAW_LISTING", "ProduceListing", listingId,
+                "{\"status\":\"" + oldStatus + "\"}", "{\"status\":\"WITHDRAWN\"}", "127.0.0.1");
+        return listing;
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('FARMER')")
+    public ProduceListing reactivateListingForUser(Long listingId, Long userId) {
+        ProduceListing listing = getOwnedListing(listingId, userId);
+        if (listing.getStatus() != ProduceListing.Status.WITHDRAWN && listing.getStatus() != ProduceListing.Status.EXPIRED) {
+            throw new BusinessValidationException("Only withdrawn or expired listings can be reactivated");
+        }
+        if (listing.getAvailableUntil() != null && listing.getAvailableUntil().isBefore(LocalDate.now())) {
+            throw new BusinessValidationException("Extend the availability date before reactivating this listing");
+        }
+        ProduceListing.Status oldStatus = listing.getStatus();
+        listing.setStatus(ProduceListing.Status.ACTIVE);
+        listingDao.update(listing);
+        auditService.log(userId, "REACTIVATE_LISTING", "ProduceListing", listingId,
+                "{\"status\":\"" + oldStatus + "\"}", "{\"status\":\"ACTIVE\"}", "127.0.0.1");
+        return listing;
+    }
+
+    public List<ProduceListing> getBelowMspListings() {
+        return listingDao.findAll().stream()
+                .filter(listing -> listing.getStatus() == ProduceListing.Status.ACTIVE
+                        || listing.getStatus() == ProduceListing.Status.BIDDING)
+                .filter(listing -> listing.getMspPricePerKg() != null
+                        && listing.getAskingPricePerKg() != null
+                        && listing.getAskingPricePerKg().compareTo(listing.getMspPricePerKg()) < 0)
+                .sorted((left, right) -> left.getAskingPricePerKg().compareTo(right.getAskingPricePerKg()))
+                .toList();
+    }
+
     public int expireStaleListings() {
         List<ProduceListing> activeListings = listingDao.findByField("status", ProduceListing.Status.ACTIVE);
         LocalDate today = LocalDate.now();
@@ -152,5 +208,16 @@ public class ListingService {
         }
         log.info("Expired {} stale listings", expiredCount);
         return expiredCount;
+    }
+
+    private ProduceListing getOwnedListing(Long listingId, Long userId) {
+        FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Farmer profile not found"));
+        ProduceListing listing = listingDao.findById(listingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Listing not found"));
+        if (!listing.getFarmerProfile().getId().equals(farmer.getId())) {
+            throw new BusinessValidationException("You can update only your own listings");
+        }
+        return listing;
     }
 }

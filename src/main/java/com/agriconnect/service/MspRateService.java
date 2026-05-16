@@ -47,4 +47,8 @@ public class MspRateService {
         }
         return latestForSeason != null ? latestForSeason : latestOverall;
     }
+
+    public List<MspRate> getAllRates() {
+        return mspRateDao.findAll();
+    }
 }

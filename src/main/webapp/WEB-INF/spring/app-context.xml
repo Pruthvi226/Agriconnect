@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- Import db-context.xml and security-context.xml -->
+    <import resource="db-context.xml" />
+    <import resource="security-context.xml" />
+
+    <context:property-placeholder location="classpath:application.properties" ignore-resource-not-found="true" />
+
+    <!-- Component-scan: com.agriconnect.service, com.agriconnect.dao, com.agriconnect.security, com.agriconnect.scheduler -->
+    <context:component-scan base-package="com.agriconnect.service, com.agriconnect.dao, com.agriconnect.security, com.agriconnect.scheduler" />
+
+    <!-- Required for Spring Security 6.x to work with Spring MVC in separate contexts -->
+    <bean id="mvcHandlerMappingIntrospector" class="org.springframework.web.servlet.handler.HandlerMappingIntrospector" />
+
+    <!-- Declare Jackson ObjectMapper bean -->
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
+        <property name="propertyNamingStrategy" value="#{T(com.fasterxml.jackson.databind.PropertyNamingStrategies).SNAKE_CASE}" />
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" ref="objectMapper" />
+        <property name="targetMethod" value="registerModule" />
+        <property name="arguments">
+            <list>
+                <bean class="com.fasterxml.jackson.datatype.jsr310.JavaTimeModule" />
+            </list>
+        </property>
+    </bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" ref="objectMapper" />
+        <property name="targetMethod" value="configure" />
+        <property name="arguments">
+            <list>
+                <value type="com.fasterxml.jackson.databind.SerializationFeature">WRITE_DATES_AS_TIMESTAMPS</value>
+                <value>false</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Declare BCryptPasswordEncoder bean (strength=12) -->
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder">
+        <constructor-arg value="12" />
+    </bean>
+
+    <!-- Declare JwtTokenProvider bean reading env var JWT_SECRET (min 256-bit), expiry 86400000ms -->
+    <bean id="jwtTokenProvider" class="com.agriconnect.security.JwtTokenProvider">
+        <property name="jwtSecret" value="${JWT_SECRET:supersecretdevjwtkeythathastobeatleast256bitslong!}" />
+        <property name="jwtExpirationInMs" value="86400000" />
+    </bean>
+
+    <!-- Declare AesEncryptionService bean reading env var AES_SECRET_KEY (32-byte base64) -->
+    <bean id="aesEncryptionService" class="com.agriconnect.security.AesEncryptionService">
+        <property name="secretKey" value="${AES_SECRET_KEY:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}" />
+    </bean>
+
+</beans>

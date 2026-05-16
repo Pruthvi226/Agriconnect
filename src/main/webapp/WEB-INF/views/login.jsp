@@ -73,7 +73,8 @@
             </div>
         </c:if>
 
-        <form action="${pageContext.request.contextPath}/login" method="post" id="loginForm">
+        <form action="${pageContext.request.contextPath}/auth/login" method="post" id="loginForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
             <input type="hidden" id="username" name="username">
             <div class="mb-3">
                 <label for="loginEmail" class="form-label text-uppercase fw-bold text-muted small" style="letter-spacing: 0.5px;">Email Address</label>
@@ -97,6 +98,10 @@
                     <div>
                         <input type="radio" name="loginRole" id="login-role-expert" value="AGRI_EXPERT">
                         <label for="login-role-expert"><i class="bi bi-mortarboard me-2"></i>Expert</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="loginRole" id="login-role-admin" value="ADMIN">
+                        <label for="login-role-admin"><i class="bi bi-shield-lock me-2"></i>Admin</label>
                     </div>
                 </div>
             </div>

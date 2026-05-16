@@ -1,5 +1,6 @@
 package com.agriconnect.controller;
 
+import com.agriconnect.dao.AdvisoryDao;
 import com.agriconnect.dto.ApiResponse;
 import com.agriconnect.dto.BookingSlotDto;
 import com.agriconnect.dto.ConsultationBookingRequestDto;
@@ -98,6 +99,9 @@ class ExpertSlotRestController {
     @Autowired
     private ExpertConsultationService expertConsultationService;
 
+    @Autowired
+    private AdvisoryDao advisoryDao;
+
     @PostMapping
     public ResponseEntity<ApiResponse<BookingSlot>> createSlot(@Valid @RequestBody BookingSlotDto dto,
                                                                Authentication authentication) {
@@ -122,6 +126,9 @@ class ExpertConsultationWebController {
 
     @Autowired
     private ExpertConsultationService expertConsultationService;
+
+    @Autowired
+    private AdvisoryDao advisoryDao;
 
     @GetMapping("/web/farmer/consultations")
     public ModelAndView farmerConsultations(Authentication authentication,
@@ -156,7 +163,8 @@ class ExpertConsultationWebController {
         model.addAttribute("walletTransactions", walletTransactions);
         model.addAttribute("totalEarnings", totalEarnings);
         model.addAttribute("upcomingCount", upcomingCount);
-        return "expert-dashboard";
+        model.addAttribute("advisories", advisoryDao.findAll());
+        return "expert/dashboard";
     }
 
     @GetMapping("/web/expert/slots")

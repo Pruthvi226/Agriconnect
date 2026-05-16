@@ -42,6 +42,11 @@
         .listing-card:hover {
             border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-hover);
         }
+        .listing-photo {
+            height: 150px; background: #f0fdf4; display: flex; align-items: center; justify-content: center;
+            color: #15803d; font-size: 2rem; overflow: hidden;
+        }
+        .listing-photo img { width: 100%; height: 100%; object-fit: cover; }
         .card-top { padding: 1.25rem 1.25rem 0.75rem; }
         .crop-icon {
             width: 44px; height: 44px; background: linear-gradient(135deg, #dcfce7, #bbf7d0);
@@ -75,7 +80,7 @@
 <body>
 
 <!-- NAVBAR -->
-<jsp:include page="fragments/farmer-nav.jsp">
+<jsp:include page="fragments/navbar-selector.jsp">
     <jsp:param name="active" value="marketplace" />
 </jsp:include>
 
@@ -89,23 +94,70 @@
 
 <div class="container pb-5" style="margin-top: -1.5rem; position: relative; z-index: 1;">
 
+    <c:if test="${not empty fpoListings}">
+        <div class="workspace-panel mb-4">
+            <div class="panel-title">
+                <div>
+                    <h2>FPO collective deals</h2>
+                    <div class="text-muted small">Verified farmer collectives pooled for bulk-ready procurement.</div>
+                </div>
+                <span class="priority-pill">At the top</span>
+            </div>
+            <div class="row g-3">
+                <c:forEach var="fpo" items="${fpoListings}">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="listing-card border-success">
+                            <div class="card-top">
+                                <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+                                    <div>
+                                        <div class="crop-name">${fpo.cropName}</div>
+                                        <div class="crop-variety">${fpo.groupName}</div>
+                                    </div>
+                                    <span class="badge-msp-above">${fpo.badgeLabel}</span>
+                                </div>
+                                <span class="location-chip">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                                    ${fpo.district}, ${fpo.state}
+                                </span>
+                            </div>
+                            <div class="price-row d-flex align-items-end gap-1">
+                                <span class="asking-price">₹ ${fpo.minPricePerKg}</span>
+                                <span class="price-unit mb-1">/ kg min</span>
+                            </div>
+                            <div class="qty-row">
+                                <i class="bi bi-people-fill me-1"></i>
+                                <strong>${fpo.totalQuantityKg} kg</strong> pooled from ${fpo.totalMembers} members
+                            </div>
+                            <div class="card-footer-custom">
+                                <div class="d-flex justify-content-between align-items-center small text-muted">
+                                    <span>Grade ${fpo.qualityGrade}</span>
+                                    <span>Deadline ${fpo.poolingDeadline}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+    </c:if>
+
     <!-- SEARCH BAR -->
     <div class="search-bar">
         <form method="get" action="${pageContext.request.contextPath}/web/marketplace" class="row g-2 align-items-end">
             <div class="col-md-4">
                 <label class="form-label text-muted fw-semibold" style="font-size: 0.78rem;">SEARCH CROP</label>
-                <input type="text" class="form-control" name="crop" placeholder="e.g. Wheat, Rice, Onion...">
+                <input type="text" class="form-control" name="cropName" value="${filters.cropName}" placeholder="e.g. Wheat, Rice, Onion...">
             </div>
             <div class="col-md-3">
                 <label class="form-label text-muted fw-semibold" style="font-size: 0.78rem;">DISTRICT</label>
-                <input type="text" class="form-control" name="district" placeholder="e.g. Nashik">
+                <input type="text" class="form-control" name="district" value="${filters.district}" placeholder="e.g. Nashik">
             </div>
             <div class="col-md-3">
                 <label class="form-label text-muted fw-semibold" style="font-size: 0.78rem;">MSP STATUS</label>
                 <select class="form-select" name="mspFilter" style="border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.875rem;">
-                    <option value="">All listings</option>
-                    <option value="ABOVE_MSP">Above MSP</option>
-                    <option value="BELOW_MSP">Below MSP</option>
+                    <option value="" ${empty mspFilter ? 'selected' : ''}>All listings</option>
+                    <option value="ABOVE_MSP" ${mspFilter == 'ABOVE_MSP' ? 'selected' : ''}>Above MSP</option>
+                    <option value="BELOW_MSP" ${mspFilter == 'BELOW_MSP' ? 'selected' : ''}>Below MSP</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -126,6 +178,16 @@
                 <c:forEach var="listing" items="${listings}">
                     <div class="col-md-6 col-lg-4">
                         <div class="listing-card">
+                            <div class="listing-photo">
+                                <c:choose>
+                                    <c:when test="${not empty listing.firstPhotoUrl}">
+                                        <img src="${pageContext.request.contextPath}/uploads/${listing.firstPhotoUrl}" alt="${listing.cropName}">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="bi bi-image"></i>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                             <div class="card-top">
                                 <div class="d-flex align-items-start gap-3 mb-2">
                                     <div class="crop-icon">🌾</div>
@@ -196,6 +258,6 @@
     </c:choose>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<jsp:include page="fragments/footer.jsp" />
 </body>
 </html>

@@ -13,6 +13,9 @@ DROP TABLE IF EXISTS wallet_transactions;
 DROP TABLE IF EXISTS supply_chain_tokens;
 DROP TABLE IF EXISTS price_history;
 DROP TABLE IF EXISTS demand_forecast_cache;
+DROP TABLE IF EXISTS fpo_listings;
+DROP TABLE IF EXISTS fpo_memberships;
+DROP TABLE IF EXISTS fpo_groups;
 DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS market_prices;
 DROP TABLE IF EXISTS crop_master;
@@ -88,8 +91,8 @@ CREATE TABLE buyer_profiles (
     company_name VARCHAR(200),
     gstin VARCHAR(20),
     business_type VARCHAR(30),
-    preferred_crops TEXT,
-    preferred_districts TEXT,
+    preferred_crops JSON,
+    preferred_districts JSON,
     credit_limit DECIMAL(12, 2),
     CONSTRAINT uk_buyer_profiles_gstin UNIQUE (gstin),
     CONSTRAINT fk_buyer_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -107,11 +110,13 @@ CREATE TABLE produce_listings (
     msp_price_per_kg DECIMAL(8, 2),
     quality_grade VARCHAR(5),
     description TEXT,
-    photos TEXT,
+    photos JSON,
     district VARCHAR(100),
     lat DECIMAL(9, 6),
     lng DECIMAL(9, 6),
     status VARCHAR(20) NOT NULL,
+    is_urgent BOOLEAN DEFAULT FALSE,
+    urgent_reason VARCHAR(255),
     view_count INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_listing_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE
@@ -125,6 +130,8 @@ CREATE TABLE bids (
     quantity_kg DECIMAL(10, 2) NOT NULL,
     bid_status VARCHAR(20) NOT NULL,
     message TEXT,
+    counter_price_per_kg DECIMAL(8, 2),
+    counter_message VARCHAR(300),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NULL,
     CONSTRAINT fk_bid_listing FOREIGN KEY (listing_id) REFERENCES produce_listings(id) ON DELETE CASCADE,
@@ -220,7 +227,7 @@ CREATE TABLE advisories (
     crop_name VARCHAR(100),
     advisory_type VARCHAR(30),
     severity VARCHAR(20),
-    affected_districts TEXT,
+    affected_districts JSON,
     valid_until DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_advisory_expert FOREIGN KEY (expert_id) REFERENCES users(id) ON DELETE CASCADE
@@ -250,7 +257,7 @@ CREATE TABLE matchmaking_scores (
     farmer_id BIGINT NOT NULL,
     buyer_id BIGINT NOT NULL,
     score DECIMAL(5, 2),
-    factors TEXT,
+    factors JSON,
     computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_match_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE,
     CONSTRAINT fk_match_buyer FOREIGN KEY (buyer_id) REFERENCES buyer_profiles(id) ON DELETE CASCADE
@@ -260,7 +267,7 @@ CREATE TABLE msp_rates (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     crop_name VARCHAR(100) NOT NULL,
     season VARCHAR(20) NOT NULL,
-    year INT NOT NULL,
+    marketing_year INT NOT NULL,
     msp_per_kg DECIMAL(8, 2) NOT NULL,
     announced_at DATE NOT NULL
 );
@@ -327,6 +334,44 @@ CREATE TABLE supply_chain_tokens (
     CONSTRAINT fk_supply_chain_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
+CREATE TABLE fpo_groups (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    group_name VARCHAR(200) NOT NULL,
+    leader_farmer_id BIGINT NOT NULL,
+    district VARCHAR(100),
+    state VARCHAR(100),
+    registration_number VARCHAR(100) NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    total_members INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_fpo_registration UNIQUE (registration_number),
+    CONSTRAINT fk_fpo_leader FOREIGN KEY (leader_farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE fpo_memberships (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fpo_id BIGINT NOT NULL,
+    farmer_id BIGINT NOT NULL,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT FALSE,
+    CONSTRAINT uk_fpo_farmer UNIQUE (fpo_id, farmer_id),
+    CONSTRAINT fk_fpo_membership_group FOREIGN KEY (fpo_id) REFERENCES fpo_groups(id) ON DELETE CASCADE,
+    CONSTRAINT fk_fpo_membership_farmer FOREIGN KEY (farmer_id) REFERENCES farmer_profiles(id) ON DELETE CASCADE
+);
+
+CREATE TABLE fpo_listings (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    fpo_id BIGINT NOT NULL,
+    crop_name VARCHAR(100) NOT NULL,
+    total_quantity_kg DECIMAL(12, 2) NOT NULL,
+    min_price_per_kg DECIMAL(8, 2) NOT NULL,
+    quality_grade VARCHAR(10),
+    pooling_deadline DATE NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_fpo_listing_group FOREIGN KEY (fpo_id) REFERENCES fpo_groups(id) ON DELETE CASCADE
+);
+
 CREATE INDEX idx_farmer_lat_lng ON farmer_profiles(lat, lng);
 CREATE INDEX idx_listing_lat_lng ON produce_listings(lat, lng);
 CREATE INDEX idx_bid_listing_status ON bids(listing_id, bid_status);
@@ -334,3 +379,16 @@ CREATE INDEX idx_match_farmer_score ON matchmaking_scores(farmer_id, score);
 CREATE INDEX idx_price_history_lookup ON price_history(crop_name, district, price_date);
 CREATE INDEX idx_booking_slot_lookup ON booking_slots(slot_date, district, crop_focus, slot_status);
 CREATE INDEX idx_expert_consultation_lookup ON expert_consultations(expert_id, consultation_status, payment_status);
+
+-- Additional indexes for frequently queried columns
+CREATE INDEX idx_listing_status ON produce_listings(status);
+CREATE INDEX idx_listing_crop_name ON produce_listings(crop_name);
+CREATE INDEX idx_listing_district ON produce_listings(district);
+CREATE INDEX idx_orders_status ON orders(order_status);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_verification ON users(verification_status);
+
+-- Full-Text Search index on produce listings (MySQL only; H2 will ignore gracefully)
+-- Enables MATCH(crop_name, description) AGAINST(:term IN BOOLEAN MODE) queries in DAO
+-- ALTER TABLE produce_listings ADD FULLTEXT INDEX ft_listing_search (crop_name, description);
+-- Note: H2 in-memory mode doesn't support FULLTEXT; MySQL-specific DDL is run via seed-data.sql conditionally.

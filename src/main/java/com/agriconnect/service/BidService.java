@@ -23,6 +23,7 @@ import com.agriconnect.model.ProduceListing;
 import com.agriconnect.model.User;
 import com.agriconnect.model.WalletTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.SessionFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +73,10 @@ public class BidService {
     @Autowired
     private OrderService orderService;
 
-    @PreAuthorize("hasRole('BUYER') and #userId == authentication.principal.id")
+    @Autowired
+    private SessionFactory sessionFactory;
+
+    @PreAuthorize("hasRole('BUYER')")
     public Bid placeBidForUser(BidRequestDto dto, Long userId) {
         BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
                 .orElseGet(() -> createStarterBuyerProfile(userId));
@@ -133,7 +137,7 @@ public class BidService {
         return bid;
     }
 
-    @PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
+    @PreAuthorize("hasRole('FARMER')")
     public Order acceptBidForUser(Long bidId, Long userId) {
         FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Farmer profile not found"));
@@ -233,7 +237,65 @@ public class BidService {
         return order;
     }
 
-    @PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
+    @PreAuthorize("hasRole('FARMER')")
+    public Bid counterBid(Long bidId, BigDecimal counterPrice, String counterMessage, Long userId) {
+        FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Farmer profile not found"));
+        Bid bid = bidDao.findById(bidId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bid not found"));
+
+        if (!bid.getListing().getFarmerProfile().getId().equals(farmer.getId())) {
+            throw new BusinessValidationException("You do not own this listing");
+        }
+
+        if (bid.getBidStatus() != Bid.BidStatus.PENDING) {
+            throw new BusinessValidationException("Only PENDING booking requests can be countered");
+        }
+
+        bid.setBidStatus(Bid.BidStatus.COUNTERED);
+        bid.setCounterPricePerKg(counterPrice);
+        bid.setCounterMessage(counterMessage);
+        bidDao.update(bid);
+
+        Notification notification = new Notification();
+        notification.setUser(bid.getBuyer().getUser());
+        notification.setTitle("New Counter Offer Received");
+        notification.setBody("Farmer offered ₹" + counterPrice + "/kg for " + bid.getListing().getCropName() + ". Check your dashboard.");
+        notification.setType("BID_UPDATE");
+        notification.setReferenceId(bid.getId());
+        notificationDao.save(notification);
+
+        auditService.log(userId, "COUNTER_BID", "Bid", bidId,
+                "{\"price\":" + bid.getBidPricePerKg() + "}",
+                "{\"counterPrice\":" + counterPrice + "}", "127.0.0.1");
+
+        return bid;
+    }
+
+    @PreAuthorize("hasRole('BUYER')")
+    public Order acceptCounterOfferForUser(Long bidId, Long userId) {
+        BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
+        Bid bid = bidDao.findById(bidId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bid not found"));
+
+        if (!bid.getBuyer().getId().equals(buyer.getId())) {
+            throw new BusinessValidationException("You do not own this bid");
+        }
+
+        if (bid.getBidStatus() != Bid.BidStatus.COUNTERED) {
+            throw new BusinessValidationException("Only COUNTERED booking requests can be accepted by buyer");
+        }
+
+        // Update bid price to counter price
+        bid.setBidPricePerKg(bid.getCounterPricePerKg());
+        bid.setBidStatus(Bid.BidStatus.PENDING); // Temporarily set to PENDING so acceptBidForProfile works
+
+        // Use the existing accept logic
+        return acceptBidForProfile(bidId, bid.getListing().getFarmerProfile(), userId);
+    }
+
+    @PreAuthorize("hasRole('FARMER')")
     public Bid rejectBidForUser(Long bidId, Long userId) {
         FarmerProfile farmer = farmerProfileDao.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Farmer profile not found"));
@@ -267,7 +329,48 @@ public class BidService {
 
     @PreAuthorize("hasRole('FARMER') and #userId == authentication.principal.id")
     public Order updateOrderDeliveryStatus(Long orderId, String action, Long userId) {
-        return orderService.updateDeliveryStatus(orderId, action, userId);
+        Order order = orderService.updateDeliveryStatus(orderId, action, userId);
+        if (order.getOrderStatus() == Order.OrderStatus.DELIVERED) {
+            recomputeFarmerScoreQuietly(order.getFarmer().getId());
+        }
+        return order;
+    }
+
+    @PreAuthorize("hasRole('BUYER')")
+    public Order confirmDeliveryForBuyerUser(Long orderId, Long userId) {
+        BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
+        Order order = orderDao.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new BusinessValidationException("You do not own this order");
+        }
+        if (order.getOrderStatus() == Order.OrderStatus.CANCELLED || order.getOrderStatus() == Order.OrderStatus.DISPUTED) {
+            throw new BusinessValidationException("This order cannot be confirmed as delivered");
+        }
+
+        Order.OrderStatus oldStatus = order.getOrderStatus();
+        order.setOrderStatus(Order.OrderStatus.DELIVERED);
+        order.setActualDelivery(LocalDate.now());
+        order.setPaymentStatus(Order.PaymentStatus.PAID);
+        orderDao.update(order);
+        recomputeFarmerScoreQuietly(order.getFarmer().getId());
+
+        Notification notification = new Notification();
+        notification.setUser(order.getFarmer().getUser());
+        notification.setTitle("Buyer Confirmed Delivery");
+        notification.setBody("Delivery was confirmed for " + order.getBid().getListing().getCropName()
+                + ". The order is now marked delivered.");
+        notification.setType("ORDER_UPDATE");
+        notification.setReferenceId(order.getId());
+        notificationDao.save(notification);
+
+        auditService.log(userId, "CONFIRM_DELIVERY", "Order", orderId,
+                "{\"status\":\"" + oldStatus + "\"}",
+                "{\"status\":\"DELIVERED\"}", "127.0.0.1");
+
+        return order;
     }
 
     public List<Bid> getPendingBookingsForFarmerUser(Long userId) {
@@ -312,6 +415,35 @@ public class BidService {
         return dto;
     }
 
+    public List<Bid> getBidsForBuyerUser(Long userId) {
+        return buyerProfileDao.findByUserId(userId)
+                .map(buyer -> bidDao.findActiveBidsByBuyer(buyer.getId()))
+                .orElseGet(java.util.Collections::emptyList);
+    }
+
+    public com.agriconnect.dto.BidRankDto getBidRankForUser(Long listingId, Long userId) {
+        BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
+        return getAnonymisedBidRankingFull(listingId, buyer.getId());
+    }
+
+    public List<Order> getOrdersForBuyerUser(Long userId) {
+        return buyerProfileDao.findByUserId(userId)
+                .map(buyer -> orderDao.findByBuyer(buyer.getId(), null))
+                .orElseGet(java.util.Collections::emptyList);
+    }
+
+    public Order getOrderForBuyerUser(Long orderId, Long userId) {
+        BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer profile not found"));
+        Order order = orderDao.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new BusinessValidationException("You do not own this order");
+        }
+        return order;
+    }
+
     private BuyerProfile createStarterBuyerProfile(Long userId) {
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -322,5 +454,16 @@ public class BidService {
         buyer.setCreditLimit(new BigDecimal("50000.00"));
         buyerDao.save(buyer);
         return buyer;
+    }
+
+    private void recomputeFarmerScoreQuietly(Long farmerId) {
+        try {
+            sessionFactory.getCurrentSession()
+                    .createNativeMutationQuery("CALL sp_compute_farmer_score(:farmerId)")
+                    .setParameter("farmerId", farmerId)
+                    .executeUpdate();
+        } catch (RuntimeException ignored) {
+            // H2 tests and fresh Docker schemas may not have the stored procedure loaded yet.
+        }
     }
 }

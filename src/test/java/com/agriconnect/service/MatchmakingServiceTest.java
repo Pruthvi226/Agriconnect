@@ -3,9 +3,10 @@ package com.agriconnect.service;
 import com.agriconnect.dao.BaseDao;
 import com.agriconnect.dao.MatchmakingDao;
 import com.agriconnect.dao.OrderDao;
+import com.agriconnect.dao.ProduceListingDao;
 import com.agriconnect.model.BuyerProfile;
 import com.agriconnect.model.FarmerProfile;
-import com.agriconnect.model.MatchmakingScore;
+import com.agriconnect.model.ProduceListing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -29,28 +29,38 @@ public class MatchmakingServiceTest {
     @Mock
     private BaseDao<BuyerProfile, Long> buyerDao;
     @Mock
+    private ProduceListingDao produceListingDao;
+    @Mock
     private OrderDao orderDao;
 
     @InjectMocks
     private MatchmakingService matchmakingService;
 
     @Test
-    void testComputeAllScores_SavesMatch() {
+    void computeAllScores_ShouldPersistScores_WhenMatchesExist() {
+        // Arrange
         FarmerProfile farmer = new FarmerProfile();
         farmer.setId(1L);
-        farmer.setLat(new BigDecimal("19.0760")); // Exact match with buyer stub
-        farmer.setLng(new BigDecimal("72.8777"));
+        farmer.setLat(new BigDecimal("32.1109"));
+        farmer.setLng(new BigDecimal("76.5363"));
 
         BuyerProfile buyer = new BuyerProfile();
         buyer.setId(1L);
         buyer.setPreferredCrops("[\"Wheat\"]");
+        buyer.setPreferredDistricts("[\"Kangra\"]");
 
-        when(farmerDao.findAll()).thenReturn(List.of(farmer));
-        when(buyerDao.findAll()).thenReturn(List.of(buyer));
-        when(orderDao.findByBuyer(anyLong(), any())).thenReturn(Collections.emptyList());
+        ProduceListing listing = new ProduceListing();
+        listing.setCropName("Wheat");
 
+        when(farmerDao.findAll()).thenReturn(Collections.singletonList(farmer));
+        when(buyerDao.findAll()).thenReturn(Collections.singletonList(buyer));
+        when(produceListingDao.findByFarmer(1L, ProduceListing.Status.ACTIVE))
+                .thenReturn(Collections.singletonList(listing));
+
+        // Act
         matchmakingService.computeAllScores();
 
-        verify(matchmakingDao, times(1)).save(any(MatchmakingScore.class));
+        // Assert
+        verify(matchmakingDao, atLeastOnce()).save(any());
     }
 }

@@ -18,7 +18,7 @@ public class UserRegistrationDto {
     private String password;
 
     @NotBlank(message = "Phone is required")
-    @Pattern(regexp = "[6-9]\\d{9}", message = "Invalid Indian phone number")
+    @Pattern(regexp = "(?:\\+91[- ]?)?[6-9]\\d{9}", message = "Invalid Indian phone number")
     private String phone;
 
     @NotBlank(message = "Role is required")

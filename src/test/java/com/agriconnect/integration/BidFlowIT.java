@@ -12,11 +12,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/applicationContext.xml", "file:src/main/webapp/WEB-INF/dispatcher-servlet.xml"}, classes = {com.agriconnect.config.SecurityConfig.class})
+@ContextConfiguration(locations = {
+        "classpath:test-app-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/security-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/mvc-context.xml"
+})
 @WebAppConfiguration
 @SuppressWarnings("null")
 public class BidFlowIT {
@@ -28,7 +33,9 @@ public class BidFlowIT {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext)
+                .apply(springSecurity())
+                .build();
     }
 
     @Test
@@ -37,6 +44,6 @@ public class BidFlowIT {
         mockMvc.perform(post("/api/v1/bids")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"listingId\":1, \"bidPricePerKg\":22, \"quantityKg\":50}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 }

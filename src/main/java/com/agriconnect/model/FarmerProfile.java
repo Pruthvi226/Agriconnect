@@ -2,10 +2,16 @@ package com.agriconnect.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "farmer_profiles")
+@Getter
+@Setter
+@NoArgsConstructor
 public class FarmerProfile {
 
     @Id
@@ -13,7 +19,7 @@ public class FarmerProfile {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(length = 100)
@@ -45,47 +51,93 @@ public class FarmerProfile {
     @Column(name = "farmer_score", precision = 4, scale = 2)
     private BigDecimal farmerScore = new BigDecimal("50.00");
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public String getVillage() { return village; }
-    public void setVillage(String village) { this.village = village; }
-    public String getDistrict() { return district; }
-    public void setDistrict(String district) { this.district = district; }
-    public String getState() { return state; }
-    public void setState(String state) { this.state = state; }
-    public BigDecimal getLat() { return lat; }
-    public void setLat(BigDecimal lat) { this.lat = lat; }
-    public BigDecimal getLng() { return lng; }
-    public void setLng(BigDecimal lng) { this.lng = lng; }
-    public BigDecimal getLandAcres() { return landAcres; }
-    public void setLandAcres(BigDecimal landAcres) { this.landAcres = landAcres; }
-    public String getAadhaarHash() { return aadhaarHash; }
-    public void setAadhaarHash(String aadhaarPlain) { 
-        this.aadhaarHash = com.agriconnect.util.EncryptionUtil.hashAadhaar(aadhaarPlain); 
+    public Long getId() {
+        return id;
     }
 
-    public String getBankAccountEncrypted() { return bankAccountEncrypted; }
-    public void setBankAccountEncrypted(String bankAccountPlain) { 
-        try {
-            this.bankAccountEncrypted = com.agriconnect.util.EncryptionUtil.encryptBankDetails(bankAccountPlain); 
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to encrypt bank account", e);
-        }
-    }
-    
-    public String getDecryptedBankAccount() {
-        try {
-            return com.agriconnect.util.EncryptionUtil.decryptBankDetails(this.bankAccountEncrypted);
-        } catch (Exception e) {
-            return null;
-        }
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public BigDecimal getFarmerScore() { return farmerScore; }
-    public void setFarmerScore(BigDecimal farmerScore) { this.farmerScore = farmerScore; }
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getVillage() {
+        return village;
+    }
+
+    public void setVillage(String village) {
+        this.village = village;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public BigDecimal getLat() {
+        return lat;
+    }
+
+    public void setLat(BigDecimal lat) {
+        this.lat = lat;
+    }
+
+    public BigDecimal getLng() {
+        return lng;
+    }
+
+    public void setLng(BigDecimal lng) {
+        this.lng = lng;
+    }
+
+    public BigDecimal getLandAcres() {
+        return landAcres;
+    }
+
+    public void setLandAcres(BigDecimal landAcres) {
+        this.landAcres = landAcres;
+    }
+
+    public String getBankAccountEncrypted() {
+        return bankAccountEncrypted;
+    }
+
+    public void setBankAccountEncrypted(String bankAccountEncrypted) {
+        this.bankAccountEncrypted = bankAccountEncrypted;
+    }
+
+    public String getAadhaarHash() {
+        return aadhaarHash;
+    }
+
+    public void setAadhaarHash(String aadhaarHash) {
+        this.aadhaarHash = aadhaarHash;
+    }
+
+    public BigDecimal getFarmerScore() {
+        return farmerScore;
+    }
+
+    public void setFarmerScore(BigDecimal farmerScore) {
+        this.farmerScore = farmerScore;
+    }
 
     @Override
     public boolean equals(Object o) {

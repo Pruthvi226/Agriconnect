@@ -2,44 +2,58 @@ services:
   db:
     image: mysql:8.3
     container_name: agriconnect_db
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASS}
-      MYSQL_DATABASE: agriconnect
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-agriconnect}
       MYSQL_USER: ${DB_USER:-agriconnect}
-      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_PASSWORD: ${DB_PASS:-agriconnect}
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3307}:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./src/main/resources/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: agriconnect_app
-    restart: always
+    restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8081}:8080"
     environment:
-      DB_URL: jdbc:mysql://db:3306/agriconnect?useSSL=false&serverTimezone=UTC
+      DB_URL: jdbc:mysql://db:3306/${DB_NAME:-agriconnect}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       DB_USER: ${DB_USER:-agriconnect}
-      DB_PASS: ${DB_PASS}
-      JWT_SECRET: ${JWT_SECRET}
-      AES_SECRET_KEY: ${AES_SECRET_KEY}
+      DB_PASS: ${DB_PASS:-agriconnect}
+      JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret-to-at-least-32-characters}
+      AES_SECRET_KEY: ${AES_SECRET_KEY:-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
       HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
       HIBERNATE_DEFAULT_SCHEMA:
-      HIBERNATE_DDL_AUTO: update
+      HIBERNATE_DDL_AUTO: ${HIBERNATE_DDL_AUTO:-update}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    volumes:
+      - upload_data:/usr/local/tomcat/uploads
 
   adminer:
-    image: adminer
+    image: adminer:latest
     container_name: agriconnect_adminer
-    restart: always
+    restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "${ADMINER_PORT:-8082}:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   db_data:
+  upload_data:

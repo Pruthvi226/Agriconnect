@@ -1,16 +1,40 @@
-# Build output — never commit compiled artefacts
-.build/
+# Build output - never commit compiled artifacts
 target/
+.build/
+.m2-local/
 
-# IDE
+# Runtime uploads and generated local data
+uploads/
+*.db
+*.mv.db
+*.trace.db
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and command output
+*.log
+cargo-*.out.log
+cargo-*.err.log
+server.log
+test_output*.txt
+
+# Local implementation notes
+FIX_SUMMARY.md
+ISSUE_FIX_VERIFICATION.md
+
+# IDE and editor files
 .idea/
+.vscode/
 *.iml
 .classpath
 .project
 .settings/
 *.launch
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
-
+desktop.ini

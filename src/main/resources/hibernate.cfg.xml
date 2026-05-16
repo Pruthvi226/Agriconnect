@@ -31,5 +31,8 @@
         <mapping class="com.agriconnect.model.ConsultationReview"/>
         <mapping class="com.agriconnect.model.ExpertWalletTransaction"/>
         <mapping class="com.agriconnect.model.SupplyChainToken"/>
+        <mapping class="com.agriconnect.model.FpoGroup"/>
+        <mapping class="com.agriconnect.model.FpoMembership"/>
+        <mapping class="com.agriconnect.model.FpoListing"/>
     </session-factory>
 </hibernate-configuration>

@@ -1,0 +1,59 @@
+:root {
+    --agri-primary: #2d6a4f;
+    --agri-primary-dark: #1b4332;
+    --agri-primary-soft: #d8f3dc;
+}
+
+.btn-primary,
+.bg-primary {
+    background-color: var(--agri-primary) !important;
+    border-color: var(--agri-primary) !important;
+}
+
+.text-primary {
+    color: var(--agri-primary) !important;
+}
+
+.sidebar-nav {
+    min-height: calc(100vh - 56px);
+    background: #f7fbf8;
+    border-right: 1px solid #dfeee5;
+}
+
+.sidebar-nav .nav-link {
+    color: #24352c;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.sidebar-nav .nav-link:hover,
+.sidebar-nav .nav-link.active {
+    color: #fff;
+    background: var(--agri-primary);
+}
+
+.status-active,
+.status-verified,
+.status-delivered,
+.status-paid,
+.status-accepted {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-pending,
+.status-bidding,
+.status-confirmed,
+.status-in-transit {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.status-rejected,
+.status-cancelled,
+.status-expired,
+.status-withdrawn,
+.status-disputed {
+    background: #f8d7da;
+    color: #842029;
+}

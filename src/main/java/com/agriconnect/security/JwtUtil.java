@@ -2,7 +2,6 @@ package com.agriconnect.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,8 +21,8 @@ public class JwtUtil {
     private final long jwtExpirationMs;
 
     public JwtUtil(
-            @Value("${jwt.secret}") String jwtSecret,
-            @Value("${jwt.expiration.ms}") long jwtExpirationMs) {
+            @Value("${JWT_SECRET:supersecretdevjwtkeythathastobeatleast256bitslong!}") String jwtSecret,
+            @Value("${JWT_EXPIRATION_MS:86400000}") long jwtExpirationMs) {
         this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         this.jwtExpirationMs = jwtExpirationMs;
     }

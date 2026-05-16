@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,225 +11,156 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/resources/css/main.css" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
         body { background: #f0f4f8; min-height: 100vh; }
-
-        .navbar {
-            background: linear-gradient(135deg, #0a4f2c, #16783a) !important;
-            padding: 0.875rem 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .navbar-brand { font-weight: 800; font-size: 1.3rem; }
-        .navbar-brand span { color: #86efac; }
-        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
-        .nav-link:hover { color: white !important; }
-        .btn-logout {
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
-            color: white; border-radius: 8px; font-size: 0.875rem;
-            font-weight: 500; padding: 0.4rem 0.875rem; transition: all 0.2s;
-        }
-        .btn-logout:hover { background: rgba(255,255,255,0.25); color: white; }
-
         .page-header {
             background: linear-gradient(135deg, #0a4f2c, #1a9e4a);
-            color: white; padding: 2rem 0 3.5rem;
-            position: relative; overflow: hidden;
+            color: white; padding: 2rem 0 3.5rem; position: relative; overflow: hidden;
         }
         .page-header::after {
-            content: ''; position: absolute;
-            bottom: -1px; left: 0; right: 0; height: 40px;
-            background: #f0f4f8;
-            clip-path: ellipse(55% 100% at 50% 100%);
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 40px;
+            background: #f0f4f8; clip-path: ellipse(55% 100% at 50% 100%);
         }
-        .page-header h1 { font-weight: 800; font-size: 1.75rem; margin-bottom: 0.25rem; }
-
+        .panel {
+            background: white; border-radius: 18px; border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
         .advisory-card {
-            background: white;
-            border-radius: 20px;
-            border: 2px solid #e2e8f0;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
+            background: white; border-radius: 16px; border: 2px solid #e2e8f0;
+            padding: 1.25rem; margin-bottom: 1rem;
         }
-        .advisory-card:hover { border-color: #16783a; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(22,120,58,0.1); }
-
-        .advisory-tag {
-            display: inline-flex; align-items: center; gap: 0.35rem;
-            background: #dcfce7; color: #15803d;
-            padding: 0.25rem 0.75rem; border-radius: 20px;
-            font-size: 0.75rem; font-weight: 600;
-            margin-bottom: 0.75rem;
+        .advisory-card.critical { border-color: #fecaca; background: #fff7f7; }
+        .advisory-card.warning { border-color: #fed7aa; background: #fffaf2; }
+        .advisory-card.info { border-color: #bfdbfe; background: #f8fbff; }
+        .severity-pill {
+            display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.65rem;
+            border-radius: 999px; font-size: 0.72rem; font-weight: 800;
         }
-        .advisory-tag.warning { background: #fff7ed; color: #c2410c; }
-        .advisory-tag.info { background: #eff6ff; color: #1d4ed8; }
-
-        .advisory-title { font-size: 1.05rem; font-weight: 700; color: #1a202c; margin-bottom: 0.5rem; }
-        .advisory-body { color: #4a5568; font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem; }
-        .advisory-meta { color: #a0aec0; font-size: 0.78rem; display: flex; gap: 1.25rem; }
-
-        .publish-card {
-            background: white; border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.07); padding: 1.75rem;
-            margin-bottom: 1.5rem;
-        }
-        .publish-card h5 { font-weight: 700; color: #1a202c; margin-bottom: 1rem; }
-
+        .severity-pill.CRITICAL { background: #fee2e2; color: #991b1b; }
+        .severity-pill.WARNING { background: #ffedd5; color: #9a3412; }
+        .severity-pill.INFO { background: #dbeafe; color: #1d4ed8; }
         .form-label {
-            font-size: 0.78rem; font-weight: 600; color: #4a5568;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: 0.78rem; font-weight: 700; color: #4a5568;
+            text-transform: uppercase; letter-spacing: 0.4px;
         }
-        .form-control, .form-select {
-            border: 2px solid #e2e8f0; border-radius: 12px;
-            padding: 0.7rem 1rem; font-size: 0.875rem; transition: all 0.2s;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #16783a;
-            box-shadow: 0 0 0 3px rgba(22,120,58,0.1);
-        }
-        .btn-publish {
-            background: linear-gradient(135deg, #16783a, #0a4f2c);
-            border: none; border-radius: 12px;
-            color: white; font-weight: 600; padding: 0.75rem 2rem;
-            transition: all 0.2s;
-        }
-        .btn-publish:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(22,120,58,0.35); color: white; }
-
-        .empty-state { text-align: center; padding: 3rem 2rem; background: white; border-radius: 20px; }
+        .form-control, .form-select { border: 2px solid #e2e8f0; border-radius: 12px; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand text-white" href="${pageContext.request.contextPath}/web/marketplace">
-            🌾 Agri<span>Connect</span>
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <a href="${pageContext.request.contextPath}/web/dashboard/expert" class="nav-link">
-                <i class="bi bi-grid me-1"></i>Dashboard
-            </a>
-            <form action="${pageContext.request.contextPath}/logout" method="post" class="d-inline ms-2">
-                <button type="submit" class="btn-logout">
-                    <i class="bi bi-box-arrow-right me-1"></i>Sign Out
-                </button>
-            </form>
-        </div>
-    </div>
-</nav>
+<jsp:include page="fragments/navbar-selector.jsp">
+    <jsp:param name="active" value="advisories" />
+</jsp:include>
 
 <div class="page-header">
     <div class="container">
-        <h1><i class="bi bi-megaphone me-2"></i>Agricultural Advisories</h1>
-        <p class="mb-0" style="opacity: 0.8; font-size: 0.9rem;">
-            Share expert insights with registered farmers across the platform
-        </p>
+        <h1 class="fw-bold mb-1"><i class="bi bi-megaphone me-2"></i>Agricultural Advisories</h1>
+        <p class="mb-0 opacity-75">Expert alerts, crop guidance, and market recommendations.</p>
     </div>
 </div>
 
 <div class="container pb-5" style="margin-top: -1.5rem; position: relative; z-index: 1;">
+    <c:if test="${not empty msg}">
+        <div class="alert alert-success border-0 shadow-sm">${msg}</div>
+    </c:if>
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger border-0 shadow-sm">${error}</div>
+    </c:if>
+
     <div class="row g-4">
-
-        <!-- Publish Form -->
-        <div class="col-lg-5">
-            <div class="publish-card">
-                <h5><i class="bi bi-pencil-square me-2 text-success"></i>Publish New Advisory</h5>
-                <form id="advisoryForm" onsubmit="publishAdvisory(event)">
-                    <div class="mb-3">
-                        <label class="form-label">Title</label>
-                        <input type="text" class="form-control" id="advisoryTitle"
-                               placeholder="e.g. Early blight alert for Nashik wheat farmers" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Category</label>
-                        <select class="form-select" id="advisoryCategory">
-                            <option value="PEST_ALERT">🐛 Pest Alert</option>
-                            <option value="WEATHER">🌦️ Weather Advisory</option>
-                            <option value="MARKET">📈 Market Update</option>
-                            <option value="TECHNIQUE">🌱 Best Practice / Technique</option>
-                            <option value="GOVERNMENT">🏛️ Government Scheme</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Target Crop (optional)</label>
-                        <input type="text" class="form-control" id="advisoryCrop"
-                               placeholder="e.g. Wheat, Onion, Rice (leave blank for all)">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Advisory Content</label>
-                        <textarea class="form-control" id="advisoryBody" rows="5"
-                                  placeholder="Provide detailed advice, recommended actions, and expected impact..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-publish" id="publishBtn">
-                        <i class="bi bi-send me-2"></i>Publish to All Farmers
-                    </button>
-                </form>
-
-                <div id="publishSuccess" style="display:none;" class="alert alert-success mt-3 border-0" style="border-radius:12px;">
-                    <i class="bi bi-check-circle-fill me-2"></i>Advisory published! All farmers have been notified.
+        <sec:authorize access="hasRole('AGRI_EXPERT')">
+            <div class="col-lg-5">
+                <div class="panel p-4">
+                    <h2 class="h5 fw-bold mb-3"><i class="bi bi-pencil-square me-2 text-success"></i>Publish Advisory</h2>
+                    <form action="${pageContext.request.contextPath}/web/advisories" method="post">
+                        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" maxlength="200" required>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Type</label>
+                                <select class="form-select" name="advisoryType" required>
+                                    <option value="PEST">Pest</option>
+                                    <option value="DISEASE">Disease</option>
+                                    <option value="WEATHER">Weather</option>
+                                    <option value="MARKET">Market</option>
+                                    <option value="TECHNIQUE">Technique</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Severity</label>
+                                <select class="form-select" name="severity" required>
+                                    <option value="INFO">Info</option>
+                                    <option value="WARNING">Warning</option>
+                                    <option value="CRITICAL">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-0">
+                            <div class="col-md-6">
+                                <label class="form-label">Crop</label>
+                                <input type="text" class="form-control" name="cropName" placeholder="Optional">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Valid Until</label>
+                                <input type="date" class="form-control" name="validUntil" value="${defaultValidUntil}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Affected Districts</label>
+                            <input type="text" class="form-control" name="affectedDistricts" placeholder="Nashik, Pune" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Advisory Content</label>
+                            <textarea class="form-control" name="body" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 fw-bold">
+                            <i class="bi bi-send me-1"></i>Publish and Notify Farmers
+                        </button>
+                    </form>
                 </div>
             </div>
-        </div>
+        </sec:authorize>
 
-        <!-- Published Advisories List -->
-        <div class="col-lg-7">
-            <h6 class="fw-bold text-dark mb-3" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                Recent Advisories
-            </h6>
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h6 fw-bold text-uppercase text-muted mb-0">Recent Advisories</h2>
+            </div>
             <c:choose>
                 <c:when test="${not empty advisories}">
                     <c:forEach var="advisory" items="${advisories}">
-                        <div class="advisory-card">
-                            <div class="advisory-tag">📢 Advisory</div>
-                            <div class="advisory-title">${advisory.title}</div>
-                            <div class="advisory-body">${advisory.body}</div>
-                            <div class="advisory-meta">
-                                <span><i class="bi bi-person me-1"></i>${advisory.expertName}</span>
-                                <span><i class="bi bi-calendar me-1"></i>${advisory.createdAt}</span>
+                        <c:set var="severityClass" value="${advisory.severity == 'CRITICAL' ? 'critical' : advisory.severity == 'WARNING' ? 'warning' : 'info'}" />
+                        <div class="advisory-card ${severityClass}">
+                            <div class="d-flex justify-content-between gap-3 mb-2">
+                                <div>
+                                    <span class="severity-pill ${advisory.severity}">
+                                        <i class="bi bi-exclamation-circle"></i>${advisory.severity}
+                                    </span>
+                                    <span class="badge text-bg-light ms-2">${advisory.advisoryType}</span>
+                                </div>
+                                <small class="text-muted">${advisory.createdAt}</small>
                             </div>
+                            <h3 class="h5 fw-bold mb-2">${advisory.title}</h3>
+                            <p class="text-muted mb-3">${advisory.body}</p>
+                            <div class="d-flex flex-wrap gap-3 small text-muted">
+                                <span><i class="bi bi-person me-1"></i>${advisory.expert.name}</span>
+                                <span><i class="bi bi-flower1 me-1"></i>${empty advisory.cropName ? 'All crops' : advisory.cropName}</span>
+                                <span><i class="bi bi-geo-alt me-1"></i>${advisory.affectedDistricts}</span>
+                                <span><i class="bi bi-calendar-check me-1"></i>Valid until ${advisory.validUntil}</span>
+                            </div>
+                            <a href="${pageContext.request.contextPath}/web/advisories/${advisory.id}" class="btn btn-sm btn-outline-success mt-3">Open advisory</a>
                         </div>
                     </c:forEach>
                 </c:when>
                 <c:otherwise>
-                    <!-- Demo Advisories when DB is empty -->
-                    <div class="advisory-card">
-                        <div class="advisory-tag warning">⚠️ Pest Alert</div>
-                        <div class="advisory-title">Early Blight Risk — Nashik & Pune Districts</div>
-                        <div class="advisory-body">
-                            High humidity levels this week (85%+) significantly increase the risk of early blight
-                            in wheat and tomato crops. Apply recommended fungicide (Mancozeb) at 2.5g/litre
-                            as a preventive measure. Avoid overhead irrigation between 6–10 AM.
-                        </div>
-                        <div class="advisory-meta">
-                            <span><i class="bi bi-person me-1"></i>Dr. Priya Sharma, KVK Nashik</span>
-                            <span><i class="bi bi-calendar me-1"></i>30 Apr 2026</span>
-                        </div>
-                    </div>
-                    <div class="advisory-card">
-                        <div class="advisory-tag info">📈 Market Update</div>
-                        <div class="advisory-title">Onion Prices Expected to Rise — Good Time to List</div>
-                        <div class="advisory-body">
-                            Based on APMC data and seasonal trends, onion prices are projected to rise
-                            15–20% over the next 3 weeks due to supply reduction in Karnataka.
-                            Farmers with stored onion produce should consider listing now.
-                        </div>
-                        <div class="advisory-meta">
-                            <span><i class="bi bi-person me-1"></i>Prof. Ramesh Nair, ICAR</span>
-                            <span><i class="bi bi-calendar me-1"></i>29 Apr 2026</span>
-                        </div>
-                    </div>
-                    <div class="advisory-card">
-                        <div class="advisory-tag">🌱 Best Practice</div>
-                        <div class="advisory-title">Drip Irrigation Subsidy — PM-KUSUM Scheme</div>
-                        <div class="advisory-body">
-                            The Government of Maharashtra is offering 55% subsidy on drip irrigation
-                            systems under PM-KUSUM for farmers under 5 acres. Apply online at
-                            mahadbt.maharashtra.gov.in before May 31, 2026.
-                        </div>
-                        <div class="advisory-meta">
-                            <span><i class="bi bi-person me-1"></i>AgriConnect Expert Team</span>
-                            <span><i class="bi bi-calendar me-1"></i>28 Apr 2026</span>
-                        </div>
+                    <div class="panel p-5 text-center">
+                        <div class="display-5 mb-3"><i class="bi bi-megaphone"></i></div>
+                        <h3 class="h5 fw-bold">No advisories published yet</h3>
+                        <p class="text-muted mb-0">Expert advisories will appear here after publishing.</p>
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -237,39 +169,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    function publishAdvisory(e) {
-        e.preventDefault();
-        const btn = document.getElementById('publishBtn');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publishing...';
-        btn.disabled = true;
-
-        const payload = {
-            title: document.getElementById('advisoryTitle').value,
-            body: document.getElementById('advisoryBody').value,
-            cropType: document.getElementById('advisoryCrop').value || null,
-            category: document.getElementById('advisoryCategory').value
-        };
-
-        fetch('${pageContext.request.contextPath}/api/v1/advisories', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(res => res.json())
-          .then(data => {
-              document.getElementById('publishSuccess').style.display = 'block';
-              document.getElementById('advisoryForm').reset();
-              btn.innerHTML = '<i class="bi bi-send me-2"></i>Publish to All Farmers';
-              btn.disabled = false;
-              setTimeout(() => {
-                  document.getElementById('publishSuccess').style.display = 'none';
-              }, 5000);
-          }).catch(() => {
-              btn.innerHTML = '<i class="bi bi-send me-2"></i>Publish to All Farmers';
-              btn.disabled = false;
-              alert('Could not publish advisory. Please ensure you are logged in as an Expert.');
-          });
-    }
-</script>
 </body>
 </html>

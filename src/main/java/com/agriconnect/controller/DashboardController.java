@@ -1,22 +1,25 @@
 package com.agriconnect.controller;
 
+import com.agriconnect.dto.BidRequestDto;
+import com.agriconnect.model.Bid;
+import com.agriconnect.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
-@RequestMapping("/web/dashboard")
 public class DashboardController {
 
-    @Autowired
-    private com.agriconnect.service.ListingService listingService;
+
 
     @Autowired
     private com.agriconnect.service.MatchmakingService matchmakingService;
@@ -24,123 +27,134 @@ public class DashboardController {
     @Autowired
     private com.agriconnect.service.BidService bidService;
 
+
     @Autowired
-    private com.agriconnect.service.DemandForecastService demandForecastService;
+    private com.agriconnect.dao.BuyerProfileDao buyerProfileDao;
 
-    @GetMapping("/farmer")
-    public ModelAndView farmerDashboard(Authentication authentication) {
-        ModelAndView mav = new ModelAndView("farmer-dashboard");
-        mav.addObject("role", "Farmer");
-        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
-
-        List<com.agriconnect.model.Bid> pendingBookings = bidService.getPendingBookingsForFarmerUser(userId);
-        List<com.agriconnect.model.Order> farmerOrders = bidService.getOrdersForFarmerUser(userId);
-        List<com.agriconnect.model.ProduceListing> farmerListings = listingService.getListingsForFarmerUser(userId);
-
-        mav.addObject("pendingBookings", pendingBookings);
-        mav.addObject("farmerOrders", farmerOrders);
-        mav.addObject("farmerListings", farmerListings);
-        mav.addObject("pendingBookingCount", pendingBookings.size());
-        mav.addObject("listingCount", farmerListings.size());
-        mav.addObject("activeOrderCount", farmerOrders.stream()
-                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.CONFIRMED
-                        || order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.IN_TRANSIT)
-                .count());
-        mav.addObject("deliveredOrderCount", farmerOrders.stream()
-                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.DELIVERED)
-                .count());
-
-        com.agriconnect.dto.DemandForecastReport forecast = demandForecastService.getLatestForecast();
-        mav.addObject("forecast", forecast);
-        mav.addObject("forecastTopCrops", forecast.getTopCrops().stream().limit(3).toList());
-        Map<String, com.agriconnect.dto.DemandForecastReport.PriceTrendSnapshot> forecastTrendMap = new LinkedHashMap<>();
-        for (com.agriconnect.dto.DemandForecastReport.PriceTrendSnapshot trend : forecast.getPriceTrends()) {
-            forecastTrendMap.put(trend.getCropName(), trend);
+    @GetMapping("/dashboard")
+    public String dashboard(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/auth/login";
         }
-        mav.addObject("forecastTrendMap", forecastTrendMap);
-
-        mav.addObject("matches", matchmakingService.getRecommendedBuyersForFarmer(1L)); // profile-aware matching still uses the demo seed
-        return mav;
-    }
-
-    @GetMapping("/farmer/listings")
-    public ModelAndView farmerListings(Authentication authentication) {
-        ModelAndView mav = new ModelAndView("farmer-listings");
-        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
-        mav.addObject("farmerListings", listingService.getListingsForFarmerUser(userId));
-        return mav;
-    }
-
-    @GetMapping("/farmer/bookings")
-    public ModelAndView farmerBookings(Authentication authentication) {
-        ModelAndView mav = new ModelAndView("farmer-bookings");
-        Long userId = ((com.agriconnect.security.CustomUserDetails) authentication.getPrincipal()).getId();
-        List<com.agriconnect.model.Bid> pendingBookings = bidService.getPendingBookingsForFarmerUser(userId);
-        List<com.agriconnect.model.Order> farmerOrders = bidService.getOrdersForFarmerUser(userId);
-        mav.addObject("pendingBookings", pendingBookings);
-        mav.addObject("farmerOrders", farmerOrders);
-        mav.addObject("pendingBookingCount", pendingBookings.size());
-        mav.addObject("activeOrderCount", farmerOrders.stream()
-                .filter(order -> order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.CONFIRMED
-                        || order.getOrderStatus() == com.agriconnect.model.Order.OrderStatus.IN_TRANSIT)
-                .count());
-        return mav;
-    }
-
-    @GetMapping("/buyer")
-    public ModelAndView buyerDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
-        mav.addObject("role", "Buyer");
-        // Feature 2: Smart Matchmaking
-        mav.addObject("matches", matchmakingService.getRecommendedFarmersForBuyer(1L)); // stub buyer 1L
-        return mav;
-    }
-
-    @GetMapping("/expert")
-    public ModelAndView expertDashboard() {
-        return new ModelAndView("redirect:/web/expert/dashboard");
-    }
-
-    @GetMapping("/admin")
-    public ModelAndView adminDashboard() {
-        ModelAndView mav = new ModelAndView("dashboard");
-        mav.addObject("role", "Administrator");
-        
-        // Feature 1: Admin panel aggregate stats
-        List<com.agriconnect.model.ProduceListing> allListings = listingService.searchListings(new com.agriconnect.dto.SearchFiltersDto());
-        long belowMspCount = 0;
-        for (com.agriconnect.model.ProduceListing listing : allListings) {
-            if (listing.getMspPricePerKg() != null && listing.getAskingPricePerKg().compareTo(listing.getMspPricePerKg()) < 0) {
-                belowMspCount++;
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            String role = authority.getAuthority();
+            if ("ROLE_FARMER".equals(role)) {
+                return "redirect:/web/farmer/dashboard";
+            }
+            if ("ROLE_BUYER".equals(role)) {
+                return "redirect:/web/buyer/dashboard";
+            }
+            if ("ROLE_ADMIN".equals(role)) {
+                return "redirect:/web/admin/dashboard";
+            }
+            if ("ROLE_AGRI_EXPERT".equals(role)) {
+                return "redirect:/web/expert/dashboard";
             }
         }
-        double belowMspPercentage = allListings.isEmpty() ? 0 : ((double) belowMspCount / allListings.size()) * 100;
-        mav.addObject("belowMspPercentage", String.format("%.1f", belowMspPercentage));
-        
+        return "redirect:/auth/login";
+    }
+
+    @GetMapping("/web/buyer/dashboard")
+    public ModelAndView buyerDashboard(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer/dashboard");
+        mav.addObject("role", "Buyer");
+        com.agriconnect.security.CustomUserDetails userDetails = (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getId();
+
+        com.agriconnect.model.BuyerProfile buyer = buyerProfileDao.findByUserId(userId)
+                .orElseThrow(() -> new com.agriconnect.exception.ResourceNotFoundException("Buyer profile not found"));
+        List<Bid> bids = bidService.getBidsForBuyerUser(userId);
+        List<Order> orders = bidService.getOrdersForBuyerUser(userId);
+        var matches = matchmakingService.getRecommendedFarmersForBuyer(buyer.getId());
+
+        mav.addObject("buyer", buyer);
+        mav.addObject("matches", matches);
+        mav.addObject("matchCount", matches.size());
+        mav.addObject("activeBidCount", bids.size());
+        mav.addObject("orderCount", orders.size());
+        mav.addObject("activeOrderCount", orders.stream()
+                .filter(order -> order.getOrderStatus() == Order.OrderStatus.CONFIRMED
+                        || order.getOrderStatus() == Order.OrderStatus.IN_TRANSIT)
+                .count());
+        mav.addObject("deliveredOrderCount", orders.stream()
+                .filter(order -> order.getOrderStatus() == Order.OrderStatus.DELIVERED)
+                .count());
         return mav;
     }
 
-    @GetMapping("/farmer/profile")
-    public ModelAndView getFarmerProfile() {
-        ModelAndView mav = new ModelAndView("farmer-profile");
-        // Stub farmer
-        com.agriconnect.model.FarmerProfile farmer = new com.agriconnect.model.FarmerProfile();
-        farmer.setFarmerScore(new java.math.BigDecimal("82.50"));
-        mav.addObject("farmer", farmer);
-        
-        double score = farmer.getFarmerScore().doubleValue();
-        String color = "red";
-        if (score >= 40 && score < 70) color = "orange";
-        else if (score >= 70) color = "green";
-        
-        String badge = "New Farmer";
-        if (score >= 40 && score < 70) badge = "Reliable";
-        else if (score >= 70 && score < 90) badge = "Top Seller";
-        else if (score >= 90) badge = "Elite";
-        
-        mav.addObject("scoreColor", color);
-        mav.addObject("scoreBadge", badge);
-        
+    @GetMapping("/web/buyer/bids")
+    public ModelAndView buyerBids(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer/bids");
+        com.agriconnect.security.CustomUserDetails userDetails = (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        mav.addObject("bids", bidService.getBidsForBuyerUser(userDetails.getId()));
         return mav;
     }
+
+    @PostMapping("/web/buyer/bids")
+    public String placeBuyerBid(@ModelAttribute BidRequestDto dto,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            com.agriconnect.security.CustomUserDetails userDetails =
+                    (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+            bidService.placeBidForUser(dto, userDetails.getId());
+            redirectAttributes.addFlashAttribute("msg", "Bid placed successfully.");
+            return "redirect:/web/buyer/bids";
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return dto.getListingId() != null
+                    ? "redirect:/web/marketplace/listing/" + dto.getListingId()
+                    : "redirect:/web/marketplace";
+        }
+    }
+
+    @GetMapping("/web/buyer/orders")
+    public ModelAndView buyerOrders(Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer/orders");
+        com.agriconnect.security.CustomUserDetails userDetails = (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        mav.addObject("orders", bidService.getOrdersForBuyerUser(userDetails.getId()));
+        return mav;
+    }
+
+    @PostMapping("/web/buyer/orders/{id}/confirm-delivery")
+    public String confirmBuyerDelivery(@PathVariable("id") Long id,
+                                       Authentication authentication,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            com.agriconnect.security.CustomUserDetails userDetails =
+                    (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+            bidService.confirmDeliveryForBuyerUser(id, userDetails.getId());
+            redirectAttributes.addFlashAttribute("msg", "Delivery confirmed and receipt updated.");
+            return "redirect:/web/buyer/orders/" + id + "/receipt";
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/web/buyer/orders";
+        }
+    }
+
+    @GetMapping("/web/buyer/orders/{id}/receipt")
+    public ModelAndView buyerReceipt(@PathVariable("id") Long id, Authentication authentication) {
+        ModelAndView mav = new ModelAndView("buyer/receipt");
+        com.agriconnect.security.CustomUserDetails userDetails =
+                (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+        mav.addObject("order", bidService.getOrderForBuyerUser(id, userDetails.getId()));
+        return mav;
+    }
+
+    @PostMapping("/web/buyer/bids/{id}/accept-counter")
+    public String acceptCounterOffer(@PathVariable("id") Long id,
+                                     Authentication authentication,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            com.agriconnect.security.CustomUserDetails userDetails =
+                    (com.agriconnect.security.CustomUserDetails) authentication.getPrincipal();
+            bidService.acceptCounterOfferForUser(id, userDetails.getId());
+            redirectAttributes.addFlashAttribute("msg", "Counter offer accepted and order created.");
+            return "redirect:/web/buyer/orders";
+        } catch (RuntimeException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/web/buyer/bids";
+        }
+    }
+
 }

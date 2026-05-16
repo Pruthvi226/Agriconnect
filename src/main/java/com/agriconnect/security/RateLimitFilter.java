@@ -24,7 +24,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (request.getRequestURI().startsWith("/api/v1/")) {
+        if (request.getRequestURI().startsWith(request.getContextPath() + "/api/")) {
             String clientIp = getClientIp(request);
             long currentTime = System.currentTimeMillis();
 
@@ -37,8 +37,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
             if (requests.size() >= MAX_REQUESTS_PER_MINUTE) {
                 response.setStatus(429); // Too Many Requests
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
                 response.setHeader("Retry-After", "60");
-                response.getWriter().write("{\"success\":false,\"message\":\"Too many requests. Please try again later.\"}");
+                response.getWriter().write("{\"error\":\"Too many requests. Please try again later.\"}");
                 return;
             }
 

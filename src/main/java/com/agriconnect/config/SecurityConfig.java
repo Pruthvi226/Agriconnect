@@ -18,7 +18,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -48,86 +47,98 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                // PUBLIC — liveness + readiness probes must be accessible without auth
-                .requestMatchers(
-                    antMatcher("/health"),          // Render liveness probe (no DB dependency)
-                    antMatcher("/actuator/health"), // detailed readiness probe
-                    antMatcher("/api/v1/auth/**"),
-                    antMatcher("/"),
-                    antMatcher("/web"),
-                    antMatcher("/web/login"),
-                    antMatcher("/web/register"),
-                    antMatcher("/web/marketplace"),
-                    antMatcher("/web/marketplace/listing/**"),
-                    antMatcher("/chain/**"),
-                    antMatcher("/qr/**"),
-                    antMatcher("/resources/**")
-                ).permitAll()
-                // FARMER
-                .requestMatchers(
-                    antMatcher("/api/v1/listings/**"),
-                    antMatcher("/api/v1/bids/received"),
-                    antMatcher("/api/v1/bids/*/accept"),
-                    antMatcher("/api/v1/bids/*/reject"),
-                    antMatcher("/api/v1/bids/orders/**"),
-                    antMatcher("/web/dashboard/farmer"),
-                    antMatcher("/web/dashboard/farmer/**")
-                ).hasRole("FARMER")
-                // BUYER
-                .requestMatchers(
-                    antMatcher("/api/v1/bids/**"),
-                    antMatcher("/api/v1/orders/my"),
-                    antMatcher("/web/dashboard/buyer")
-                ).hasRole("BUYER")
-                // EXPERT
-                .requestMatchers(
-                    antMatcher("/api/v1/advisories/**"),
-                    antMatcher("/api/v1/expert/**"),
-                    antMatcher("/web/dashboard/expert"),
-                    antMatcher("/web/advisories"),
-                    antMatcher("/web/expert/**")
-                ).hasRole("AGRI_EXPERT")
-                .requestMatchers(
-                    antMatcher("/api/v1/consultations/**"),
-                    antMatcher("/web/farmer/consultations"),
-                    antMatcher("/web/farmer/consultations/**")
-                ).authenticated()
-                // ADMIN
-                .requestMatchers(
-                    antMatcher("/web/admin/**"),
-                    antMatcher("/web/dashboard/admin"),
-                    antMatcher("/api/v1/admin/**"),
-                    antMatcher("/api/v1/orders/*/qr-download"),
-                    antMatcher("/api/v1/orders/*/supply-chain"),
-                    antMatcher("/actuator/metrics")
-                ).hasRole("ADMIN")
-                // Notifications for authenticated users
-                .requestMatchers(antMatcher("/web/notifications")).authenticated()
-                // ANY OTHER
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            )
-            .formLogin(form -> form
-                .loginPage("/web/login")
-                .loginProcessingUrl("/login")
-                .successHandler(roleBasedSuccessHandler())
-                .failureUrl("/web/login?error=true")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/web/login?logout=true")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .permitAll()
-            )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // PUBLIC - liveness + readiness probes must be accessible without auth
+                        .requestMatchers(
+                                antMatcher("/health"), // Render liveness probe (no DB dependency)
+                                antMatcher("/actuator/health"), // detailed readiness probe
+                                antMatcher("/auth/**"),
+                                antMatcher("/api/auth/**"),
+                                antMatcher("/api/v1/auth/**"),
+                                antMatcher("/"),
+                                antMatcher("/web"),
+                                antMatcher("/web/login"),
+                                antMatcher("/web/register"),
+                                antMatcher("/web/marketplace"),
+                                antMatcher("/web/marketplace/listing/**"),
+                                antMatcher("/web/msp-checker"),
+                                antMatcher("/chain/**"),
+                                antMatcher("/qr/**"),
+                                antMatcher("/api/msp"),
+                                antMatcher("/api/v1/listings/search"),
+                                antMatcher("/api/v1/listings/*/msp-comparison"),
+                                antMatcher("/resources/**"))
+                        .permitAll()
+                        // FARMER
+                        .requestMatchers(
+                                antMatcher("/api/farmer/**"),
+                                antMatcher("/api/v1/listings"),
+                                antMatcher("/api/v1/fpo/groups"),
+                                antMatcher("/api/v1/fpo/*/join"),
+                                antMatcher("/api/v1/fpo/memberships/*/approve"),
+                                antMatcher("/api/v1/fpo/*/listings"),
+                                antMatcher("/api/v1/bids/received"),
+                                antMatcher("/api/v1/bids/*/accept"),
+                                antMatcher("/api/v1/bids/*/reject"),
+                                antMatcher("/api/v1/bids/orders/**"),
+                                antMatcher("/farmer/**"),
+                                antMatcher("/web/farmer"),
+                                antMatcher("/web/farmer/**"))
+                        .hasRole("FARMER")
+                        // BUYER
+                        .requestMatchers(
+                                antMatcher("/api/v1/bids"),
+                                antMatcher("/api/v1/bids/**"),
+                                antMatcher("/api/v1/orders/my"),
+                                antMatcher("/buyer/**"),
+                                antMatcher("/web/buyer/**"),
+                                antMatcher("/web/dashboard/buyer"))
+                        .hasRole("BUYER")
+                        // EXPERT
+                        .requestMatchers(
+                                antMatcher("/api/v1/advisories/**"),
+                                antMatcher("/api/v1/expert/**"),
+                                antMatcher("/expert/**"),
+                                antMatcher("/web/expert/**"),
+                                antMatcher("/web/dashboard/expert"))
+                        .hasRole("AGRI_EXPERT")
+                        .requestMatchers(
+                                antMatcher("/api/v1/consultations/**"))
+                        .authenticated()
+                        // ADMIN
+                        .requestMatchers(
+                                antMatcher("/web/admin/**"),
+                                antMatcher("/web/dashboard/admin"),
+                                antMatcher("/api/v1/admin/**"),
+                                antMatcher("/api/v1/orders/*/qr-download"),
+                                antMatcher("/api/v1/orders/*/supply-chain"),
+                                antMatcher("/actuator/metrics"))
+                        .hasRole("ADMIN")
+                        // Notifications for authenticated users
+                        .requestMatchers(
+                                antMatcher("/web/notifications/**"),
+                                antMatcher("/web/advisories/**"))
+                        .authenticated()
+                        // ANY OTHER
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .formLogin(form -> form
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/login")
+                        .successHandler(roleBasedSuccessHandler())
+                        .failureUrl("/auth/login?error=true")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .logoutSuccessUrl("/auth/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .permitAll())
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -137,23 +148,23 @@ public class SecurityConfig {
         return new AuthenticationSuccessHandler() {
             @Override
             public void onAuthenticationSuccess(HttpServletRequest request,
-                                                HttpServletResponse response,
-                                                Authentication authentication) throws IOException {
+                    HttpServletResponse response,
+                    Authentication authentication) throws IOException {
                 Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
                 String redirectUrl = "/web/marketplace";
                 for (GrantedAuthority authority : authorities) {
                     String role = authority.getAuthority();
                     if (role.equals("ROLE_FARMER")) {
-                        redirectUrl = "/web/dashboard/farmer";
+                        redirectUrl = "/web/farmer/dashboard";
                         break;
                     } else if (role.equals("ROLE_BUYER")) {
-                        redirectUrl = "/web/dashboard/buyer";
+                        redirectUrl = "/web/buyer/dashboard";
                         break;
                     } else if (role.equals("ROLE_AGRI_EXPERT")) {
-                        redirectUrl = "/web/dashboard/expert";
+                        redirectUrl = "/web/expert/dashboard";
                         break;
                     } else if (role.equals("ROLE_ADMIN")) {
-                        redirectUrl = "/web/dashboard/admin";
+                        redirectUrl = "/web/admin/dashboard";
                         break;
                     }
                 }
